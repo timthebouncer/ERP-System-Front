@@ -6,25 +6,26 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    name: 'barcode',
-    component: () => import('../views/barcode/layout.vue'),
+    name: 'check',
+    component: () => import('../views/check/Layout.vue'),
+    redirect:'/clogin',
     children: [
       {
-        path: '/blogin',
-        name: 'barcodeLogin',
-        component: () => import('../views/barcode/login.vue'),
+        path: '/clogin',
+        name: 'checkLogin',
+        component: () => import('../views/check/Login.vue'),
       },
     ],
   },
   {
     path: '/',
     name: 'scale',
-    component: () => import('../views/scale/layout.vue'),
+    component: () => import('../views/scale/Layout.vue'),
     children: [
       {
         path: '/slogin',
         name: 'scaleLogin',
-        component: () => import('../views/scale/login.vue'),
+        component: () => import('../views/scale/Login.vue'),
       },
       {
         path: '/scale',

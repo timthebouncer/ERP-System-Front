@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="bbb">
     <div class="title">條碼機系統</div>
     <router-view />
   </div>
@@ -12,5 +12,4 @@
 </script>
 
 <style lang="scss" scoped>
-
 </style>
