@@ -15,17 +15,22 @@ const routes = [
         name: 'checkLogin',
         component: () => import('../views/check/Login.vue'),
       },
+      {
+        path: '/sales',
+        name: 'sales',
+        component: () => import('../views/check/Sales/index.vue'),
+      },
     ],
   },
   {
     path: '/',
     name: 'scale',
-    component: () => import('../views/scale/Layout.vue'),
+    component: () => import('../views/scale/layout.vue'),
     children: [
       {
         path: '/slogin',
         name: 'scaleLogin',
-        component: () => import('../views/scale/Login.vue'),
+        component: () => import('../views/scale/login.vue'),
       },
       {
         path: '/scale',
