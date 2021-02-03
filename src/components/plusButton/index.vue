@@ -5,7 +5,7 @@
             <input type="button" @click="minuser" value="-"/>
         </li>
         <li style="width: 100%; height: 50px">
-            <input class="numberCount" v-model="number" style="text-align: center"/>
+            <input class="numberCount" type="number" v-model="number" style="text-align: center"/>
         </li>
         <li>
             <input type="button" @click="adder" value="+"/>
