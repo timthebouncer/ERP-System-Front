@@ -1,21 +1,24 @@
 <template>
-  <div class="PosSystem">
-    <div class="title">條碼機系統</div>
-    <router-view />
+  <div class="app-class">
     <HeaderOption />
-
+    <v-main>
+      <Sales/>
+    </v-main>
 
   </div>
 </template>
 
 <script>
   import HeaderOption from './components/Header/index'
+  import Sales from './Sales'
   export default {
-    components:{HeaderOption}
+    components:{HeaderOption,Sales}
   }
 </script>
 
 <style lang="scss" scoped>
-  .HeaderOption{
+  .app-class{
+    background-color: #fff0e9;
+    height: 100%;
   }
 </style>
