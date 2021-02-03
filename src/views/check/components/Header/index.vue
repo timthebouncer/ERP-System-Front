@@ -6,21 +6,22 @@
         bottom
         offset-y
         offset-x
-        nudge-left="160"
-        nudge-bottom="10"
+        absolute
+        :position-x="menuPositionX"
+        :position-y="menuPositionY"
         max-width="300"
         min-width="300"
         :value="showMenu"
       >
         <template v-slot:activator="{ on, attrs, value }">
-          <v-btn :ripple="false" icon v-bind="attrs" v-on="on" style="margin-left: 30px;">
+          <v-btn :ripple="false" text v-bind="attrs" v-on="on" style="margin-left: 30px;">
             <span style="font-size: large; color: #fff0e9;">{{menuName}}</span>
             <v-icon large color="#f7b573" v-if="value">mdi-menu-up</v-icon>
             <v-icon large color="#f7b573" v-else>mdi-menu-down</v-icon>
           </v-btn>
         </template>
         <v-row style="background-color: #fff0e9;">
-          <v-col cols="5" >
+          <v-col cols="5">
             <v-list style="background-color: #fff0e9;">
               <v-list-item
                 ><v-btn color="primary" @click="toggleMenu('出貨')"
@@ -74,6 +75,8 @@ export default {
   name: "HeaderOption",
   data() {
     return {
+      menuPositionX:100,
+      menuPositionY:50,
       showMenu: false,
       menuName: ''
     };
@@ -102,6 +105,7 @@ export default {
   },
   mounted() {
     this.menuName = '出貨'
+    this.menuPositionX = window.innerWidth/2 - 150
   }
 };
 </script>
