@@ -1,5 +1,6 @@
 <template>
   <v-container class="container">
+    <span class="font-weight-light">工作日期:{{ today }}</span>
     <div class="top-wrapper rounded">
       客戶資訊
     </div>
@@ -16,53 +17,110 @@
           </v-list-item-content>
         </template>
 
-        <v-list-item v-for="child in item.items" :key="child.title">
-          <v-list-item-action>
-            <v-checkbox :input-value="child.active"></v-checkbox>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title v-text="child.title"></v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
+        <template v-if="item.key == 'class'">
+          <v-radio-group>
+            <v-list-item v-for="child in item.items" :key="child.id">
+              <v-list-item-action class="mr-4">
+                <v-radio :value="child.id" :key="child.id"></v-radio>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title v-text="child.className"></v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-radio-group>
+        </template>
+        <template v-else-if="item.key == 'client'">
+          <v-radio-group>
+            <v-list-item v-for="child in item.items" :key="child.id">
+              <v-list-item-action class="mr-4">
+                <v-radio :value="child.id" :key="child.id"></v-radio>
+              </v-list-item-action>
+              <v-list-item-content>
+                  <v-row class="justify-space-between ma-0"><span class="">{{child.name}}</span><span class="">{{child.phone}}</span><span></span></v-row>
+              </v-list-item-content>
+            </v-list-item>
+          </v-radio-group>
+          <v-list-item class="pa-0 justify-center">
+              <v-btn text class="font-weight-bold text-h5"><v-icon>mdi-plus-circle-outline</v-icon>新增客戶資料</v-btn>
+          </v-list-item>
+        </template>
+        <template v-else-if="item.key == 'receive'">
+          <v-radio-group>
+            <v-list-item v-for="child in item.items" :key="child.id">
+              <v-list-item-action class="mr-4">
+                <v-radio :value="child.id" :key="child.id"></v-radio>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-row class="justify-space-between ma-0"><span class="">{{child.name}}</span><span class="">{{child.phone}}</span><span></span></v-row>
+                <v-row class="justify-space-between ma-0"><span class="col-1">{{child.code}}</span><span class="col-10">{{child.address}}</span><span></span></v-row>
+
+              </v-list-item-content>
+            </v-list-item>
+          </v-radio-group>
+          <v-list-item class="pa-0 justify-center">
+            <v-btn text class="font-weight-bold text-h5"><v-icon>mdi-plus-circle-outline</v-icon>新增收件資料</v-btn>
+          </v-list-item>
+        </template>
       </v-list-group>
     </v-list>
-    <div class="content-wrapper">
+    <div class="content-wrapper rounded">
       輸入商品
     </div>
-    <div class="footer-wrapper">
+    <div>
+    <v-row class="ma-0"><v-col class="col-4 align-self-center"><span>商品條碼</span></v-col><v-col><v-text-field solo></v-text-field></v-col></v-row>
+    </div>
+    <div class="footer-wrapper rounded">
       商品資料
     </div>
   </v-container>
 </template>
 <script>
+import moment from "moment";
 export default {
   name: "Sales",
   data() {
     return {
+      today: "",
       items: [
         {
+          key: "class",
           title: "客戶類別:",
           active: true,
           items: [
-            { title: "客戶類別1",active:false },
-            { title: "客戶類別2",active:false },
-            { title: "客戶類別3",active:false }
+            { id: 1, className: "客戶類別1" },
+            { id: 2, className: "客戶類別2" },
+            { id: 3, className: "客戶類別3" }
           ]
         },
         {
+          key: "client",
           title: "客戶資料:",
           items: [
-            { title: "同公司資料" },
-            { title: "示範客戶A" },
-            { title: "示範客戶B" }
+            { id:1,name: "示範客戶A",phone:"0912265485",code:"123",address:"AAAA" },
+            { id:2,name: "示範客戶B",phone:"0912265486",code:"321",address:"BBBB"},
+            { id:3,name: "示範客戶C",phone:"0912265487",code:"444",address:"CCCC"},
           ]
         },
         {
-          items: [{ title: "List Item" }],
-          title: "收件資料"
+          key: "receive",
+          title: "收件資料",
+          items: [
+            { id:1,name: "同客戶資料(預設地址)",phone:"",code:"",address:"" },
+            { id:2,name: "同公司資料",phone:"",code:"",address:"" },
+            { id:3,name: "收件客戶A",phone:"0912265485",code:"123",address:"示範收件地址A" },
+            { id:4,name: "收件客戶B",phone:"0912265486",code:"321",address:"示範收件地址B"},
+            { id:5,name: "收件客戶C",phone:"0912265487",code:"444",address:"示範收件地址C"},
+            { id:6,name: "收件客戶D",phone:"0912265487",code:"444",address:"示範收件地址D"},
+          ]
         }
       ]
     };
+  },
+  methods: {
+    moment
+  },
+  mounted() {
+    this.today = moment(new Date()).format("YYYY-MM-DD");
   }
 };
 </script>
@@ -70,7 +128,13 @@ export default {
 .container {
   background-color: #fff0e9;
 }
-.top-wrapper {
+.top-wrapper{
+  background-color: #c2c2c2;
+}
+.content-wrapper{
+  background-color: #c2c2c2;
+}
+.footer-wrapper{
   background-color: #c2c2c2;
 }
 </style>
