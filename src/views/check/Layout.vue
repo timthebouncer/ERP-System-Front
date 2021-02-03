@@ -2,17 +2,17 @@
   <div class="app-class">
     <HeaderOption />
     <v-main>
-      <Sales/>
+      <router-link to="/Sales"></router-link>
+      <router-link to="/Restore"></router-link>
+      <router-view />
     </v-main>
-
   </div>
 </template>
 
 <script>
   import HeaderOption from './components/Header/index'
-  import Sales from './Sales'
   export default {
-    components:{HeaderOption,Sales}
+    components:{ HeaderOption}
   }
 </script>
 

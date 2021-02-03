@@ -20,6 +20,11 @@ const routes = [
         name: 'sales',
         component: () => import('../views/check/Sales/index.vue'),
       },
+      {
+        path: '/restore',
+        name: 'restore',
+        component: () => import('../views/check/Restore/index.vue'),
+      },
     ],
   },
   {

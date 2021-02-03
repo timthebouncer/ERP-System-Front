@@ -82,6 +82,17 @@ export default {
     toggleMenu(name) {
       this.menuName = name
       this.showMenu = false
+
+      switch (name) {
+        case '出貨':
+        this.$router.push('/Sales')
+        break;
+        case '重新入庫':
+        this.$router.push('Restore')
+        break;
+      }
+
+
     },
     openMenu(attrs){
       console.log(attrs);
