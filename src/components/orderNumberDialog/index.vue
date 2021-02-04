@@ -3,7 +3,7 @@
         <v-dialog v-model="show" persistent max-width="800">
             <v-card>
                 <v-toolbar flat>
-                    <v-toolbar-title>入庫單號</v-toolbar-title>
+                    <v-toolbar-title>入料單號</v-toolbar-title>
                 </v-toolbar>
                 <v-data-table
                         v-model="selected"
@@ -60,7 +60,7 @@
                 selected: [],
                 headers: [
                     {
-                        text: '入庫單號',
+                        text: '入料單號',
                         align: 'center',
                         sortable: false,
                         value: 'name',

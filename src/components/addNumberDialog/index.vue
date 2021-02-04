@@ -3,11 +3,11 @@
         <v-dialog v-model="show" persistent max-width="400">
             <v-card>
                 <v-toolbar flat>
-                    <v-toolbar-title>新增單號</v-toolbar-title>
+                    <v-toolbar-title>新增入料</v-toolbar-title>
                 </v-toolbar>
                 <v-card-text class="mt-8">
                     <v-form ref="form" v-model="valid" lazy-validation>
-                        <v-text-field label="入庫單號" disabled />
+                        <v-text-field label="入料單號" disabled />
                         <v-select :items="items" label="物料名稱"/>
                         <v-text-field label="物料數量" type="number" />
                         <v-text-field label="屠體重量(公斤)" disabled />
