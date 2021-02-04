@@ -10,14 +10,14 @@
                         :headers="headers"
                         :items="desserts"
                         item-key="name"
-                        class="elevation-1"
                         :footer-props="{ itemsPerPageText: '每頁顯示筆數' }"
                         @click:row="handleRow"
+                        hide-default-footer
                 >
                 </v-data-table>
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn :disabled="loading" text @click="cancel">取消</v-btn>
+                    <v-btn text @click="cancel">取消</v-btn>
                     <v-btn :loading="loading" text @click="submit">確定</v-btn>
                 </v-card-actions>
             </v-card>
