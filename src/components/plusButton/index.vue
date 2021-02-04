@@ -63,7 +63,7 @@
 
         li {
             list-style-type: none;
-            width: 50px;
+            width: 150px;
             height: 50px;
             text-align: center;
             line-height: 30px;
