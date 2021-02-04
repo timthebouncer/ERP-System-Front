@@ -8,7 +8,7 @@
           <v-text-field
             solo
             v-model="barCode"
-            @change="barcodeChange"
+            @input="barcodeChange"
             placeholder="可掃條碼 或 手動輸入"
             class="barcode-input"
           ></v-text-field>
@@ -20,9 +20,9 @@
       <template v-if="barCode !== ''">
         <div class="goods-detail" v-for="item in barCodeSelection" :key="item.id">
           <div>商品名稱
-            {{item.name}}
+            <span style="margin-left: 100px">{{item.name}}</span>
           </div>
-          <div class="goods-display" v-if="item.unit === '件' || item.unit ==='包'">
+          <div class="goods-display" v-if="item.unit === 'PIECE' || item.unit ==='PACK'">
             <div style="margin-left: -32px;">數量</div>
             <div>
               <v-text-field
@@ -103,6 +103,7 @@ export default {
         amount:this.restoreList[0].stockAmount,
         weight:this.restoreList[0].weight
       }).then((res)=>{
+        alert("入庫成功")
         console.log(res)
       })
     },
