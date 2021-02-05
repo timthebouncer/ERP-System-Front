@@ -77,11 +77,17 @@ export default {
     };
   },
   created() {
-
+      // this.$api.Commodity.getCommodityDetail({
+      //   searchKey: '',
+      //   barcode: this.barCode
+      // }).then(res=>{
+      //  let specifedId = res.data.find(item=>item.id)
+      //   console.log(specifedId)
+      // })
   },
   methods:{
     barcodeChange(){
-      this.getCommodity(this.barCode)
+      this.salesProduct(this.barCode)
       if(!this.barCode){
         this.barCodeSelection = []
       }
@@ -107,8 +113,8 @@ export default {
         console.log(res)
       })
     },
-    getCommodity(){
-      this.$api.Commodity.getCommodityDetail({
+    salesProduct(){
+      this.$api.Commodity.getSalesProduct({
         searchKey: '',
         barcode: this.barCode
       }).then(res=>{

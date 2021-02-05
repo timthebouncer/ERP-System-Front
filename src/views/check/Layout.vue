@@ -2,6 +2,7 @@
   <div class="app-class">
     <HeaderOption />
     <v-main>
+      工作日期
       <router-link to="/Sales"></router-link>
       <router-link to="/Restore"></router-link>
       <router-view />
