@@ -87,8 +87,24 @@ export default {
         case '出貨':
         this.$router.push('/Sales')
         break;
+        case '出貨清單':
+        this.$router.push('/salesLog')
+        break;
         case '重新入庫':
-        this.$router.push('Restore')
+        this.$router.push('/Restore')
+        this.menuName = '重新入庫'
+        break;
+        case '重新入庫清單':
+        this.$router.push('/restoreLog')
+        this.menuName = '重新入庫清單'
+        break;
+        case '取消入庫':
+        this.$router.push('/cancelRestore')
+        this.menuName = '取消入庫'
+        break;
+        case '取消入庫清單':
+        this.$router.push('/cancelRestoreLog')
+        this.menuName = '取消入庫清單'
         break;
       }
 

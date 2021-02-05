@@ -21,9 +21,29 @@ const routes = [
         component: () => import('../views/check/Sales/index.vue'),
       },
       {
+        path: '/salesLog',
+        name: 'salesLog',
+        component: () => import('../views/check/Sales/SalesLog.vue'),
+      },
+      {
         path: '/restore',
         name: 'restore',
         component: () => import('../views/check/Restore/index.vue'),
+      },
+      {
+        path: '/restoreLog',
+        name: 'restoreLog',
+        component: () => import('../views/check/Restore/restoreLog.vue'),
+      },
+      {
+        path: '/cancelRestoreLog',
+        name: 'cancelRestoreLog',
+        component: () => import('../views/check/Restore/cancelRestoreLog.vue'),
+      },
+      {
+        path: '/cancelRestore',
+        name: 'cancelRestore',
+        component: () => import('../views/check/Restore/cancelRestore.vue'),
       },
     ],
   },
