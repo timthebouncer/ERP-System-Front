@@ -111,18 +111,72 @@
     <div>
       <v-row class="ma-0"
         ><v-col class="col-4 align-self-center"><span>商品條碼</span></v-col
-        ><v-col><v-text-field solo></v-text-field></v-col
+        ><v-col><v-autocomplete
+              v-model="productId"
+              :items="productItem"
+              item-text="barcode"
+              item-value="id"
+              dense
+              @change="setBarcode"
+              filled
+      ></v-autocomplete></v-col
       ></v-row>
     </div>
     <div class="footer-wrapper rounded">
       商品資料
     </div>
+    <swipe-list class="productList" :items="productItem" transition-key="id">
+      <template slot-scope="{ item}">
+        <v-row>
+          <v-col class="col-6">
+            <div class="productList-content">
+              <p>{{item.name}}</p>
+              <p><span>{{item.unit}}</span></p>
+              <p><span>出貨售價:</span><span>{{item.listPrice==0?item.salesPrice*item.amount:item.listPrice*item.amount}}</span></p>
+              <p><span>備註</span><span>{{item.description}}</span></p>
+            </div>
+          </v-col>
+          <v-col class="col-3 align-self-center">
+            <ul class="counter">
+              <p class="mb-1 commodityNumber">數量</p>
+              <li>
+                <input type="button" @click="minuser" value="-"/>
+              </li>
+              <li style="width: 100%; height: 50px">
+                <input class="numberCount" type="number" v-model="item.amount" style="text-align: center"/>
+              </li>
+              <li>
+                <input type="button" @click="adder" value="+"/>
+              </li>
+            </ul>
+          </v-col>
+          <v-col class="col-3"></v-col>
+        </v-row>
+        <v-divider></v-divider>
+      </template>
+
+      <template slot="left">
+        <div class="swipeout-action action-panel-left"></div>
+      </template>
+      <template slot="right">
+        <div class="swipeout-action action-panel-right">
+          <div>
+        <v-icon>mdi-trash-can-outline</v-icon>
+          </div>
+        </div>
+      </template>
+    </swipe-list>
   </v-container>
 </template>
 <script>
 import moment from "moment";
+import {SwipeList} from 'vue-swipe-actions'
+import 'vue-swipe-actions/dist/vue-swipe-actions.css';
 export default {
   name: "Sales",
+  components:{
+    SwipeList
+  },
   data() {
     return {
       today: "",
@@ -207,9 +261,15 @@ export default {
           ]
         }
       ],
+      productItem:[
+        {id:1,barcode:'123456',name:'商品1',unit:'KG',amount:'10',salesPrice:150,listPrice:150,description:'123'},
+        {id:2,barcode:'1234567',name:'商品2',unit:'PACK',amount:'20',salesPrice:100,listPrice:100,description:'456'},
+        {id:3,barcode:'1234568',name:'商品3',unit:'G',amount:'5',salesPrice:50,listPrice:50,description:''},
+      ],
+      productId:'',
       dialogVisible: false,
       dialogTitle: "",
-      dialogData: [{ title: "", value: "" }]
+      dialogData: [{ title: "", value: "" }],
     };
   },
   methods: {
@@ -235,6 +295,13 @@ export default {
 
       this.dialogVisible = true;
     },
+    setBarcode(){
+      console.log('barcode');
+    },
+    adder(){
+
+    },
+    minuser(){},
     moment
   },
   mounted() {
@@ -254,5 +321,102 @@ export default {
 }
 .footer-wrapper {
   background-color: #c2c2c2;
+}
+.swipeout-list {
+  display: flex;
+  flex-direction: column;
+}
+.swipeout-list-item {
+  flex: 1;
+  border-bottom: 1px solid lightgray;
+  &:last-of-type {
+    border-bottom: none;
+  }
+}
+.swipeout-action {
+  display: flex;
+  > div {
+    display: flex;
+    align-items: center;
+    padding: 0 3rem;
+    cursor: pointer;
+  }
+  &.action-panel-right {
+    > div {
+      background-color: #d9001b;
+      color: white;
+      &:hover {
+        background-color: darken(dodgerblue, 5%);
+      }
+    }
+  }
+  &.action-panel-left {
+    > div:nth-of-type(even) {
+      background-color: darkorchid;
+      color: white;
+      &:hover {
+        background-color: darken(darkorchid, 5%);
+      }
+    }
+    > div:nth-of-type(odd) {
+      background-color: dodgerblue;
+      color: white;
+      &:hover {
+        background-color: darken(dodgerblue, 5%);
+      }
+    }
+  }
+}
+.productList {
+  width: 100%;
+  background-color: white;
+  border-radius: 3px;
+  box-shadow: none;
+  border: 1px solid lightgray;
+}
+.productList-content {
+  padding: 1rem;
+}
+
+ul, li {
+  margin: 0;
+  padding: 0;
+}
+.counter {
+  width: 100%;
+  display: flex;
+  position: relative;
+
+  li:nth-child(2n+1) {
+    border-style: solid none;
+  }
+
+  li {
+    list-style-type: none;
+    width: 150px;
+    height: 50px;
+    text-align: center;
+    line-height: 30px;
+    border: #999 thin solid;
+    background-color: #fff;
+
+    input {
+      font-size: 12px;
+      width: 100%;
+      height: 50%;
+      outline: none;
+      -webkit-appearance: none;
+      background: none;
+      margin: 0;
+      padding: 0;
+      border: 1px solid transparent;
+      border-radius: 0;
+    }
+  }
+
+  .commodityNumber {
+    top: -60%;
+    position: absolute;
+  }
 }
 </style>
