@@ -136,7 +136,7 @@
               <p><span>備註</span><span>{{item.description}}</span></p>
             </div>
           </v-col>
-          <v-col class="col-3 align-self-center">
+          <v-col class="col-6 align-self-center">
             <ul class="counter">
               <p class="mb-1 commodityNumber">數量</p>
               <li>
@@ -150,7 +150,7 @@
               </li>
             </ul>
           </v-col>
-          <v-col class="col-3"></v-col>
+          <v-col ></v-col>
         </v-row>
         <v-divider></v-divider>
       </template>
@@ -401,9 +401,9 @@ ul, li {
     background-color: #fff;
 
     input {
-      font-size: 12px;
+      font-size: 20px;
       width: 100%;
-      height: 50%;
+      height: 100%;
       outline: none;
       -webkit-appearance: none;
       background: none;
