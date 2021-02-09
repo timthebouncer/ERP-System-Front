@@ -1,14 +1,19 @@
 <template>
   <v-container class="container">
-    <v-dialog v-model="dialogVisible" hide-overlay fullscreen >
+    <v-dialog v-model="dialogVisible" hide-overlay fullscreen>
       <v-card style="background-color: #fff0e9;">
         <v-card-title class="justify-center">
           <span class="text-h4">{{ dialogTitle }}</span>
         </v-card-title>
         <v-card-text>
-          <v-row class="align-content-center" v-for="item in dialogData" v-bind:key="item.title"
+          <v-row
+            class="align-content-center"
+            v-for="item in dialogData"
+            v-bind:key="item.title"
             ><v-col class="col-4"
-              ><span class="text-h6 font-weight-black">{{ item.title }}</span></v-col
+              ><span class="text-h6 font-weight-black">{{
+                item.title
+              }}</span></v-col
             ><v-col class="col-8"
               ><v-text-field
                 class=""
@@ -39,15 +44,34 @@
       >
         <template v-slot:activator>
           <v-list-item-content>
-            <v-list-item-title v-text="item.title"></v-list-item-title>
+            <v-col class="col-4">
+              <v-list-item-title v-text="item.title"></v-list-item-title>
+            </v-col>
+            <v-col v-if="item.key == 'class'"
+              ><v-list-item-title
+                style="word-break: break-all;text-align: center;"
+                >{{ className }}</v-list-item-title
+              ></v-col
+            >
+            <v-col v-else-if="item.key == 'client'"
+            ><v-list-item-title
+                    style="word-break: break-all;text-align: center;"
+            ><v-row class="justify-space-between ma-0"
+            ><span class="">{{ clientData.name }}</span
+            ><span class="">{{ clientData.phone }}</span
+            ><span></span
+            ></v-row></v-list-item-title
+            ></v-col
+            >
           </v-list-item-content>
         </template>
 
+        <!--        客戶類別 List-->
         <template v-if="item.key == 'class'">
-          <v-radio-group @change="classRadioChange">
+          <v-radio-group @change="classRadioChange" class="mt-0">
             <v-list-item v-for="child in item.items" :key="child.id">
               <v-list-item-action class="mr-4">
-                <v-radio :value="child.id" :key="child.id" ></v-radio>
+                <v-radio :value="child.id" :key="child.id"></v-radio>
               </v-list-item-action>
               <v-list-item-content>
                 <v-list-item-title v-text="child.className"></v-list-item-title>
@@ -55,8 +79,9 @@
             </v-list-item>
           </v-radio-group>
         </template>
+        <!--        客戶資料 List-->
         <template v-else-if="item.key == 'client'">
-          <v-radio-group>
+          <v-radio-group @change="clientRadioChange">
             <v-list-item v-for="child in item.items" :key="child.id">
               <v-list-item-action class="mr-4">
                 <v-radio :value="child.id" :key="child.id"></v-radio>
@@ -71,11 +96,15 @@
             </v-list-item>
           </v-radio-group>
           <v-list-item class="pa-0 justify-center">
-            <v-btn text class="font-weight-bold text-h5" @click="addClientData('client')"
+            <v-btn
+              text
+              class="font-weight-bold text-h5"
+              @click="addClientData('client')"
               ><v-icon>mdi-plus-circle-outline</v-icon>新增客戶資料</v-btn
             >
           </v-list-item>
         </template>
+        <!--        收件資料 List-->
         <template v-else-if="item.key == 'receive'">
           <v-radio-group>
             <v-list-item v-for="child in item.items" :key="child.id">
@@ -97,7 +126,10 @@
             </v-list-item>
           </v-radio-group>
           <v-list-item class="pa-0 justify-center">
-            <v-btn text class="font-weight-bold text-h5" @click="addClientData('receive')"
+            <v-btn
+              text
+              class="font-weight-bold text-h5"
+              @click="addClientData('receive')"
               ><v-icon>mdi-plus-circle-outline</v-icon>新增收件資料</v-btn
             >
           </v-list-item>
@@ -110,48 +142,70 @@
     <div>
       <v-row class="ma-0"
         ><v-col class="col-4 align-self-center"><span>商品條碼</span></v-col
-        ><v-col><v-autocomplete
-              v-model="productId"
-              :items="productItem"
-              item-text="barcode"
-              item-value="id"
-              dense
-              @change="setBarcode"
-              filled
-      ></v-autocomplete></v-col
+        ><v-col
+          ><v-autocomplete
+            v-model="productId"
+            :items="productItem"
+            item-text="barcode"
+            item-value="id"
+            dense
+            @change="setBarcode"
+            filled
+          ></v-autocomplete></v-col
       ></v-row>
     </div>
     <div class="footer-wrapper rounded">
       商品資料
     </div>
     <swipe-list class="productList" :items="productItem" transition-key="id">
-      <template slot-scope="{ item}">
+      <template slot-scope="{ item }">
         <v-row>
           <v-col class="col-6">
             <div class="productList-content">
-              <p>{{item.name}}</p>
-              <p><span>{{item.unit}}</span></p>
-              <p><span>出貨售價:</span><span>{{item.listPrice==0?item.salesPrice*item.amount:item.listPrice*item.amount}}</span></p>
-              <p><span>備註</span><span>{{item.description}}</span></p>
+              <p>{{ item.name }}</p>
+              <p>
+                <span>{{ item.unit }}</span>
+              </p>
+              <p>
+                <span>出貨售價:</span
+                ><span>{{
+                  item.listPrice === 0
+                    ? item.salesPrice * item.amount
+                    : item.listPrice * item.amount
+                }}</span>
+              </p>
+              <p>
+                <span>備註</span><span>{{ item.description }}</span>
+              </p>
             </div>
           </v-col>
           <v-col class="col-6 align-self-center">
             <div>
-            <ul class="counter">
-              <p class="mb-1 commodityNumber">數量</p>
-              <li>
-                <input type="button" @click="minuser" value="-"/>
-              </li>
-              <li style="width: 100%; height: 50px">
-                <input class="numberCount" type="number" v-model="item.amount" style="text-align: center"/>
-              </li>
-              <li>
-                <input type="button" @click="adder" value="+"/>
-              </li>
-            </ul>
+              <ul class="counter">
+                <p class="mb-1 commodityNumber">數量</p>
+                <li>
+                  <input type="button" @click="minuser" value="-" />
+                </li>
+                <li style="width: 100%; height: 50px">
+                  <input
+                    class="numberCount"
+                    type="number"
+                    v-model="item.amount"
+                    style="text-align: center"
+                  />
+                </li>
+                <li>
+                  <input type="button" @click="adder" value="+" />
+                </li>
+              </ul>
             </div>
             <div class="text-center pt-3">
-              <p>$<input  type="number" style="text-align: center;border: #999 thin solid; width: 150px;"></p>
+              <p>
+                $<input
+                  type="number"
+                  style="text-align: center;border: #999 thin solid; width: 150px;"
+                />
+              </p>
             </div>
           </v-col>
         </v-row>
@@ -176,11 +230,11 @@
   </v-container>
 </template>
 <script>
-import {SwipeList} from 'vue-swipe-actions'
-import 'vue-swipe-actions/dist/vue-swipe-actions.css';
+import { SwipeList } from "vue-swipe-actions";
+import "vue-swipe-actions/dist/vue-swipe-actions.css";
 export default {
   name: "Sales",
-  components:{
+  components: {
     SwipeList
   },
   data() {
@@ -225,7 +279,7 @@ export default {
         },
         {
           key: "receive",
-          title: "收件資料",
+          title: "收件資料:",
           items: [
             {
               id: 1,
@@ -266,32 +320,71 @@ export default {
           ]
         }
       ],
-      productItem:[
-        {id:1,barcode:'123456',name:'商品1',unit:'KG',amount:'10',salesPrice:150,listPrice:150,description:'123'},
-        {id:2,barcode:'1234567',name:'商品2',unit:'PACK',amount:'20',salesPrice:100,listPrice:100,description:'456'},
-        {id:3,barcode:'1234568',name:'商品3',unit:'G',amount:'5',salesPrice:50,listPrice:50,description:''},
+      productItem: [
+        {
+          id: 1,
+          barcode: "123456",
+          name: "商品1",
+          unit: "KG",
+          amount: "10",
+          salesPrice: 150,
+          listPrice: 150,
+          description: "123"
+        },
+        {
+          id: 2,
+          barcode: "1234567",
+          name: "商品2",
+          unit: "PACK",
+          amount: "20",
+          salesPrice: 100,
+          listPrice: 100,
+          description: "456"
+        },
+        {
+          id: 3,
+          barcode: "1234568",
+          name: "商品3",
+          unit: "G",
+          amount: "5",
+          salesPrice: 50,
+          listPrice: 50,
+          description: ""
+        }
       ],
-      productId:'',
+      productId: "",
       dialogVisible: false,
       dialogTitle: "",
       dialogData: [{ title: "", value: "" }],
+      className: "",
+      clientData: {
+        id: "",
+        name: "",
+        phone: "",
+        code: "",
+        address: ""
+      }
     };
   },
   methods: {
-    classRadioChange(value){
-      console.log(value);
+    classRadioChange(value) {
+      this.className = this.items[0].items.find(x => x.id == value).className
+      this.items[0].active = false
+    },
+    clientRadioChange(value) {
+      this.clientData = this.items[1].items.find(x => x.id == value)
+      this.items[1].active = false
     },
     addClientData(type) {
-      if(type === 'client'){
-        this.dialogTitle = "新增客戶資料"
+      if (type === "client") {
+        this.dialogTitle = "新增客戶資料";
         this.dialogData = [
           { title: "*客戶名稱", value: "", required: true },
           { title: "*客戶電話", value: "", required: true },
           { title: "郵遞區號", value: "", required: false },
           { title: "聯絡地址", value: "", required: false }
-        ]
-      }
-      else{
+        ];
+      } else {
         this.dialogTitle = "新增收件資料";
         this.dialogData = [
           { title: "收件人", value: "", required: false },
@@ -303,13 +396,11 @@ export default {
 
       this.dialogVisible = true;
     },
-    setBarcode(){
-      console.log('barcode');
+    setBarcode() {
+      console.log("barcode");
     },
-    adder(){
-
-    },
-    minuser(){}
+    adder() {},
+    minuser() {}
   }
 };
 </script>
@@ -382,7 +473,8 @@ export default {
   padding: 1rem;
 }
 
-ul, li {
+ul,
+li {
   margin: 0;
   padding: 0;
 }
@@ -391,7 +483,7 @@ ul, li {
   display: flex;
   position: relative;
 
-  li:nth-child(2n+1) {
+  li:nth-child(2n + 1) {
     border-style: solid none;
   }
 
