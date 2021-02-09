@@ -27,11 +27,10 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <span class="font-weight-light">工作日期:{{ today }}</span>
     <div class="top-wrapper rounded">
       客戶資訊
     </div>
-    <v-list class="rounded-xl elevation-10">
+    <v-list class="rounded elevation-10">
       <v-list-group
         v-for="item in items"
         :key="item.title"
@@ -45,10 +44,10 @@
         </template>
 
         <template v-if="item.key == 'class'">
-          <v-radio-group>
+          <v-radio-group @change="classRadioChange">
             <v-list-item v-for="child in item.items" :key="child.id">
               <v-list-item-action class="mr-4">
-                <v-radio :value="child.id" :key="child.id"></v-radio>
+                <v-radio :value="child.id" :key="child.id" ></v-radio>
               </v-list-item-action>
               <v-list-item-content>
                 <v-list-item-title v-text="child.className"></v-list-item-title>
@@ -137,6 +136,7 @@
             </div>
           </v-col>
           <v-col class="col-6 align-self-center">
+            <div>
             <ul class="counter">
               <p class="mb-1 commodityNumber">數量</p>
               <li>
@@ -149,19 +149,26 @@
                 <input type="button" @click="adder" value="+"/>
               </li>
             </ul>
+            </div>
+            <div class="text-center pt-3">
+              <p>$<input  type="number" style="text-align: center;border: #999 thin solid; width: 150px;"></p>
+            </div>
           </v-col>
-          <v-col ></v-col>
         </v-row>
         <v-divider></v-divider>
       </template>
 
       <template slot="left">
-        <div class="swipeout-action action-panel-left"></div>
+        <div class="swipeout-action action-panel-left">
+          <div>
+            <span>編輯備註</span>
+          </div>
+        </div>
       </template>
       <template slot="right">
         <div class="swipeout-action action-panel-right">
           <div>
-        <v-icon>mdi-trash-can-outline</v-icon>
+            <v-icon>mdi-trash-can-outline</v-icon>
           </div>
         </div>
       </template>
@@ -169,7 +176,6 @@
   </v-container>
 </template>
 <script>
-import moment from "moment";
 import {SwipeList} from 'vue-swipe-actions'
 import 'vue-swipe-actions/dist/vue-swipe-actions.css';
 export default {
@@ -179,7 +185,6 @@ export default {
   },
   data() {
     return {
-      today: "",
       items: [
         {
           key: "class",
@@ -273,6 +278,9 @@ export default {
     };
   },
   methods: {
+    classRadioChange(value){
+      console.log(value);
+    },
     addClientData(type) {
       if(type === 'client'){
         this.dialogTitle = "新增客戶資料"
@@ -301,11 +309,7 @@ export default {
     adder(){
 
     },
-    minuser(){},
-    moment
-  },
-  mounted() {
-    this.today = moment(new Date()).format("YYYY-MM-DD");
+    minuser(){}
   }
 };
 </script>
@@ -352,14 +356,14 @@ export default {
   }
   &.action-panel-left {
     > div:nth-of-type(even) {
-      background-color: darkorchid;
+      background-color: #71b603;
       color: white;
       &:hover {
         background-color: darken(darkorchid, 5%);
       }
     }
     > div:nth-of-type(odd) {
-      background-color: dodgerblue;
+      background-color: #71b603;
       color: white;
       &:hover {
         background-color: darken(dodgerblue, 5%);

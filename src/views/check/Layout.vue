@@ -2,7 +2,7 @@
   <div class="app-class">
     <HeaderOption />
     <v-main>
-      工作日期
+      <span class="font-weight-light">工作日期:{{ today }}</span>
       <router-link to="/Sales"></router-link>
       <router-link to="/Restore"></router-link>
       <router-view />
@@ -13,8 +13,17 @@
 
 <script>
 import HeaderOption from './components/Header/index'
+import moment from "moment";
 export default {
-  components:{ HeaderOption}
+  components:{ HeaderOption},
+  data(){
+    return{
+      today: "",
+    }
+  },
+  mounted() {
+    this.today = moment(new Date()).format("YYYY-MM-DD");
+  }
 }
 </script>
 
