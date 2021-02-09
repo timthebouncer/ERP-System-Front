@@ -13,6 +13,9 @@ const api= {
     addInventory(data){
       return request.post("/inventory/stockIn",data);
     },
+    deleteInventory(id){
+      return request.delete("/inventory/deleteInventory/"+id);
+    },
   }
 }
 export default api;
