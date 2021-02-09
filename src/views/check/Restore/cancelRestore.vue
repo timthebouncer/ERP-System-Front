@@ -7,7 +7,7 @@
         <div>
           <v-text-field
             solo
-            v-model="barCode"
+            v-model="searchBarcode"
             @input="barcodeChange"
             placeholder="可掃條碼 或 手動輸入"
             class="barcode-input"
@@ -17,10 +17,10 @@
     </div>
     <div class="content-wrapper">
       <div class="enter-goods">取消商品資料</div>
-      <template v-if="barCode !== ''">
+      <template v-if="searchBarcode !== ''">
         <div
           class="goods-detail"
-          v-for="item in barCodeSelection"
+          v-for="item in restoreList"
           :key="item.id"
         >
           <div>
@@ -63,7 +63,7 @@
         <v-btn>
           清空
         </v-btn>
-        <v-btn @click="addInventory" depressed color="primary">
+        <v-btn @click="deleteInventory" depressed color="primary">
           確定
         </v-btn>
       </div>
@@ -72,7 +72,55 @@
 </template>
 <script>
 export default {
-  name: "cancelRestore"
+  name: "cancelRestore",
+  data(){
+    return{
+      searchBarcode:'',
+      productList:[],
+      restoreList:[]
+    }
+  },
+  created() {
+
+  },
+
+  methods:{
+    barcodeChange(barcode){
+      this.$api.Commodity.getCommodityDetail({
+        searchKey: '',
+        barcode: this.searchBarcode
+      }).then(res=>{
+        this.productList = res.data;
+        this.restoreList = this.productList.filter(item=>{
+          return item.barcode === barcode
+        })
+      })
+    },
+    deleteInventory(){
+      //todo
+      //等Kevin做一支get 庫存商品的api才能拿到該庫存id
+      // console.log(this.restoreList)
+      // let delId = this.restoreList.map(item=> {
+      //  if (this.searchBarcode === item.barcode){
+      //    return item.id
+      //  }
+      // })
+      // console.log(delId)
+      // this.$api.Inventory.deleteInventory(delId)
+      //         .then(res => {
+      //           console.log(res)
+                // this.getInventoryList(this.search)
+              // })
+    },
+    decrement(item){
+      if(item.stockAmount > 0){
+        item.stockAmount -= 1
+      }
+    },
+    increment(item){
+      item.stockAmount += 1
+    },
+  }
 };
 </script>
 <style scoped>

@@ -7,7 +7,7 @@
         <div>
           <v-text-field
             solo
-            v-model="barCode"
+            v-model="searchBarcode"
             @input="barcodeChange"
             placeholder="可掃條碼 或 手動輸入"
             class="barcode-input"
@@ -17,8 +17,8 @@
     </div>
     <div class="content-wrapper">
       <div class="enter-goods">入庫商品資料</div>
-      <template v-if="barCode !== ''">
-        <div class="goods-detail" v-for="item in barCodeSelection" :key="item.id">
+      <template v-if="searchBarcode !== ''">
+        <div class="goods-detail" v-for="item in restoreList" :key="item.id">
           <div>商品名稱
             <span style="margin-left: 100px">{{item.name}}</span>
           </div>
@@ -70,29 +70,26 @@ export default {
   name: "Restore",
   data() {
     return {
-      barCode: "",
+      searchBarcode: "",
       productList:[],
       barCodeSelection:[],
       restoreList:[]
     };
   },
   created() {
-      // this.$api.Commodity.getCommodityDetail({
-      //   searchKey: '',
-      //   barcode: this.barCode
-      // }).then(res=>{
-      //  let specifedId = res.data.find(item=>item.id)
-      //   console.log(specifedId)
-      // })
+
   },
   methods:{
-    barcodeChange(){
-      this.salesProduct(this.barCode)
-      if(!this.barCode){
-        this.barCodeSelection = []
-      }
-      this.restoreList = this.barCodeSelection.map(item => item)
-      console.log(this.restoreList)
+    barcodeChange(barcode){
+      this.$api.Commodity.getCommodityDetail({
+        searchKey: '',
+        barcode: this.searchBarcode
+      }).then(res=>{
+        this.productList = res.data;
+        this.restoreList = this.productList.filter(item=>{
+          return item.barcode === barcode
+        })
+      })
     },
     decrement(item){
       if(item.stockAmount > 0){
@@ -105,34 +102,16 @@ export default {
     addInventory(){
       this.$api.Inventory.addInventory({
         productId: this.restoreList[0].id,
-        barcode:this.barCode,
+        barcode:this.searchBarcode,
         amount:this.restoreList[0].stockAmount,
         weight:this.restoreList[0].weight
       }).then((res)=>{
         alert("入庫成功")
+        this.searchBarcode = ""
+        this.restoreList = []
         console.log(res)
       })
     },
-    salesProduct(){
-      this.$api.Commodity.getSalesProduct({
-        searchKey: '',
-        barcode: this.barCode
-      }).then(res=>{
-        this.productList = res.data
-        let data = [];
-
-        this.barCodeSelection = this.productList.forEach(item=>{
-          if (item.barcode !== '') {
-            data.push(item)
-          }
-        })
-        if(!this.barCode){
-          data = [];
-        }
-        this.barCodeSelection = data
-        // console.log(this.barCodeSelection);
-      })
-    }
   }
 };
 </script>
