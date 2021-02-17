@@ -53,6 +53,7 @@
         methods: {
             getZero () {
                 this.snackbar = true
+                this.$emit('getZero')
             },
             async submit () {
                 this.$emit('close')
