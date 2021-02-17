@@ -10,7 +10,7 @@
                 </v-toolbar>
                 <v-card-title class="headline" />
                 <v-card-text class="pb-15" style="text-align: center">
-                    <p style="font-size: 22px;">累加重量 : {{kg}}公斤</p>
+                    <p style="font-size: 22px;">累加重量 : {{kg}} 公斤</p>
                     <v-btn class="mt-5" x-large color="primary" style="width: 240px" @click="getZero">歸零</v-btn>
                 </v-card-text>
             </v-card>
@@ -41,7 +41,7 @@
         name: 'index',
         props: {
             show: Boolean,
-            kg: String
+            kg: Number
         },
         data () {
             return {
