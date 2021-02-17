@@ -1,5 +1,13 @@
 <template>
   <v-container class="container">
+    <v-snackbar
+            v-model="snackbar"
+            top
+            color="primary"
+            timeout=2000
+    >
+      <span>{{ messageText }}</span>
+    </v-snackbar>
     <v-dialog v-model="dialogVisible" hide-overlay fullscreen>
       <v-card style="background-color: #fff0e9;">
         <v-card-title class="justify-center">
@@ -158,7 +166,7 @@
       商品資料
     </div>
     <swipe-list class="productList" :items="productItem" transition-key="id">
-      <template slot-scope="{ item }">
+      <template slot-scope="{ item,index }">
         <v-row>
           <v-col class="col-6">
             <div class="productList-content">
@@ -169,9 +177,9 @@
               <p>
                 <span>出貨售價:</span
                 ><span>{{
-                  item.listPrice === 0
-                    ? item.salesPrice * item.amount
-                    : item.listPrice * item.amount
+                  item.salesPrice === 0
+                    ? item.listPrice * item.quantity
+                    : item.salesPrice * item.quantity
                 }}</span>
               </p>
               <p>
@@ -179,23 +187,23 @@
               </p>
             </div>
           </v-col>
-          <v-col class="col-6 align-self-center">
-            <div>
+          <v-col class="col-6 align-self-center pl-0">
+            <div class="mr-1">
               <ul class="counter">
                 <p class="mb-1 commodityNumber">數量</p>
                 <li>
-                  <input type="button" @click="minuser" value="-" />
+                  <input type="button" @click="minuser(index)" value="-" />
                 </li>
-                <li style="width: 100%; height: 50px">
+                <li style="width: 100%; height: 50px;">
                   <input
                     class="numberCount"
                     type="number"
-                    v-model="item.amount"
+                    v-model="item.quantity"
                     style="text-align: center"
                   />
                 </li>
                 <li>
-                  <input type="button" @click="adder" value="+" />
+                  <input type="button" @click="adder(index)" value="+" />
                 </li>
               </ul>
             </div>
@@ -203,7 +211,9 @@
               <p>
                 $<input
                   type="number"
-                  style="text-align: center;border: #999 thin solid; width: 150px;"
+                  v-model="item.money"
+                  @change=""
+                  style="text-align: center;border: #999 thin solid; width: 100px;margin-left: 5px; font-size: large;"
                 />
               </p>
             </div>
@@ -227,6 +237,14 @@
         </div>
       </template>
     </swipe-list>
+    <div class="pa-2" style="font-size: 26px; font-weight:bold;">
+      <v-row>
+        <v-col><span>折讓</span></v-col><v-col class="text-end"><span>$100</span></v-col>
+      </v-row>
+      <v-row>
+        <v-col><span>合計</span></v-col><v-col class="text-end"><span style="color: red;">$100</span></v-col>
+      </v-row>
+    </div>
   </v-container>
 </template>
 <script>
@@ -239,6 +257,8 @@ export default {
   },
   data() {
     return {
+      snackbar: false,
+      messageText:'',
       items: [
         {
           key: "class",
@@ -329,7 +349,9 @@ export default {
           amount: "10",
           salesPrice: 150,
           listPrice: 150,
-          description: "123"
+          description: "123",
+          quantity: 1,
+          money: 0
         },
         {
           id: 2,
@@ -337,9 +359,11 @@ export default {
           name: "商品2",
           unit: "PACK",
           amount: "20",
-          salesPrice: 100,
+          salesPrice: 0,
           listPrice: 100,
-          description: "456"
+          description: "456",
+          quantity: 1,
+          money: 0
         },
         {
           id: 3,
@@ -349,7 +373,9 @@ export default {
           amount: "5",
           salesPrice: 50,
           listPrice: 50,
-          description: ""
+          description: "",
+          quantity: 1,
+          money: 0
         }
       ],
       productId: "",
@@ -399,12 +425,37 @@ export default {
     setBarcode() {
       console.log("barcode");
     },
-    adder() {},
-    minuser() {}
+    adder(index) {
+      let item = this.productItem[index]
+      if(item.quantity < item.amount){
+        item.quantity++
+        item.money = item.salesPrice===0 ? item.listPrice:item.salesPrice * item.quantity
+      }
+      else{
+        this.snackbar = true
+        this.messageText = '數量不能超過現有庫存數!'
+      }
+
+    },
+    minuser(index) {
+      let item = this.productItem[index]
+      if(item.quantity > 1) {
+        item.quantity--
+        item.money = item.salesPrice===0 ? item.listPrice:item.salesPrice * item.quantity
+      }
+    },
+  },
+  mounted() {
+    this.productItem.forEach(item =>{
+      item.money = item.salesPrice===0 ? item.listPrice:item.salesPrice * item.quantity
+    })
   }
 };
 </script>
 <style lang="scss" scoped>
+::v-deep .v-snack__content {
+  text-align: center;
+}
 .container {
   background-color: #fff0e9;
 }
