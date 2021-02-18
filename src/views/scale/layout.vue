@@ -1,5 +1,5 @@
 <template>
-  <div class="aaa">
+  <div class="layout">
     <router-view />
   </div>
 </template>
@@ -11,7 +11,4 @@
 </script>
 
 <style lang="scss" scoped>
-  .aaa{
-    display: flex;
-  }
 </style>
