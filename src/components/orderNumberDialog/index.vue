@@ -1,15 +1,16 @@
 <template>
     <v-row justify="center">
-        <v-dialog v-model="show" persistent max-width="800">
+        <v-dialog v-model="show" persistent max-width="900">
             <v-card>
-                <v-toolbar flat>
-                    <v-toolbar-title>入料單號</v-toolbar-title>
+                <v-toolbar flat class="mb-8">
+                    <v-toolbar-title class="mt-8 ml-4" style="font-size: 28px;">入料單號</v-toolbar-title>
                 </v-toolbar>
                 <v-data-table
                         v-model="selected"
+                        item-key="name"
                         :headers="headers"
                         :items="desserts"
-                        item-key="name"
+                        :options.sync="options"
                         :footer-props="{ itemsPerPageText: '每頁顯示筆數' }"
                         @click:row="handleRow"
                         hide-default-footer
@@ -17,8 +18,8 @@
                 </v-data-table>
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn text @click="cancel">取消</v-btn>
-                    <v-btn :loading="loading" text @click="submit">確定</v-btn>
+                    <v-btn large text @click="cancel">取消</v-btn>
+                    <v-btn large :loading="loading" text @click="submit">確定</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
@@ -133,8 +134,39 @@
                         fat: 0.2,
                         carbs: 98,
                         protein: 11
+                    },
+                    {
+                        name: '2958477741',
+                        calories: 392,
+                        fat: 0.2,
+                        carbs: 98,
+                        protein: 11
+                    },
+                    {
+                        name: '2958477741',
+                        calories: 392,
+                        fat: 0.2,
+                        carbs: 98,
+                        protein: 11
+                    },
+                    {
+                        name: '2958477741',
+                        calories: 392,
+                        fat: 0.2,
+                        carbs: 98,
+                        protein: 11
+                    },
+                    {
+                        name: '2958477741',
+                        calories: 392,
+                        fat: 0.2,
+                        carbs: 98,
+                        protein: 11
                     }
                 ],
+                options:{
+                    itemsPerPage: 500,
+                }
             }
         },
         methods: {
@@ -158,5 +190,14 @@
 </script>
 
 <style scoped>
-
+    .v-dialog > .v-card > .v-card__actions {
+        position: sticky;
+        bottom: 0;
+        z-index: 999;
+        background-color: #fff;
+    }
+    .v-data-table >>> th,
+    .v-data-table >>> td {
+        font-size: 18px !important;
+    }
 </style>
