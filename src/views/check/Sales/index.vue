@@ -1,13 +1,9 @@
 <template>
   <v-container class="container">
-    <v-snackbar
-            v-model="snackbar"
-            top
-            color="primary"
-            timeout=2000
-    >
+    <v-snackbar v-model="snackbar" top color="primary" timeout="2000">
       <span>{{ messageText }}</span>
     </v-snackbar>
+<!--    新增客戶資料 新增收件資料 彈窗-->
     <v-dialog v-model="dialogVisible" hide-overlay fullscreen>
       <v-card style="background-color: #fff0e9;">
         <v-card-title class="justify-center">
@@ -40,9 +36,126 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+<!--    新增商品 彈窗-->
+    <v-dialog v-model="salesDialogVisible">
+      <v-card style="background-color: #fff0e9;">
+        <v-card-text>
+          <v-row class="align-content-center"
+            ><v-col class="col-4"
+              ><span class="text-h6 font-weight-black">商品條碼</span></v-col
+            ><v-col class="col-8"
+              ><span class="text-h6">123456</span></v-col
+            ></v-row
+          >
+          <v-row class="align-content-center"
+            ><v-col class="col-4"
+              ><span class="text-h6 font-weight-black">商品名稱</span></v-col
+            ><v-col class="col-8"
+              ><span class="text-h6">雞腿</span></v-col
+            ></v-row
+          >
+          <v-row class="align-content-center"
+            ><v-col class="col-4"
+              ><span class="text-h6 font-weight-black">計價單位</span></v-col
+            ><v-col class="col-8"><span class="text-h6">包</span></v-col></v-row
+          >
+          <v-row class="align-content-center"
+            ><v-col class="col-4"
+              ><span class="text-h6 font-weight-black">數量</span></v-col
+            ><v-col class="col-8"
+              ><ul class="counter">
+                <li>
+                  <input type="button" value="-" />
+                </li>
+                <li style="width: 100%; height: 50px;">
+                  <input
+                    class="numberCount"
+                    type="number"
+                    value="1"
+                    style="text-align: center"
+                  />
+                </li>
+                <li>
+                  <input type="button" value="+" />
+                </li></ul></v-col
+          ></v-row>
+          <v-row class="align-content-center"
+            ><v-col class="col-4"
+              ><span class="text-h6 font-weight-black">備註</span></v-col
+            ><v-col class="col-8"><v-textarea solo rows="3"></v-textarea></v-col
+          ></v-row>
+        </v-card-text>
+        <v-card-actions class="justify-center">
+          <v-btn color="" text outlined @click="salesDialogVisible = false">
+            取消
+          </v-btn>
+          <v-btn color="primary" @click="addSales">
+            儲存
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+<!--    刪除商品 彈窗-->
+    <v-dialog v-model="delProductDialogVisible">
+      <v-card style="background-color: #fff0e9;">
+        <v-card-text class="text-center"
+          ><span class="text-h6 font-weight-black"
+            >是否刪除{{ delProductDialogItem.name }}</span
+          ></v-card-text
+        >
+        <v-card-actions class="justify-center">
+          <v-btn
+            color=""
+            text
+            outlined
+            @click="delProductDialogVisible = false"
+          >
+            取消
+          </v-btn>
+          <v-btn color="primary" @click="deleteProduct(delProductDialogItem)">
+            確定
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+<!--    編輯備註 彈窗-->
+    <v-dialog v-model="changeProductDialogVisible">
+      <v-card style="background-color: #fff0e9;">
+        <v-card-text>
+          <v-row class="align-content-center"
+          ><v-col class="col-4"
+          ><span class="text-h6 font-weight-black">商品條碼</span></v-col
+          ><v-col class="col-8"
+          ><span class="text-h6">{{changeProductDialogItem.barcode}}</span></v-col
+          ></v-row
+          >
+          <v-row class="align-content-center"
+          ><v-col class="col-4"
+          ><span class="text-h6 font-weight-black">商品名稱</span></v-col
+          ><v-col class="col-8"
+          ><span class="text-h6">{{changeProductDialogItem.name}}</span></v-col
+          ></v-row
+          >
+          <v-row class="align-content-center"
+          ><v-col class="col-4"
+          ><span class="text-h6 font-weight-black">備註</span></v-col
+          ><v-col class="col-8"><v-textarea solo rows="3" v-model="changeProductDialogDes"></v-textarea></v-col
+          ></v-row>
+        </v-card-text>
+        <v-card-actions class="justify-center">
+          <v-btn color="" text outlined @click="changeDesDialogCancel">
+            取消
+          </v-btn>
+          <v-btn color="primary" @click="changeProductDes">
+            儲存
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <div class="top-wrapper rounded">
       客戶資訊
     </div>
+<!--    客戶資訊 -->
     <v-list class="rounded elevation-10">
       <v-list-group
         v-for="item in items"
@@ -62,15 +175,27 @@
               ></v-col
             >
             <v-col v-else-if="item.key == 'client'"
-            ><v-list-item-title
-                    style="word-break: break-all;text-align: center;"
-            ><v-row class="justify-space-between ma-0"
-            ><span class="">{{ clientData.name }}</span
-            ><span class="">{{ clientData.phone }}</span
-            ><span></span
-            ></v-row></v-list-item-title
-            ></v-col
-            >
+              ><v-list-item-title
+                style="word-break: break-all;text-align: center;"
+                ><v-row class="justify-space-between ma-0"
+                  ><span class="">{{ clientData.name }}</span
+                  ><span class="">{{ clientData.phone }}</span
+                  ><span></span></v-row></v-list-item-title
+            ></v-col>
+            <v-col v-else-if="item.key == 'receive'"
+              ><v-list-item-title
+                style="word-break: break-all;text-align: center;"
+                ><v-row class="justify-space-between ma-0"
+                  ><span class="">{{ receiveData.name }}</span
+                  ><span class="">{{ receiveData.phone }}</span
+                  ><span></span
+                ></v-row>
+                <v-row class="justify-space-between ma-0"
+                  ><span class="">{{ receiveData.code }}</span
+                  ><span class="">{{ receiveData.address }}</span
+                  ><span></span
+                ></v-row> </v-list-item-title
+            ></v-col>
           </v-list-item-content>
         </template>
 
@@ -114,7 +239,7 @@
         </template>
         <!--        收件資料 List-->
         <template v-else-if="item.key == 'receive'">
-          <v-radio-group>
+          <v-radio-group @change="receiveRadioChange">
             <v-list-item v-for="child in item.items" :key="child.id">
               <v-list-item-action class="mr-4">
                 <v-radio :value="child.id" :key="child.id"></v-radio>
@@ -153,7 +278,7 @@
         ><v-col
           ><v-autocomplete
             v-model="productId"
-            :items="productItem"
+            :items="productItemData"
             item-text="barcode"
             item-value="id"
             dense
@@ -165,8 +290,9 @@
     <div class="footer-wrapper rounded">
       商品資料
     </div>
-    <swipe-list class="productList" :items="productItem" transition-key="id">
-      <template slot-scope="{ item,index }">
+<!--    商品資料 List-->
+    <swipe-list ref="swipeList" class="productList" :items="productItem" transition-key="id">
+      <template slot-scope="{ item, index }">
         <v-row>
           <v-col class="col-6">
             <div class="productList-content">
@@ -212,7 +338,7 @@
                 $<input
                   type="number"
                   v-model="item.money"
-                  @change=""
+                  @change="onCalculation"
                   style="text-align: center;border: #999 thin solid; width: 100px;margin-left: 5px; font-size: large;"
                 />
               </p>
@@ -222,15 +348,18 @@
         <v-divider></v-divider>
       </template>
 
-      <template slot="left">
-        <div class="swipeout-action action-panel-left">
+      <template v-slot:left="{ item , index }">
+        <div class="swipeout-action action-panel-left" @click="onChangeDesDialog(item,index)">
           <div>
             <span>編輯備註</span>
           </div>
         </div>
       </template>
-      <template slot="right">
-        <div class="swipeout-action action-panel-right">
+      <template v-slot:right="{ item }">
+        <div
+          class="swipeout-action action-panel-right"
+          @click="onDelProductDialog(item)"
+        >
           <div>
             <v-icon>mdi-trash-can-outline</v-icon>
           </div>
@@ -239,11 +368,22 @@
     </swipe-list>
     <div class="pa-2" style="font-size: 26px; font-weight:bold;">
       <v-row>
-        <v-col><span>折讓</span></v-col><v-col class="text-end"><span>$100</span></v-col>
+        <v-col><span>折讓</span></v-col
+        ><v-col class="text-end"
+          ><span>${{ discount }}</span></v-col
+        >
       </v-row>
       <v-row>
-        <v-col><span>合計</span></v-col><v-col class="text-end"><span style="color: red;">$100</span></v-col>
+        <v-col><span>合計</span></v-col
+        ><v-col class="text-end"
+          ><span style="color: red;">${{ total }}</span></v-col
+        >
       </v-row>
+    </div>
+    <div>
+      <v-btn color="primary" style="width: 100%;" :disabled="nextDisabled">
+        下一步 > 輸入出貨資料
+      </v-btn>
     </div>
   </v-container>
 </template>
@@ -258,7 +398,7 @@ export default {
   data() {
     return {
       snackbar: false,
-      messageText:'',
+      messageText: "",
       items: [
         {
           key: "class",
@@ -340,7 +480,7 @@ export default {
           ]
         }
       ],
-      productItem: [
+      productItemData: [
         {
           id: 1,
           barcode: "123456",
@@ -378,8 +518,16 @@ export default {
           money: 0
         }
       ],
+      productItem: [],
       productId: "",
       dialogVisible: false,
+      salesDialogVisible: false,
+      delProductDialogVisible: false,
+      changeProductDialogVisible: false,
+      delProductDialogItem: {},
+      changeProductDialogItem: {},
+      changeProductDialogDes: "",
+      changeProductDesIndex: 0,
       dialogTitle: "",
       dialogData: [{ title: "", value: "" }],
       className: "",
@@ -389,17 +537,50 @@ export default {
         phone: "",
         code: "",
         address: ""
-      }
+      },
+      receiveData: {
+        id: "",
+        name: "",
+        phone: "",
+        code: "",
+        address: ""
+      },
+      hasClass: false,
+      hasClient: false,
+      hasReceive: false,
+      nextDisabled: true,
+      discount: 0,
+      total: 0
     };
   },
   methods: {
     classRadioChange(value) {
-      this.className = this.items[0].items.find(x => x.id == value).className
-      this.items[0].active = false
+      this.className = this.items[0].items.find(x => x.id == value).className;
+      this.items[0].active = false;
+      this.hasClass = true;
+      this.checkNexted();
     },
     clientRadioChange(value) {
-      this.clientData = this.items[1].items.find(x => x.id == value)
-      this.items[1].active = false
+      this.clientData = this.items[1].items.find(x => x.id == value);
+      this.items[1].active = false;
+      this.hasClient = true;
+      this.checkNexted();
+    },
+    receiveRadioChange(value) {
+      this.receiveData = this.items[2].items.find(x => x.id == value);
+      this.items[2].active = false;
+      this.hasReceive = true;
+      this.checkNexted();
+    },
+    checkNexted() {
+      if (
+        this.hasClass &&
+        this.hasClient &&
+        this.hasReceive &&
+        this.total !== 0
+      ) {
+        this.nextDisabled = false;
+      }
     },
     addClientData(type) {
       if (type === "client") {
@@ -423,33 +604,82 @@ export default {
       this.dialogVisible = true;
     },
     setBarcode() {
-      console.log("barcode");
+      this.salesDialogVisible = true;
+    },
+    addSales() {
+      this.productItem = this.productItemData;
+      this.productItem.forEach(item => {
+        item.money =
+          (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
+          item.quantity;
+      });
+      this.onCalculation();
+      this.salesDialogVisible = false;
     },
     adder(index) {
-      let item = this.productItem[index]
-      if(item.quantity < item.amount){
-        item.quantity++
-        item.money = item.salesPrice===0 ? item.listPrice:item.salesPrice * item.quantity
+      let item = this.productItem[index];
+      if (item.quantity < item.amount) {
+        item.quantity++;
+        item.money =
+          (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
+          item.quantity;
+        this.onCalculation();
+      } else {
+        this.snackbar = true;
+        this.messageText = "數量不能超過現有庫存數!";
       }
-      else{
-        this.snackbar = true
-        this.messageText = '數量不能超過現有庫存數!'
-      }
-
     },
     minuser(index) {
-      let item = this.productItem[index]
-      if(item.quantity > 1) {
-        item.quantity--
-        item.money = item.salesPrice===0 ? item.listPrice:item.salesPrice * item.quantity
+      let item = this.productItem[index];
+      if (item.quantity > 1) {
+        item.quantity--;
+        item.money =
+          (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
+          item.quantity;
+        this.onCalculation();
       }
     },
+    onDelProductDialog(item) {
+      this.delProductDialogItem = item;
+      this.delProductDialogVisible = true;
+    },
+    deleteProduct(item) {
+      this.productItem = this.productItem.filter(i => i !== item);
+      this.delProductDialogVisible = false;
+      this.onCalculation();
+    },
+    onChangeDesDialog(item,index) {
+      this.changeProductDialogItem = item
+      this.changeProductDialogDes = item.description
+      this.changeProductDesIndex = index
+      this.changeProductDialogVisible = true
+    },
+    changeProductDes() {
+      this.productItem[this.changeProductDesIndex].description = this.changeProductDialogDes
+      this.changeProductDialogVisible = false
+      this.$refs.swipeList.closeActions(this.changeProductDesIndex)
+    },
+    changeDesDialogCancel(){
+      this.changeProductDialogVisible = false
+      this.$refs.swipeList.closeActions(this.changeProductDesIndex)
+    },
+    onCalculation() {
+      let _this = this;
+      this.discount = 0;
+      this.total = 0;
+      this.productItem.forEach(item => {
+        let price = 0;
+        price =
+          (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
+          item.quantity;
+        _this.discount = _this.discount + (price - item.money);
+
+        _this.total = _this.total + parseInt(item.money, 10);
+      });
+      this.checkNexted();
+    }
   },
-  mounted() {
-    this.productItem.forEach(item =>{
-      item.money = item.salesPrice===0 ? item.listPrice:item.salesPrice * item.quantity
-    })
-  }
+  mounted() {}
 };
 </script>
 <style lang="scss" scoped>
@@ -491,25 +721,12 @@ export default {
     > div {
       background-color: #d9001b;
       color: white;
-      &:hover {
-        background-color: darken(dodgerblue, 5%);
-      }
     }
   }
   &.action-panel-left {
-    > div:nth-of-type(even) {
+    > div {
       background-color: #71b603;
       color: white;
-      &:hover {
-        background-color: darken(darkorchid, 5%);
-      }
-    }
-    > div:nth-of-type(odd) {
-      background-color: #71b603;
-      color: white;
-      &:hover {
-        background-color: darken(dodgerblue, 5%);
-      }
     }
   }
 }
@@ -533,10 +750,6 @@ li {
   width: 100%;
   display: flex;
   position: relative;
-
-  li:nth-child(2n + 1) {
-    border-style: solid none;
-  }
 
   li {
     list-style-type: none;
