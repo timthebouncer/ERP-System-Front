@@ -1,13 +1,12 @@
 <template>
-  <div class="aaa">
-    <div class="title">磅秤機系統</div>
+  <div class="layout">
     <router-view />
   </div>
 </template>
 
 <script>
   export default {
-    
+
   }
 </script>
 

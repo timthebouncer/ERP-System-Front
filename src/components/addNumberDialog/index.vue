@@ -10,7 +10,7 @@
                         <v-text-field label="入料單號" disabled />
                         <v-select :items="items" label="物料名稱"/>
                         <v-text-field label="物料數量" type="number" />
-                        <v-text-field label="屠體重量(公斤)" disabled />
+                        <v-text-field v-model="kg" label="屠體重量(公斤)" disabled />
                         <v-text-field label="毛雞重量(公斤)" type="number" />
                     </v-form>
                 </v-card-text>
@@ -46,7 +46,8 @@
     export default {
         name: 'index',
         props: {
-            show: Boolean
+            show: Boolean,
+            kg: Number
         },
         data () {
             return {
@@ -81,5 +82,7 @@
 </script>
 
 <style scoped>
-
+    .v-text-field >>> input {
+        font-size: 20px;
+    }
 </style>
