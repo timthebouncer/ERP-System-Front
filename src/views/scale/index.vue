@@ -3,16 +3,16 @@
         <v-container fluid class="wrapper">
             <div class="top pa-3">
                 <div class="title d-flex align-center">
-                    <div
-                            class="mr-3"
-                            v-if="btStatus"
-                            style="width:20px; height:20px; background-color: #4caf50; border-radius: 50%"
-                    />
-                    <div
-                            class="mr-3"
-                            v-if="!btStatus"
-                            style="width:20px; height:20px; background-color: #888888; border-radius: 50%"
-                    />
+<!--                    <div-->
+<!--                            class="mr-3"-->
+<!--                            v-if="btStatus"-->
+<!--                            style="width:20px; height:20px; background-color: #4caf50; border-radius: 50%"-->
+<!--                    />-->
+<!--                    <div-->
+<!--                            class="mr-3"-->
+<!--                            v-if="!btStatus"-->
+<!--                            style="width:20px; height:20px; background-color: #888888; border-radius: 50%"-->
+<!--                    />-->
                     <span class="inbound">入庫作業</span>
                     <span class="work-date">工作日期 : {{today}}</span>
                 </div>
@@ -46,7 +46,7 @@
                     <v-btn class="mr-10" large depressed color="error">取消入庫</v-btn>
                     <div class="staffName">
                         <span>Jennifer Lopez</span>
-                        <v-btn class="ml-2" icon>
+                        <v-btn class="ml-2" icon @click="logout">
                             <v-icon large>mdi-exit-to-app</v-icon>
                         </v-btn>
                     </div>
@@ -57,7 +57,7 @@
                     <div class="weight-scale">
                         <div v-if="kgStatus">{{ displayValue.toFixed(3) }}</div>
                         <div v-else-if="tkgStatus">{{Math.floor(changeValue)}}斤{{twTael}}兩</div>
-                        <div v-else>{{ changeValue.toFixed(3) }}</div>
+                        <div v-else>{{ changeValue }}</div>
                     </div>
                     <div class="d-flex">
                         <v-btn-toggle v-model="defaultValue" mandatory>
@@ -110,28 +110,29 @@
                                         append-icon="mdi-menu-down"
                                         label="入料單號 :"
                                         @click="showOrderNumberDialog(true)"
+                                        style="font-size: 22px;"
                                 />
                             </v-col>
                             <v-col class="d-flex pb-0" cols="12" sm="6" md="6">
-                                <v-text-field disabled label="物料名稱 :"/>
+                                <v-text-field disabled label="物料名稱 :" style="font-size: 22px;" />
                             </v-col>
                             <v-col class="d-flex pb-0" cols="12" sm="6" md="6">
-                                <v-text-field disabled label="物料數量 :"/>
+                                <v-text-field disabled label="物料數量 :" style="font-size: 22px;" />
                             </v-col>
                             <v-col class="d-flex pb-0" cols="12" sm="6" md="6">
-                                <v-text-field disabled label="屠體重量(公斤) :"/>
+                                <v-text-field disabled label="屠體重量(公斤) :" style="font-size: 22px;" />
                             </v-col>
                             <v-col class="d-flex pb-0" cols="12" sm="6" md="6">
-                                <v-text-field type="number" label="毛雞重量(公斤) :"/>
+                                <v-text-field type="number" label="毛雞重量(公斤) :" style="font-size: 22px;"/>
                             </v-col>
                             <v-col class="d-flex pb-0" cols="12" sm="6" md="6">
-                                <v-select :items="items" :rules="warehouseValidat" label="儲存倉庫 :"/>
+                                <v-select :items="items" :rules="warehouseValidat" label="儲存倉庫 :" style="font-size: 17px;"/>
                             </v-col>
                         <v-col class="d-flex pb-0 mt-4" cols="12" sm="6" md="6">
-                            <PlusButton :name="'商品序號'" @changeNumber="changeNumber"/>
+                            <PlusButton v-if="restPlusBtn" :name="'商品序號'" @changeNumber="changeNumber"/>
                         </v-col>
                         <v-col class="d-flex pb-0 mt-4" cols="12" sm="6" md="6">
-                            <PlusButton :name="'數量'" @changeNumber="changeNumber"/>
+                            <PlusButton v-if="restPlusBtn" :name="'數量'" @changeNumber="changeNumber"/>
                         </v-col>
                     </v-row>
                     </v-form>
@@ -215,7 +216,7 @@
                 </template>
             </v-snackbar>
         </v-container>
-        <AddNumberDialog :show="this.addNumberShow" @close="closeAddNumberDialog"/>
+        <AddNumberDialog :show="this.addNumberShow" :kg="displayValue" @close="closeAddNumberDialog"/>
         <OrderNumberDialog
                 :show="this.orderNumberShow"
                 @getOrderNumber="getOrderNumber"
@@ -247,7 +248,7 @@
         },
         data() {
             return {
-                items: ["1", "2"],
+                items: ["台中大里第四儲存倉庫", "台中貨運儲存倉庫"],
                 characteristic: null,
                 addNumberShow: false,
                 isActive: false,
@@ -261,10 +262,11 @@
                 kgStatus: false,
                 tkgStatus: false,
                 valid: true,
+                restPlusBtn: true,
                 defaultValue: 0,
                 list: [],
                 lastValue: "0",
-                displayValue: 10.000,
+                displayValue: 812.685,
                 changeValue: 0,
                 accumulateValue: 0,
                 log: "",
@@ -273,8 +275,8 @@
                 orderNumber: "",
                 btColor: "success",
                 testText: "連接藍芽",
-                commodityNumber: 0,
-                count: 0,
+                commodityNumber: 1,
+                count: 1,
                 commodity: [
                     {
                         name: "滴雞精專用雞(老母雞)",
@@ -537,6 +539,12 @@
             },
             addClass(index) {
                 this.position = index;
+                this.restPlusBtn = false //切換標籤時reset組件
+                this.$nextTick(() => { //切換標籤時reset組件
+                    this.restPlusBtn = true
+                })
+                this.commodityNumber = 1 //切換標籤的時候數量歸1
+                this.count = 1 //切換標籤的時候數量歸1
             },
             connectBt(status) {
                 if (status) {
@@ -551,12 +559,10 @@
                         }
                     }, 1500);
                 } else {
-                    setTimeout(() => {
-                        this.btStatus = status;
-                        this.testText = "連結藍芽";
-                        this.btColor = "success";
-                        this.btConncet = true;
-                    }, 800);
+                    this.btStatus = status;
+                    this.testText = "連接藍芽";
+                    this.btColor = "success";
+                    this.btConncet = true;
                 }
                 // if (!status) {
                 //     this.btStatus = status;
@@ -571,6 +577,9 @@
                 if (this.$refs.form.validate()) {
                     this.handleNotification()
                 }
+            },
+            logout () {
+              this.$router.push('/slogin')
             },
             async handleNotification() {
                 try {
@@ -596,7 +605,9 @@
                         this.handleNotifications
                     );
                 } catch (e) {
-                    this.connectBt(true)
+                    setTimeout(() => {
+                        this.connectBt(false)
+                    }, 1000)
                     this.appendLog(e);
                 }
             },
@@ -756,7 +767,7 @@
 
     .weight-control {
         width: 100%;
-        height: calc(36%);
+        height: calc(44%);
         overflow-y: scroll;
         flex: 1;
         color: #444;
@@ -803,7 +814,7 @@
     .active {
         width: calc(17.05%);
         transition: 0.3s;
-        box-shadow: 0 5px 8px rgba(0, 0, 0, 0.14), 0 3px 6px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 5px 8px rgba(0, 0, 0, 0.2), 0 3px 6px rgba(0, 0, 0, 0.2);
     }
 
     h2 {
