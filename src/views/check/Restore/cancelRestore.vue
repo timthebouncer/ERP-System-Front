@@ -17,27 +17,30 @@
     </div>
     <div class="content-wrapper">
       <div class="enter-goods">取消商品資料</div>
+      <v-alert :value="status"
+               type="info"
+               elevation="6"
+               style="width: 200px; margin: 0 auto"
+      >
+        取消入庫成功
+      </v-alert>
       <template v-if="searchBarcode !== ''">
-        <div
-          class="goods-detail"
-          v-for="item in restoreList"
-          :key="item.id"
-        >
+        <div class="goods-detail">
           <div>
             商品名稱
-            <span style="margin-left: 100px">{{ item.name }}</span>
+            <span style="margin-left: 100px">{{ productList.productName }}</span>
           </div>
           <div
             class="goods-display"
-            v-if="item.unit === 'PIECE' || item.unit === 'PACK'"
+            v-if="productList.unit === '件' || productList.unit === '包'"
           >
             <div style="margin-left: -32px;">數量</div>
             <div>
               <v-text-field
-                v-model="item.stockAmount"
-                @click:prepend="decrement(item)"
+                v-model="totalAmount"
+                @click:prepend="decrement()"
                 prepend-icon="mdi-minus"
-                @click:append-outer="increment(item)"
+                @click:append-outer="increment()"
                 append-outer-icon="mdi-plus"
                 type="number"
                 class="input-number"
@@ -46,8 +49,10 @@
             </div>
           </div>
           <div v-else>
-            重量
-            {{ item.weight }}
+            數量
+            <span style="margin-left: 138px">
+            {{productList.weight}}
+            </span>
           </div>
         </div>
       </template>
@@ -60,7 +65,7 @@
     </div>
     <div class="footer">
       <div class="btn-wrapper">
-        <v-btn>
+        <v-btn @click="clearData">
           清空
         </v-btn>
         <v-btn @click="deleteInventory" depressed color="primary">
@@ -73,53 +78,71 @@
 <script>
 export default {
   name: "cancelRestore",
-  data(){
-    return{
-      searchBarcode:'',
-      productList:[],
-      restoreList:[]
+  data() {
+    return {
+      searchBarcode: "",
+      productList: {},
+      totalAmount:0,
+      status: false
+    };
+  },
+  beforeUpdate: function () {
+    if(this.status){
+      this.hide_alert();
     }
   },
-  created() {
-
-  },
-
-  methods:{
-    barcodeChange(barcode){
-      this.$api.Commodity.getCommodityDetail({
-        searchKey: '',
+  methods: {
+    barcodeChange() {
+      this.$api.Inventory.getStockDetail({
         barcode: this.searchBarcode
-      }).then(res=>{
-        this.productList = res.data;
-        this.restoreList = this.productList.filter(item=>{
-          return item.barcode === barcode
-        })
+      }).then(res => {
+          this.productList = res.data;
+      }).catch(()=>{
+          this.productList = {}
+          this.totalAmount = 0
       })
     },
-    deleteInventory(){
-      //todo
-      //等Kevin做一支get 庫存商品的api才能拿到該庫存id
-      // console.log(this.restoreList)
-      // let delId = this.restoreList.map(item=> {
-      //  if (this.searchBarcode === item.barcode){
-      //    return item.id
-      //  }
-      // })
-      // console.log(delId)
-      // this.$api.Inventory.deleteInventory(delId)
-      //         .then(res => {
-      //           console.log(res)
-                // this.getInventoryList(this.search)
-              // })
-    },
-    decrement(item){
-      if(item.stockAmount > 0){
-        item.stockAmount -= 1
+    deleteInventory() {
+      if(this.totalAmount === 0){
+        this.$api.Inventory.deleteInventory({
+          id: this.productList.inventoryId,
+          barcode: this.searchBarcode,
+          amount: this.productList.amount -1
+        }).then(() => {
+          this.status = true;
+          this.clearData();
+        });
+      }else{
+        this.$api.Inventory.deleteInventory({
+          id: this.productList.inventoryId,
+          barcode: this.searchBarcode,
+          amount: this.productList.amount - this.totalAmount
+        }).then(() => {
+          this.status = true
+          this.clearData()
+        });
       }
     },
-    increment(item){
-      item.stockAmount += 1
+    clearData(){
+      this.searchBarcode = "",
+      this.productList = {},
+      this.totalAmount = 0
     },
+    hide_alert() {
+      window.setInterval(() => {
+        this.status = false;
+      }, 6000)
+    },
+    decrement() {
+      if (this.totalAmount > 0) {
+        this.totalAmount -= 1;
+      }
+    },
+    increment() {
+      if(this.productList.amount > this.totalAmount){
+        this.totalAmount += 1;
+      }
+    }
   }
 };
 </script>

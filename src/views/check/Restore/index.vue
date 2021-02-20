@@ -16,49 +16,62 @@
       </div>
     </div>
     <div class="content-wrapper">
-      <div class="enter-goods">入庫商品資料</div>
+      <div class="enter-goods">商品資料</div>
+      <v-alert
+        :value="status"
+        type="info"
+        elevation="6"
+        style="width: 200px; margin: 0 auto"
+      >
+        入庫成功
+      </v-alert>
       <template v-if="searchBarcode !== ''">
-        <div class="goods-detail" v-for="item in restoreList" :key="item.id">
-          <div>商品名稱
-            <span style="margin-left: 100px">{{item.name}}</span>
+        <div class="goods-detail">
+          <div>
+            商品名稱
+            <span style="margin-left: 100px">{{
+              productList.productName
+            }}</span>
           </div>
-          <div class="goods-display" v-if="item.unit === 'PIECE' || item.unit ==='PACK'">
+          <div
+            class="goods-display"
+            v-if="productList.unit === '件' || productList.unit === '包'"
+          >
             <div style="margin-left: -32px;">數量</div>
             <div>
               <v-text-field
-                      v-model="item.stockAmount"
-                      @click:prepend="decrement(item)"
-                      prepend-icon="mdi-minus"
-                      @click:append-outer="increment(item)"
-                      append-outer-icon="mdi-plus"
-                      type="number"
-                      class="input-number"
+                v-model="totalAmount"
+                @click:prepend="decrement()"
+                prepend-icon="mdi-minus"
+                @click:append-outer="increment()"
+                append-outer-icon="mdi-plus"
+                type="number"
+                class="input-number"
               >
               </v-text-field>
             </div>
           </div>
           <div v-else>
-            重量
-            {{item.weight}}
+            數量
+            <span style="margin-left: 138px">
+            {{productList.weight}}
+            </span>
           </div>
         </div>
       </template>
       <template v-else>
-       <span class="barcode-message">
-         <v-icon>mdi-plus</v-icon>
-         請掃條碼添加商品</span>
+        <span class="barcode-message">
+          <v-icon>mdi-plus</v-icon>
+          請掃條碼添加商品</span
+        >
       </template>
     </div>
     <div class="footer">
       <div class="btn-wrapper">
-        <v-btn>
+        <v-btn @click="clearData">
           清空
         </v-btn>
-        <v-btn
-                @click="addInventory"
-                depressed
-                color="primary"
-        >
+        <v-btn @click="addInventory" depressed color="primary">
           確定
         </v-btn>
       </div>
@@ -71,47 +84,68 @@ export default {
   data() {
     return {
       searchBarcode: "",
-      productList:[],
-      barCodeSelection:[],
-      restoreList:[]
+      productList: {},
+      totalAmount: 0,
+      status: false
     };
   },
-  created() {
-
+  beforeUpdate: function() {
+    if (this.status) {
+      this.hide_alert();
+    }
   },
-  methods:{
-    barcodeChange(barcode){
-      this.$api.Commodity.getCommodityDetail({
-        searchKey: '',
+  methods: {
+    barcodeChange() {
+      this.$api.Inventory.getStockDetail({
         barcode: this.searchBarcode
-      }).then(res=>{
-        this.productList = res.data;
-        this.restoreList = this.productList.filter(item=>{
-          return item.barcode === barcode
-        })
       })
+        .then(res => {
+          this.productList = res.data;
+        })
+        .catch(() => {
+          this.productList = {};
+          this.totalAmount = 0;
+        });
     },
-    decrement(item){
-      if(item.stockAmount > 0){
-        item.stockAmount -= 1
+    addInventory() {
+      if(this.totalAmount === 0){
+        this.$api.Inventory.deleteInventory({
+          id: this.productList.inventoryId,
+          barcode: this.searchBarcode,
+          amount: this.productList.amount + 1
+        }).then(() => {
+          this.status = true;
+          this.clearData();
+        });
+      }else {
+        this.$api.Inventory.deleteInventory({
+          id: this.productList.inventoryId,
+          barcode: this.searchBarcode,
+          amount: this.productList.amount + this.totalAmount
+        }).then(() => {
+          this.status = true;
+          this.clearData();
+        });
       }
     },
-    increment(item){
-      item.stockAmount += 1
+    clearData() {
+      (this.searchBarcode = ""),
+        (this.productList = {}),
+        (this.totalAmount = 0);
     },
-    addInventory(){
-      this.$api.Inventory.addInventory({
-        productId: this.restoreList[0].id,
-        barcode:this.searchBarcode,
-        amount:this.restoreList[0].stockAmount,
-        weight:this.restoreList[0].weight
-      }).then((res)=>{
-        alert("入庫成功")
-        this.searchBarcode = ""
-        this.restoreList = []
-        console.log(res)
-      })
+    hide_alert() {
+      window.setInterval(() => {
+        this.status = false;
+      }, 6000);
     },
+    decrement() {
+      if (this.totalAmount > 0) {
+        this.totalAmount -= 1;
+      }
+    },
+    increment() {
+      this.totalAmount += 1;
+    }
   }
 };
 </script>
@@ -132,27 +166,26 @@ export default {
 }
 .enter-goods {
   width: 100%;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
 }
-.content-wrapper{
+.content-wrapper {
 }
-  .goods-display{
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    padding: 10px 10px 0px 10px;
-  }
-  .btn-wrapper{
-    display: flex;
-    justify-content: space-evenly;
-    margin-top: 60px;
-  }
-  .barcode-message{
-    margin: 0 100px 0 110px;
-    line-height: 8;
-  }
-  .input-number{
-    width: 180px;
-  }
-
+.goods-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 10px 10px 0px 10px;
+}
+.btn-wrapper {
+  display: flex;
+  justify-content: space-evenly;
+  margin-top: 60px;
+}
+.barcode-message {
+  margin: 0 100px 0 110px;
+  line-height: 8;
+}
+.input-number {
+  width: 180px;
+}
 </style>
