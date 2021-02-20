@@ -120,7 +120,7 @@
                                 <v-text-field v-model="addOrderForm.count" disabled label="物料數量 :" style="font-size: 22px;" />
                             </v-col>
                             <v-col class="d-flex pb-0" cols="12" sm="6" md="6">
-                                <v-text-field v-model="displayValue" disabled label="屠體重量(公斤) :" style="font-size: 22px;" />
+                                <v-text-field v-model="addOrderForm.carcassWeight" disabled label="屠體重量(公斤) :" style="font-size: 22px;" />
                             </v-col>
                             <v-col class="d-flex pb-0" cols="12" sm="6" md="6">
                                 <v-text-field v-model="addOrderForm.livingWeight" type="number" label="毛雞重量(公斤) :" style="font-size: 22px;"/>
