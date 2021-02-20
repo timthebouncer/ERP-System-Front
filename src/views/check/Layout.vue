@@ -31,5 +31,6 @@ export default {
 .app-class {
   background-color: #fff0e9;
   height: 100%;
+  overflow-x: hidden;
 }
 </style>

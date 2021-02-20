@@ -1,5 +1,16 @@
 <template>
   <v-container class="container">
+    <v-btn  v-scroll="onScroll"
+            v-show="fab"
+            fab
+            dark
+            fixed
+            right
+            bottom
+            small
+            color="primary"
+            style="margin-right: -10px;"
+            @click="toTop"><v-icon>mdi-chevron-up</v-icon></v-btn>
     <v-snackbar v-model="snackbar" top color="primary" timeout="2000">
       <span>{{ messageText }}</span>
     </v-snackbar>
@@ -381,7 +392,7 @@
       </v-row>
     </div>
     <div>
-      <v-btn color="primary" style="width: 100%;" :disabled="nextDisabled">
+      <v-btn color="primary" style="width: 100%;" :disabled="nextDisabled" @click="submit">
         下一步 > 輸入出貨資料
       </v-btn>
     </div>
@@ -397,6 +408,7 @@ export default {
   },
   data() {
     return {
+      fab:false,
       snackbar: false,
       messageText: "",
       items: [
@@ -554,6 +566,14 @@ export default {
     };
   },
   methods: {
+    onScroll (e) {
+      if (typeof window === 'undefined') return
+      const top = window.pageYOffset ||   e.target.scrollTop || 0
+      this.fab = top > 20
+    },
+    toTop () {
+      this.$vuetify.goTo(0)
+    },
     classRadioChange(value) {
       this.className = this.items[0].items.find(x => x.id == value).className;
       this.items[0].active = false;
@@ -677,6 +697,9 @@ export default {
         _this.total = _this.total + parseInt(item.money, 10);
       });
       this.checkNexted();
+    },
+    submit(){
+      this.$router.push('/shipment')
     }
   },
   mounted() {}
