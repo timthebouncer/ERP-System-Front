@@ -10,11 +10,14 @@ const api= {
     },
  },
   Inventory:{
-    addInventory(data){
-      return request.post("/inventory/stockIn",data);
+    deleteInventory(data){
+      return request.put("/inventory/updateStock/",data);
     },
-    deleteInventory(id){
-      return request.delete("/inventory/deleteInventory/"+id);
+    getStockDetail(params){
+      return request.get('inventory/getStock?', {params})
+    },
+    getInventoryLogList(data) {
+      return request.post("/inventoryLog/list",data);
     },
   }
 }
