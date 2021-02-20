@@ -114,16 +114,16 @@
                                 />
                             </v-col>
                             <v-col class="d-flex pb-0" cols="12" sm="6" md="6">
-                                <v-text-field disabled label="物料名稱 :" style="font-size: 22px;" />
+                                <v-text-field v-model="orderName" disabled label="物料名稱 :" style="font-size: 22px;" />
                             </v-col>
                             <v-col class="d-flex pb-0" cols="12" sm="6" md="6">
-                                <v-text-field disabled label="物料數量 :" style="font-size: 22px;" />
+                                <v-text-field v-model="addOrderForm.count" disabled label="物料數量 :" style="font-size: 22px;" />
                             </v-col>
                             <v-col class="d-flex pb-0" cols="12" sm="6" md="6">
-                                <v-text-field disabled label="屠體重量(公斤) :" style="font-size: 22px;" />
+                                <v-text-field v-model="displayValue" disabled label="屠體重量(公斤) :" style="font-size: 22px;" />
                             </v-col>
                             <v-col class="d-flex pb-0" cols="12" sm="6" md="6">
-                                <v-text-field type="number" label="毛雞重量(公斤) :" style="font-size: 22px;"/>
+                                <v-text-field v-model="addOrderForm.livingWeight" type="number" label="毛雞重量(公斤) :" style="font-size: 22px;"/>
                             </v-col>
                             <v-col class="d-flex pb-0" cols="12" sm="6" md="6">
                                 <v-select :items="items" :rules="warehouseValidat" label="儲存倉庫 :" style="font-size: 17px;"/>
@@ -147,18 +147,13 @@
                     <div
                             class="weight-control-button"
                             v-for="(item, index) in commodity"
-                            :key="index"
+                            :key="item.id"
                             @click="addClass(index)"
                             :class="{'active': position === index}"
                     >
                         <div>{{item.name}}</div>
-                        <div>{{item.weight}}{{item.unit}}</div>
+                        <div>{{item.weight}}{{getUnit(item.unit)}}</div>
                     </div>
-                    <i/>
-                    <i/>
-                    <i/>
-                    <i/>
-                    <i/>
                     <i/>
                     <i/>
                     <i/>
@@ -216,7 +211,7 @@
                 </template>
             </v-snackbar>
         </v-container>
-        <AddNumberDialog :show="this.addNumberShow" :kg="displayValue" @close="closeAddNumberDialog"/>
+        <AddNumberDialog :show="this.addNumberShow" :kg="displayValue" :materialList="materialList" :addOrderNumber="addOrderNumber" @getAddOrderForm="getAddOrderForm" @close="closeAddNumberDialog"/>
         <OrderNumberDialog
                 :show="this.orderNumberShow"
                 @getOrderNumber="getOrderNumber"
@@ -237,6 +232,7 @@
     import OrderNumberDialog from "../../components/orderNumberDialog";
     import AccumulateDialog from "../../components/accumulateDialog";
     import LongPress from "vue-directive-long-press";
+    import {UNIT} from "../../mixin/enums"
 
     const SERVICE_ID = "00004353-0000-1000-8000-00805f9b34fb";
     export default {
@@ -271,190 +267,36 @@
                 accumulateValue: 0,
                 log: "",
                 today: "",
+                orderName: "",
                 position: "",
                 orderNumber: "",
+                addOrderNumber: "",
                 btColor: "success",
                 testText: "連接藍芽",
                 commodityNumber: 1,
                 count: 1,
-                commodity: [
-                    {
-                        name: "滴雞精專用雞(老母雞)",
-                        weight: "500",
-                        unit: "公斤"
-                    },
-                    {
-                        name: "雞翅",
-                        weight: "1000",
-                        unit: "公克/包"
-                    },
-                    {
-                        name: "雞腿",
-                        weight: "500",
-                        unit: "公克"
-                    },
-                    {
-                        name: "伊比利雞",
-                        weight: "1500",
-                        unit: "公斤/箱"
-                    },
-                    {
-                        name: "剝皮辣椒雞",
-                        weight: "500",
-                        unit: "包"
-                    },
-                    {
-                        name: "椒麻雞",
-                        weight: "500",
-                        unit: "公克"
-                    },
-                    {
-                        name: "甕燒滴雞精",
-                        weight: "500",
-                        unit: "公克"
-                    },
-                    {
-                        name: "原汁鹹水雞",
-                        weight: "500",
-                        unit: "公克"
-                    },
-                    {
-                        name: "烏骨雞",
-                        weight: "0",
-                        unit: "公克"
-                    },
-                    {
-                        name: "古法糖燻雞(全雞)",
-                        weight: "570",
-                        unit: "公克"
-                    },
-                    {
-                        name: "生鮮分切公雞(半隻裝)",
-                        weight: "350",
-                        unit: "公克"
-                    },
-                    {
-                        name: "糖燻二節翅",
-                        weight: "150",
-                        unit: "公克"
-                    },
-                    {
-                        name: "生鮮雞腿(去骨)",
-                        weight: "100",
-                        unit: "公斤"
-                    },
-                    {
-                        name: "生鮮雞胸肉(切片)",
-                        weight: "200",
-                        unit: "公克"
-                    },
-                    {
-                        name: "生鮮雞胸肉(切丁)",
-                        weight: "3500",
-                        unit: "公克"
-                    },
-                    {
-                        name: "生鮮松坂雞肉",
-                        weight: "750",
-                        unit: "公克"
-                    },
-                    {
-                        name: "生鮮全公雞",
-                        weight: "800",
-                        unit: "公克"
-                    },
-                    {
-                        name: "生鮮雞腳(去骨)",
-                        weight: "5000",
-                        unit: "公克"
-                    },
-                    {
-                        name: "古法糖燻雞(全雞)",
-                        weight: "570",
-                        unit: "公克"
-                    },
-                    {
-                        name: "生鮮分切公雞(半隻裝)",
-                        weight: "350",
-                        unit: "公克"
-                    },
-                    {
-                        name: "糖燻二節翅",
-                        weight: "150",
-                        unit: "公克"
-                    },
-                    {
-                        name: "生鮮雞腿(去骨)",
-                        weight: "100",
-                        unit: "公斤"
-                    },
-                    {
-                        name: "生鮮雞胸肉(切片)",
-                        weight: "200",
-                        unit: "公克"
-                    },
-                    {
-                        name: "生鮮雞胸肉(切丁)",
-                        weight: "3500",
-                        unit: "公克"
-                    },
-                    {
-                        name: "生鮮松坂雞肉",
-                        weight: "750",
-                        unit: "公克"
-                    },
-                    {
-                        name: "生鮮全公雞",
-                        weight: "800",
-                        unit: "公克"
-                    },
-                    {
-                        name: "生鮮雞腳(去骨)",
-                        weight: "5000",
-                        unit: "公克"
-                    },
-                    {
-                        name: "古法糖燻雞(全雞)",
-                        weight: "570",
-                        unit: "公克"
-                    },
-                    {
-                        name: "生鮮分切公雞(半隻裝)",
-                        weight: "350",
-                        unit: "公克"
-                    },
-                    {
-                        name: "糖燻二節翅",
-                        weight: "150",
-                        unit: "公克"
-                    },
-                    {
-                        name: "生鮮雞腿(去骨)",
-                        weight: "100",
-                        unit: "公斤"
-                    },
-                    {
-                        name: "生鮮雞胸肉(切片)",
-                        weight: "200",
-                        unit: "公克"
-                    },
-                    {
-                        name: "生鮮雞胸肉(切丁)",
-                        weight: "3500",
-                        unit: "公克"
-                    },
-                    {
-                        name: "生鮮松坂雞肉",
-                        weight: "750",
-                        unit: "公克"
-                    }
-                ],
+                commodity: [],
+                materialList: [],
+                addOrderForm: {},
                 warehouseValidat: [
                     v => !!v || '請選擇倉庫'
                 ],
             };
         },
+        async created() {
+            await this.$scale.Product.getProduct().then(res => {
+                if (res.status === 200) {
+                    this.commodity = res.data
+                }
+            })
+        },
         mounted() {
+            const formData = new FormData()
+            formData.append("username", 'admin')
+            formData.append("password", '123')
+            this.$scale.Login.login(formData).then(res => {
+                console.log(res);
+            })
             this.changeUnit("kg");
             let today = new Date();
             this.today =
@@ -507,11 +349,28 @@
                     );
                 }
             },
-            showAddNumberDialog(show) {
+            async showAddNumberDialog(show) {
                 this.addNumberShow = show;
+                //拿物料名稱
+                await this.$scale.Material.getList().then(res => {
+                    if (res.status === 200) {
+                        this.materialList = res.data
+                    }
+                })
+                //拿入料單號
+                await this.$scale.DepotOrder.getNumber().then(res => {
+                    if (res.status === 200) {
+                        this.addOrderNumber = res.data.toString()
+                    }
+                })
             },
             closeAddNumberDialog() {
                 this.addNumberShow = false;
+            },
+            getAddOrderForm(form, addOrderNumber, name) {
+                this.addOrderForm = form
+                this.orderNumber = addOrderNumber
+                this.orderName = name
             },
             showOrderNumberDialog(show) {
                 this.textDisabled = true;
@@ -580,6 +439,12 @@
             },
             logout () {
               this.$router.push('/slogin')
+            },
+            getUnit(unit) {
+                let unitName = UNIT.find(item => item.value === unit);
+                if (unitName) {
+                    return unitName.name
+                }
             },
             async handleNotification() {
                 try {
@@ -772,7 +637,6 @@
         flex: 1;
         color: #444;
         padding-top: 5px;
-        display: flex;
     }
 
     .weight-btn-bar {
@@ -800,7 +664,7 @@
         justify-content: space-between;
         cursor: pointer;
         width: calc(17%);
-        /*width: 200px;*/
+        /*width: 160px;*/
         height: 100px;
         text-align: center;
         padding: 6px;
