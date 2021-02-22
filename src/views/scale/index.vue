@@ -211,14 +211,15 @@
                 </template>
             </v-snackbar>
         </v-container>
-        <AddNumberDialog :show="this.addNumberShow" :kg="displayValue" :materialList="materialList" :addOrderNumber="addOrderNumber" @getAddOrderForm="getAddOrderForm" @close="closeAddNumberDialog"/>
+        <AddNumberDialog :show="addNumberShow" :kg="displayValue" :materialList="materialList" :addOrderNumber="addOrderNumber" @getAddOrderForm="getAddOrderForm" @close="closeAddNumberDialog"/>
         <OrderNumberDialog
-                :show="this.orderNumberShow"
+                :show="orderNumberShow"
+                :getUnusedList="getUnusedList"
                 @getOrderNumber="getOrderNumber"
                 @close="closeOrderNumberDialog"
         />
         <AccumulateDialog
-                :show="this.accumulateShow"
+                :show="accumulateShow"
                 :kg="accumulateValue"
                 @close="closeAccumulateShowDialog"
                 @getZero="getZero"
@@ -277,6 +278,7 @@
                 count: 1,
                 commodity: [],
                 materialList: [],
+                getUnusedList: [],
                 addOrderForm: {},
                 warehouseValidat: [
                     v => !!v || '請選擇倉庫'
@@ -373,6 +375,11 @@
                 this.orderName = name
             },
             showOrderNumberDialog(show) {
+                this.$scale.DepotOrder.getUnusedList().then(res => {
+                    if(res.status === 200) {
+                        this.getUnusedList = res.data
+                    }
+                })
                 this.textDisabled = true;
                 this.orderNumberShow = show;
             },
@@ -384,7 +391,7 @@
                 this.accumulateShow = false;
             },
             getOrderNumber(value) {
-                this.orderNumber = value.name;
+                this.orderNumber = value.number;
             },
             changeNumber(value, name) {
                 if (name === "商品序號") {
