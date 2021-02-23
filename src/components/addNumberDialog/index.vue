@@ -8,8 +8,8 @@
                 <v-card-text class="mt-8">
                     <v-form ref="form" v-model="valid" lazy-validation>
                         <v-text-field v-model="addOrderNumber" label="入料單號" disabled />
-                        <v-select v-model="material" :items="materialList" return-object item-text="name" item-value="id" label="物料名稱"/>
-                        <v-text-field v-model="orderForm.count" label="物料數量" type="number" />
+                        <v-select v-model="material" :items="materialList" return-object item-text="name" item-value="id" label="*物料名稱" :rules="materialValidat"/>
+                        <v-text-field v-model="orderForm.count" label="*物料數量" type="number" :rules="materiaCountlValidat"/>
                         <v-text-field v-model="kg" label="屠體重量(公斤)" disabled />
                         <v-text-field v-model="orderForm.livingWeight" label="毛雞重量(公斤)" type="number" />
                     </v-form>
@@ -65,36 +65,38 @@
                     count: '',
                     carcassWeight: '',
                     livingWeight: ''
-                }
+                },
+                materialValidat: [
+                    v => !!v || '請選擇物料名稱'
+                ],
+                materiaCountlValidat: [
+                    v => !!v || '請填寫物料數量'
+                ],
             }
         },
         methods: {
             async submit () {
-                this.orderForm.materialId = this.material.id
-                this.orderForm.carcassWeight = this.kg
-                await this.$scale.DepotOrder.addOrder(this.orderForm).then(res => {
-                    this.loading = true
-                    if(res.status === 200){
-                        this.$emit('close')
-                        this.$emit('getAddOrderForm', this.orderForm, this.addOrderNumber, this.material.name)
-                    }
-                })
-                // await this.$api.Customer.deleteCustomer({contractId: this.current.contractId}).then(res => {
-                //     this.loading = true
-                //     if (res.data.status) {
-                //         this.$emit('close')
-                //     }
-                // }).catch(err => {
-                //     if (err.response.data.message) {
-                //         this.loading = false
-                //         this.snackbar = true
-                //         this.deleteText = err.response.data.message
-                //     }
-                // })
+                if(this.$refs.form.validate()) {
+                    this.orderForm.materialId = this.material.id
+                    this.orderForm.carcassWeight = this.kg
+                    await this.$scale.DepotOrder.addOrder(this.orderForm).then(res => {
+                        this.loading = true
+                        if(res.status === 200){
+                            this.$emit('getAddOrderForm', this.orderForm, this.addOrderNumber, this.material.name)
+                            this.reset()
+                            this.$emit('close')
+                            this.loading = false
+                        }
+                    })
+                }
             },
             cancel () {
+                this.reset()
                 this.$emit('close')
-            }
+            },
+            reset () {
+                this.$refs.form.reset()
+            },
         }
     }
 </script>
