@@ -126,7 +126,7 @@
                                 <v-text-field v-model="addOrderForm.livingWeight" type="number" label="毛雞重量(公斤) :" style="font-size: 22px;"/>
                             </v-col>
                             <v-col class="d-flex pb-0" cols="12" sm="6" md="6">
-                                <v-select :items="items" :rules="warehouseValidat" label="儲存倉庫 :" style="font-size: 17px;"/>
+                                <v-select :items="depotList" item-value="id" item-text="name" :rules="warehouseValidat" label="儲存倉庫 :" style="font-size: 17px;"/>
                             </v-col>
                         <v-col class="d-flex pb-0 mt-4" cols="12" sm="6" md="6">
                             <PlusButton v-if="restPlusBtn" :name="'商品序號'" @changeNumber="changeNumber"/>
@@ -245,7 +245,6 @@
         },
         data() {
             return {
-                items: ["台中大里第四儲存倉庫", "台中貨運儲存倉庫"],
                 characteristic: null,
                 addNumberShow: false,
                 isActive: false,
@@ -279,6 +278,7 @@
                 commodity: [],
                 materialList: [],
                 getUnusedList: [],
+                depotList: [],
                 addOrderForm: {},
                 warehouseValidat: [
                     v => !!v || '請選擇倉庫'
@@ -289,6 +289,11 @@
             await this.$scale.Product.getProduct().then(res => {
                 if (res.status === 200) {
                     this.commodity = res.data
+                }
+            })
+            await this.$scale.Depot.getList().then(res => {
+                if (res.status === 200) {
+                    this.depotList = res.data
                 }
             })
         },
