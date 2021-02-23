@@ -13,6 +13,12 @@ const api = {
           return request.post("/api/logout")
       }
     },
+    Depot: {
+        //取得物料倉庫
+        getList() {
+            return request.get("/depot/getList");
+        },
+    },
     DepotOrder: {
         //取得入料單號
         getNumber() {
@@ -21,10 +27,11 @@ const api = {
         //新增入料
         addOrder(data) {
             return request.post("/depotOrder/addOrder", data);
+        },
+        //未使用入料列表
+        getUnusedList() {
+            return request.get("/depotOrder/getUnusedList");
         }
-    },
-    depotOrder: {
-
     },
     Material: {
         //取得物料名稱

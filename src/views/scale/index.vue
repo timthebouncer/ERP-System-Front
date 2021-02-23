@@ -126,7 +126,7 @@
                                 <v-text-field v-model="addOrderForm.livingWeight" type="number" label="毛雞重量(公斤) :" style="font-size: 22px;"/>
                             </v-col>
                             <v-col class="d-flex pb-0" cols="12" sm="6" md="6">
-                                <v-select :items="items" :rules="warehouseValidat" label="儲存倉庫 :" style="font-size: 17px;"/>
+                                <v-select :items="depotList" item-value="id" item-text="name" :rules="warehouseValidat" label="儲存倉庫 :" style="font-size: 17px;"/>
                             </v-col>
                         <v-col class="d-flex pb-0 mt-4" cols="12" sm="6" md="6">
                             <PlusButton v-if="restPlusBtn" :name="'商品序號'" @changeNumber="changeNumber"/>
@@ -211,14 +211,15 @@
                 </template>
             </v-snackbar>
         </v-container>
-        <AddNumberDialog :show="this.addNumberShow" :kg="displayValue" :materialList="materialList" :addOrderNumber="addOrderNumber" @getAddOrderForm="getAddOrderForm" @close="closeAddNumberDialog"/>
+        <AddNumberDialog :show="addNumberShow" :kg="displayValue" :materialList="materialList" :addOrderNumber="addOrderNumber" @getAddOrderForm="getAddOrderForm" @close="closeAddNumberDialog"/>
         <OrderNumberDialog
-                :show="this.orderNumberShow"
+                :show="orderNumberShow"
+                :getUnusedList="getUnusedList"
                 @getOrderNumber="getOrderNumber"
                 @close="closeOrderNumberDialog"
         />
         <AccumulateDialog
-                :show="this.accumulateShow"
+                :show="accumulateShow"
                 :kg="accumulateValue"
                 @close="closeAccumulateShowDialog"
                 @getZero="getZero"
@@ -244,7 +245,6 @@
         },
         data() {
             return {
-                items: ["台中大里第四儲存倉庫", "台中貨運儲存倉庫"],
                 characteristic: null,
                 addNumberShow: false,
                 isActive: false,
@@ -262,7 +262,7 @@
                 defaultValue: 0,
                 list: [],
                 lastValue: "0",
-                displayValue: 812.685,
+                displayValue: 113.685,
                 changeValue: 0,
                 accumulateValue: 0,
                 log: "",
@@ -277,6 +277,8 @@
                 count: 1,
                 commodity: [],
                 materialList: [],
+                getUnusedList: [],
+                depotList: [],
                 addOrderForm: {},
                 warehouseValidat: [
                     v => !!v || '請選擇倉庫'
@@ -287,6 +289,11 @@
             await this.$scale.Product.getProduct().then(res => {
                 if (res.status === 200) {
                     this.commodity = res.data
+                }
+            })
+            await this.$scale.Depot.getList().then(res => {
+                if (res.status === 200) {
+                    this.depotList = res.data
                 }
             })
         },
@@ -373,6 +380,11 @@
                 this.orderName = name
             },
             showOrderNumberDialog(show) {
+                this.$scale.DepotOrder.getUnusedList().then(res => {
+                    if(res.status === 200) {
+                        this.getUnusedList = res.data
+                    }
+                })
                 this.textDisabled = true;
                 this.orderNumberShow = show;
             },
@@ -384,7 +396,8 @@
                 this.accumulateShow = false;
             },
             getOrderNumber(value) {
-                this.orderNumber = value.name;
+                this.addOrderForm = value
+                this.orderNumber = value.number;
             },
             changeNumber(value, name) {
                 if (name === "商品序號") {
