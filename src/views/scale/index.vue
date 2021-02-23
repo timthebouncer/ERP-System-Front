@@ -263,7 +263,7 @@
                 defaultValue: 0,
                 list: [],
                 lastValue: "0",
-                displayValue: 812.685,
+                displayValue: 113.685,
                 changeValue: 0,
                 accumulateValue: 0,
                 log: "",
@@ -391,6 +391,7 @@
                 this.accumulateShow = false;
             },
             getOrderNumber(value) {
+                this.addOrderForm = value
                 this.orderNumber = value.number;
             },
             changeNumber(value, name) {
