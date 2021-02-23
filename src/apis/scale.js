@@ -13,6 +13,12 @@ const api = {
           return request.post("/api/logout")
       }
     },
+    Depot: {
+        //取得物料倉庫
+        getList() {
+            return request.get("/depot/getList");
+        },
+    },
     DepotOrder: {
         //取得入料單號
         getNumber() {
