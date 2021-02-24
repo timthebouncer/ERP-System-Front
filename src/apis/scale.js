@@ -13,10 +13,20 @@ const api = {
           return request.post("/api/logout")
       }
     },
-    Depot: {
+    Inventory: {
+        //新增庫存
+        stockIn(formatData) {
+            return request.post("/inventory/stockIn", formatData);
+        },
+        //編輯庫存
+        updateStock(params) {
+            return request.put("/inventory/updateStock", params);
+        }
+    },
+    ProductDepot: {
         //取得物料倉庫
-        getList() {
-            return request.get("/depot/getList");
+        productDepotList() {
+            return request.get("/productDepot/productDepotList?depotName");
         },
     },
     DepotOrder: {
