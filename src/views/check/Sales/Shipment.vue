@@ -81,7 +81,7 @@
       </v-row>
       <v-row v-if="shipmentEvent=='2'" class="mt-0">
         <v-col class="col-3"><span>物流編號:</span></v-col>
-        <v-col class="col-8 pa-0"><v-text-field outlined></v-text-field></v-col>
+        <v-col class="col-8 pa-0"><v-text-field outlined v-model="trackingNo"></v-text-field></v-col>
       </v-row>
       <v-row class="mt-0" v-if="shipmentEvent!=3">
         <v-col class="col-3 align-self-center"><span>溫層類別:</span></v-col>
@@ -149,20 +149,26 @@ export default {
       payment:1,
       menuVisible: false,
       shipmentEvent: 1,
+      trackingNo:'',
       temperatureCategory:2,
       volume:1,
       shippingFee:0,
       remark:'',
-      nextDisabled: false,
-      fab:false
+      nextDisabled: true,
+      fab:false,
     }
   },
   computed:{
     shippingFeeCom:{
       get: function () {
-        return shippingRule[''+this.shipmentEvent+this.temperatureCategory+this.volume]
+        let value = shippingRule[''+this.shipmentEvent+this.temperatureCategory+this.volume]
+        this.shippingFee = value
+        return value
+      },
+      set: function (value) {
+        this.shippingFee = value
       }
-    }
+    },
   },
   watch:{
     temperatureCategory(value){
@@ -172,6 +178,15 @@ export default {
           this.volume = 1
         }
       }
+    },
+    shipmentEvent(){
+      this.checkNextDisable()
+    },
+    trackingNo(){
+      this.checkNextDisable()
+    },
+    shippingFee(){
+      this.checkNextDisable()
     }
   },
   methods: {
@@ -184,11 +199,11 @@ export default {
       this.$vuetify.goTo(0)
     },
     onChangeDate(){
-      console.log(this.date)
       this.$api.Distribute.getOrderNo({
         date: this.date
       }).then(res => {
         this.orderNo = res.data
+        this.checkNextDisable()
       })
     },
     changeShip(){
@@ -197,6 +212,25 @@ export default {
     back(){
       this.$store.state.shipmentBacked = true
       this.$router.push('/sales')
+    },
+    checkNextDisable(){
+      console.log('check disable')
+      console.log(this.shippingFee);
+      if(this.orderNo!=''&&(this.shippingFee!=''&&this.shippingFee!=0)){
+        if(this.shipmentEvent==2 && this.trackingNo==''){
+          this.nextDisabled = true
+        }else{
+          this.nextDisabled = false
+        }
+      }
+      else{
+        if(this.shipmentEvent == 3){
+          this.nextDisabled = false
+        }
+        else{
+          this.nextDisabled = true
+        }
+      }
     },
     submit(){}
   },
