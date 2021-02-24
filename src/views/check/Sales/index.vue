@@ -1,5 +1,16 @@
 <template>
   <v-container class="container">
+    <v-btn  v-scroll="onScroll"
+            v-show="fab"
+            fab
+            dark
+            fixed
+            right
+            bottom
+            small
+            color="primary"
+            style="margin-right: -10px;"
+            @click="toTop"><v-icon>mdi-chevron-up</v-icon></v-btn>
     <v-snackbar v-model="snackbar" top color="primary" timeout="2000">
       <span>{{ messageText }}</span>
     </v-snackbar>
@@ -44,20 +55,20 @@
             ><v-col class="col-4"
               ><span class="text-h6 font-weight-black">商品條碼</span></v-col
             ><v-col class="col-8"
-              ><span class="text-h6">123456</span></v-col
+              ><span class="text-h6">{{productData.barcode}}</span></v-col
             ></v-row
           >
           <v-row class="align-content-center"
             ><v-col class="col-4"
               ><span class="text-h6 font-weight-black">商品名稱</span></v-col
             ><v-col class="col-8"
-              ><span class="text-h6">雞腿</span></v-col
+              ><span class="text-h6">{{productData.name}}</span></v-col
             ></v-row
           >
           <v-row class="align-content-center"
             ><v-col class="col-4"
               ><span class="text-h6 font-weight-black">計價單位</span></v-col
-            ><v-col class="col-8"><span class="text-h6">包</span></v-col></v-row
+            ><v-col class="col-8"><span class="text-h6">{{productData.unit}}</span></v-col></v-row
           >
           <v-row class="align-content-center"
             ><v-col class="col-4"
@@ -65,31 +76,39 @@
             ><v-col class="col-8"
               ><ul class="counter">
                 <li>
-                  <input type="button" value="-" />
+                  <input type="button" value="-" @click="()=>{
+                    if(this.quantityDialog>1){
+                      this.quantityDialog--
+                    }
+                  }"/>
                 </li>
                 <li style="width: 100%; height: 50px;">
                   <input
                     class="numberCount"
                     type="number"
-                    value="1"
+                    v-model="quantityDialog"
                     style="text-align: center"
                   />
                 </li>
                 <li>
-                  <input type="button" value="+" />
+                  <input type="button" value="+" @click="()=>{
+                    if(this.quantityDialog<productData.amount){
+                      this.quantityDialog++
+                    }
+                  }"/>
                 </li></ul></v-col
           ></v-row>
           <v-row class="align-content-center"
             ><v-col class="col-4"
               ><span class="text-h6 font-weight-black">備註</span></v-col
-            ><v-col class="col-8"><v-textarea solo rows="3"></v-textarea></v-col
+            ><v-col class="col-8"><v-textarea solo rows="3" v-model="remarkDialog"></v-textarea></v-col
           ></v-row>
         </v-card-text>
         <v-card-actions class="justify-center">
           <v-btn color="" text outlined @click="salesDialogVisible = false">
             取消
           </v-btn>
-          <v-btn color="primary" @click="addSales">
+          <v-btn color="primary" @click="addSales(productData.id)">
             儲存
           </v-btn>
         </v-card-actions>
@@ -108,7 +127,7 @@
             color=""
             text
             outlined
-            @click="delProductDialogVisible = false"
+            @click="deleteDialogCancel(delProductDialogItem)"
           >
             取消
           </v-btn>
@@ -164,14 +183,36 @@
         no-action
       >
         <template v-slot:activator>
-          <v-list-item-content>
+          <v-list-item-content v-if="item.key == 'receive'">
+            <v-col class="col-4">
+              <v-list-item-title v-text="item.title"></v-list-item-title>
+            </v-col>
+            <v-col v-if="hasReceive">
+              <v-list-item-title v-if="receiveData.id == 1" class="text-center">同客戶資料<span v-if="item.defaultReceiveInfo==0">(預設地址)</span></v-list-item-title>
+              <v-list-item-title v-else-if="receiveData.id == 2" class="text-center">同公司資料<span v-if="item.defaultReceiveInfo==1">(預設地址)</span></v-list-item-title>
+              <v-list-item-title v-else class="text-center"><span v-if="item.defaultReceiveInfo==item.selectedIndex">(預設地址)</span></v-list-item-title>
+            </v-col>
+            <div v-if="hasReceive">
+            <v-list-item class="justify-space-between ma-0 pa-0">
+              <v-col class="">{{ receiveData.name }}</v-col
+              ><v-col class="">{{ receiveData.phone }}</v-col
+              >
+            </v-list-item>
+            <v-list-item class="justify-space-between ma-0 pa-0">
+              <v-col class="col-1">{{ receiveData.code }}</v-col
+              ><v-col class="col-10">{{ receiveData.address }}</v-col
+              >
+            </v-list-item>
+            </div>
+          </v-list-item-content>
+          <v-list-item-content v-else>
             <v-col class="col-4">
               <v-list-item-title v-text="item.title"></v-list-item-title>
             </v-col>
             <v-col v-if="item.key == 'class'"
               ><v-list-item-title
                 style="word-break: break-all;text-align: center;"
-                >{{ className }}</v-list-item-title
+                >{{ classData.className }}</v-list-item-title
               ></v-col
             >
             <v-col v-else-if="item.key == 'client'"
@@ -182,26 +223,12 @@
                   ><span class="">{{ clientData.phone }}</span
                   ><span></span></v-row></v-list-item-title
             ></v-col>
-            <v-col v-else-if="item.key == 'receive'"
-              ><v-list-item-title
-                style="word-break: break-all;text-align: center;"
-                ><v-row class="justify-space-between ma-0"
-                  ><span class="">{{ receiveData.name }}</span
-                  ><span class="">{{ receiveData.phone }}</span
-                  ><span></span
-                ></v-row>
-                <v-row class="justify-space-between ma-0"
-                  ><span class="">{{ receiveData.code }}</span
-                  ><span class="">{{ receiveData.address }}</span
-                  ><span></span
-                ></v-row> </v-list-item-title
-            ></v-col>
           </v-list-item-content>
         </template>
 
         <!--        客戶類別 List-->
         <template v-if="item.key == 'class'">
-          <v-radio-group @change="classRadioChange" class="mt-0">
+          <v-radio-group @change="classRadioChange" class="mt-0" :value="classData.id">
             <v-list-item v-for="child in item.items" :key="child.id">
               <v-list-item-action class="mr-4">
                 <v-radio :value="child.id" :key="child.id"></v-radio>
@@ -214,17 +241,16 @@
         </template>
         <!--        客戶資料 List-->
         <template v-else-if="item.key == 'client'">
-          <v-radio-group @change="clientRadioChange">
+          <v-radio-group @change="clientRadioChange" :value="clientData.id">
             <v-list-item v-for="child in item.items" :key="child.id">
-              <v-list-item-action class="mr-4">
+              <v-list-item-action class="mr-0">
                 <v-radio :value="child.id" :key="child.id"></v-radio>
               </v-list-item-action>
               <v-list-item-content>
-                <v-row class="justify-space-between ma-0"
-                  ><span class="">{{ child.name }}</span
-                  ><span class="">{{ child.phone }}</span
-                  ><span></span
-                ></v-row>
+                <v-row class="justify-space-between ma-0 text-center"
+                  ><span class="col-4">{{ child.name }}</span
+                  ><span class="col-6">{{ child.phone }}</span
+                  ><span class=""></span></v-row>
               </v-list-item-content>
             </v-list-item>
           </v-radio-group>
@@ -239,12 +265,13 @@
         </template>
         <!--        收件資料 List-->
         <template v-else-if="item.key == 'receive'">
-          <v-radio-group @change="receiveRadioChange">
+          <v-radio-group @change="receiveRadioChange" :value="receiveData.id">
             <v-list-item v-for="child in item.items" :key="child.id">
               <v-list-item-action class="mr-4">
                 <v-radio :value="child.id" :key="child.id"></v-radio>
               </v-list-item-action>
               <v-list-item-content>
+                <div>
                 <v-row class="justify-space-between ma-0"
                   ><span class="">{{ child.name }}</span
                   ><span class="">{{ child.phone }}</span
@@ -255,6 +282,7 @@
                   ><span class="col-10">{{ child.address }}</span
                   ><span></span
                 ></v-row>
+                </div>
               </v-list-item-content>
             </v-list-item>
           </v-radio-group>
@@ -381,7 +409,7 @@
       </v-row>
     </div>
     <div>
-      <v-btn color="primary" style="width: 100%;" :disabled="nextDisabled">
+      <v-btn color="primary" style="width: 100%;" :disabled="nextDisabled" @click="submit">
         下一步 > 輸入出貨資料
       </v-btn>
     </div>
@@ -397,6 +425,7 @@ export default {
   },
   data() {
     return {
+      fab:false,
       snackbar: false,
       messageText: "",
       items: [
@@ -405,123 +434,44 @@ export default {
           title: "客戶類別:",
           active: true,
           items: [
-            { id: 1, className: "客戶類別1" },
-            { id: 2, className: "客戶類別2" },
-            { id: 3, className: "客戶類別3" }
+            { id: '', className: "" },
           ]
         },
         {
           key: "client",
           title: "客戶資料:",
-          items: [
-            {
-              id: 1,
-              name: "示範客戶A",
-              phone: "0912265485",
-              code: "123",
-              address: "AAAA"
-            },
-            {
-              id: 2,
-              name: "示範客戶B",
-              phone: "0912265486",
-              code: "321",
-              address: "BBBB"
-            },
-            {
-              id: 3,
-              name: "示範客戶C",
-              phone: "0912265487",
-              code: "444",
-              address: "CCCC"
-            }
-          ]
+          active: false,
+          items: []
         },
         {
           key: "receive",
           title: "收件資料:",
-          items: [
-            {
-              id: 1,
-              name: "同客戶資料(預設地址)",
-              phone: "",
-              code: "",
-              address: ""
-            },
-            { id: 2, name: "同公司資料", phone: "", code: "", address: "" },
-            {
-              id: 3,
-              name: "收件客戶A",
-              phone: "0912265485",
-              code: "123",
-              address: "示範收件地址A"
-            },
-            {
-              id: 4,
-              name: "收件客戶B",
-              phone: "0912265486",
-              code: "321",
-              address: "示範收件地址B"
-            },
-            {
-              id: 5,
-              name: "收件客戶C",
-              phone: "0912265487",
-              code: "444",
-              address: "示範收件地址C"
-            },
-            {
-              id: 6,
-              name: "收件客戶D",
-              phone: "0912265487",
-              code: "444",
-              address: "示範收件地址D"
-            }
-          ]
+          active: false,
+          defaultReceiveInfo: 0,
+          selectedIndex:0,
+          items: []
         }
       ],
-      productItemData: [
-        {
-          id: 1,
-          barcode: "123456",
-          name: "商品1",
-          unit: "KG",
-          amount: "10",
-          salesPrice: 150,
-          listPrice: 150,
-          description: "123",
-          quantity: 1,
-          money: 0
-        },
-        {
-          id: 2,
-          barcode: "1234567",
-          name: "商品2",
-          unit: "PACK",
-          amount: "20",
-          salesPrice: 0,
-          listPrice: 100,
-          description: "456",
-          quantity: 1,
-          money: 0
-        },
-        {
-          id: 3,
-          barcode: "1234568",
-          name: "商品3",
-          unit: "G",
-          amount: "5",
-          salesPrice: 50,
-          listPrice: 50,
-          description: "",
-          quantity: 1,
-          money: 0
-        }
-      ],
+      productItemData: [],
       productItem: [],
       productId: "",
+      productData:{
+        id: '',
+        productId:'',
+        barcode: "",
+        name: "",
+        unit: "",
+        amount: "",
+        salesPrice: 0,
+        listPrice: 0,
+        description: "",
+        quantity: 1,
+        money: 0
+      },
       dialogVisible: false,
       salesDialogVisible: false,
+      quantityDialog:1,
+      remarkDialog:'',
       delProductDialogVisible: false,
       changeProductDialogVisible: false,
       delProductDialogItem: {},
@@ -530,8 +480,16 @@ export default {
       changeProductDesIndex: 0,
       dialogTitle: "",
       dialogData: [{ title: "", value: "" }],
-      className: "",
+      classData: {id:"",className:""},
+      clientListRes:[],
       clientData: {
+        id: "",
+        name: "",
+        phone: "",
+        code: "",
+        address: ""
+      },
+      companyData: {
         id: "",
         name: "",
         phone: "",
@@ -553,21 +511,151 @@ export default {
       total: 0
     };
   },
+  watch:{
+    quantityDialog(){
+      if(this.quantityDialog == ''){
+        return
+      }
+      else{
+        if(this.quantityDialog==0){
+          this.quantityDialog = 1
+        }
+        else if(this.quantityDialog>this.productData.amount){
+          this.quantityDialog = this.productData.amount
+        }
+      }
+    }
+  },
   methods: {
+    onScroll (e) {
+      if (typeof window === 'undefined') return
+      const top = window.pageYOffset ||   e.target.scrollTop || 0
+      this.fab = top > 20
+    },
+    toTop () {
+      this.$vuetify.goTo(0)
+    },
     classRadioChange(value) {
-      this.className = this.items[0].items.find(x => x.id == value).className;
+      this.clientData = {}
+      this.companyData = {}
+      this.receiveData = {}
+      this.items[2].items = []
+      this.hasClient = false
+      this.hasReceive = false
+      this.classData = this.items[0].items.find(x => x.id == value);
       this.items[0].active = false;
+      this.items[1].items = []
+      this.clientListRes.map(item=>{
+        if(value == item.classes.id){
+          let data = {
+            id: item.id,
+            name: item.name,
+            phone: item.tel,
+            code: item.postCode,
+            address: item.address
+          }
+          this.items[1].items.push(data)
+        }
+      })
       this.hasClass = true;
+      this.items[1].active = false;
+      this.items[1].active = true;
       this.checkNexted();
     },
     clientRadioChange(value) {
+      this.companyData = {}
+      this.receiveData = {}
+      this.hasReceive = false
       this.clientData = this.items[1].items.find(x => x.id == value);
       this.items[1].active = false;
+      let data = {}
+      data = this.clientListRes.filter(item=>{
+        return value==item.id
+      })
+      console.log(this.clientListRes,'clientRadioChange clientList');
+      let tmpData = {
+        id: '2',
+        name: data[0].companyName,
+        phone: data[0].companyTel,
+        code: data[0].companyPostCode,
+        address: data[0].companyAddress
+      }
+      this.companyData = tmpData
+      let list = []
+      list = data[0].recipientList
+      // (預設地址)
+      let receivedList = [
+        { id: '1', name: "同客戶資料", phone: "", code: "", address: "" },
+        { id: '2', name: "同公司資料", phone: "", code: "", address: "" }
+      ]
+      list.map(items=>{
+        let item = {id: items.id, name: items.receiver, phone: items.tel, code: items.postCode, address: items.address}
+        receivedList.push(item)
+      })
+      this.items[2].items = receivedList
       this.hasClient = true;
+      let defaultReceiveInfo = data[0].defaultReceiveInfo
+      this.items[2].defaultReceiveInfo = defaultReceiveInfo
+      if(defaultReceiveInfo == 0){
+        this.receiveData = Object.assign({}, this.clientData)
+        this.receiveData.id = '1'
+        this.items[2].selectedIndex = 0
+        this.hasReceive = true
+      }
+      else if(defaultReceiveInfo == 1){
+        this.receiveData = Object.assign({},this.companyData)
+        this.items[2].selectedIndex = 1
+        this.hasReceive = true
+      }
+      else{
+        this.receiveData = this.items[2].items[defaultReceiveInfo]
+        this.items[2].selectedIndex = defaultReceiveInfo
+        this.hasReceive = true
+      }
+
+      this.$api.Commodity.getSalesProduct({
+        searchKey: '',
+        barcode: '',
+        clientId: value
+      }).then(res=>{
+        this.productItemData = []
+        res.data.map((item,index)=>{
+          let data = {
+            id: index,
+            productId: item.productId,
+            barcode: item.barcode,
+            name: item.productName,
+            unit: item.unit,
+            amount: item.amount,
+            salesPrice: item.clientPrice,
+            listPrice: item.clientPrice,
+            description: "",
+            quantity: 1,
+            money: 0
+          }
+          this.productItemData.push(data)
+        })
+        console.log(this.productItemData);
+      })
+
       this.checkNexted();
     },
     receiveRadioChange(value) {
-      this.receiveData = this.items[2].items.find(x => x.id == value);
+      if(value == '1'){
+        this.receiveData = Object.assign({},this.clientData)
+        this.receiveData.id = '1'
+        this.items[2].selectedIndex = 0
+      }
+      else if(value == '2'){
+        this.receiveData = Object.assign({},this.companyData)
+        this.receiveData.id = '2'
+        this.items[2].selectedIndex = 1
+      }
+      else{
+        this.receiveData = this.items[2].items.find(x => x.id == value);
+        this.items[2].selectedIndex = this.items[2].items.findIndex(x => x.id == value)
+      }
+
       this.items[2].active = false;
       this.hasReceive = true;
       this.checkNexted();
@@ -580,6 +668,9 @@ export default {
         this.total !== 0
       ) {
         this.nextDisabled = false;
+      }
+      else{
+        this.nextDisabled = true
       }
     },
     addClientData(type) {
@@ -603,11 +694,29 @@ export default {
 
       this.dialogVisible = true;
     },
-    setBarcode() {
+    setBarcode(id) {
+      console.log(id);
+      this.productData = Object.assign({},this.productItemData.find(x=>x.id==id))
+      this.quantityDialog = 1
+      this.remarkDialog = ''
       this.salesDialogVisible = true;
     },
-    addSales() {
-      this.productItem = this.productItemData;
+    addSales(id) {
+      if(this.productItem.findIndex(item=>item.id == id) == -1){
+        this.productData.quantity = this.quantityDialog
+        this.productData.description = this.remarkDialog
+        this.productItem.push(this.productData)
+      }
+      else {
+        let data = this.productItem.find(item=>item.id == id)
+        if((data.quantity+this.quantityDialog)>data.amount){
+          data.quantity = data.amount
+        }
+        else{
+          data.quantity += this.quantityDialog
+        }
+      }
+
       this.productItem.forEach(item => {
         item.money =
           (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
@@ -648,6 +757,12 @@ export default {
       this.delProductDialogVisible = false;
       this.onCalculation();
     },
+    deleteDialogCancel(item){
+      this.delProductDialogVisible = false
+      let index
+      index = this.productItem.findIndex(x=>x == item)
+      this.$refs.swipeList.closeActions(index)
+    },
     onChangeDesDialog(item,index) {
       this.changeProductDialogItem = item
       this.changeProductDialogDes = item.description
@@ -677,9 +792,51 @@ export default {
         _this.total = _this.total + parseInt(item.money, 10);
       });
       this.checkNexted();
+    },
+    submit(){
+      this.$store.state.shipment.classItem = this.classData
+      this.$store.state.shipment.clientItem = this.clientData
+      this.$store.state.shipment.receiveItem = this.receiveData
+      this.$store.state.shipment.orderItemRequestList = this.productItem
+
+      this.$store.state.shipmentBacked = false
+      this.$router.push('/shipment')
+    },
+    changeDialogInput(){
+      console.log('dialog input change')
     }
   },
-  mounted() {}
+  async mounted() {
+    const formData = new FormData()
+    formData.append("username",'admin')
+    formData.append("password", '123')
+    await this.$api.Login.userLogin(formData).then(async ()=>{
+      await this.$api.Customer.getClass().then(res => {
+        this.items[0].items = res.data.map(item => {
+          return item
+        })
+      })
+      await this.$api.Customer.onlyCustomerList().then(res => {
+        this.clientListRes = res.data
+      })
+    })
+
+    if(this.$store.state.shipmentBacked){
+      this.classRadioChange(this.$store.state.shipment.classItem.id)
+      this.clientRadioChange(this.$store.state.shipment.clientItem.id)
+      this.receiveRadioChange(this.$store.state.shipment.receiveItem.id)
+      // this.classData = this.$store.state.shipment.classItem
+      // this.clientData = this.$store.state.shipment.clientItem
+      // this.receiveData = this.$store.state.shipment.receiveItem
+      this.productItem = this.$store.state.shipment.orderItemRequestList
+
+      this.hasClass = true
+      this.hasClient = true
+      this.hasReceive = true
+      this.onCalculation()
+    }
+
+  }
 };
 </script>
 <style lang="scss" scoped>

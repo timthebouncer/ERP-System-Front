@@ -23,6 +23,7 @@ export default {
   },
   mounted() {
     this.today = moment(new Date()).format("YYYY-MM-DD");
+    this.$store.state.workDate = this.today
   }
 }
 </script>
@@ -31,5 +32,6 @@ export default {
 .app-class {
   background-color: #fff0e9;
   height: 100%;
+  overflow-x: hidden;
 }
 </style>

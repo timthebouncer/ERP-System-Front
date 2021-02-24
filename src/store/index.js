@@ -4,7 +4,25 @@ import Vuex from "vuex";
 Vue.use(Vuex);
 
 export default new Vuex.Store({
-  state: {},
+  state: {
+    shipment:{
+      shipmentDate: '',
+      orderNo: '',
+      classItem: {id:'',className:''},
+      clientItem: {id: '', name: "", phone: "", code: "", address: ""},
+      receiveItem: {id: '', name: "", phone: "", code: "", address: ""},
+      payment: 1,
+      shipment:1,
+      temperatureCategory:1,
+      volume: 1,
+      shippingFee: 0,
+      trackingNo:'',
+      remark:'',
+      orderItemRequestList:[]
+    },
+    workDate: '',
+    shipmentBacked: false
+  },
   mutations: {},
   actions: {},
   modules: {}
