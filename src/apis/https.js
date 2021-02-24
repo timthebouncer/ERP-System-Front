@@ -23,33 +23,9 @@ service.interceptors.request.use(
 );
 
 service.interceptors.response.use(
-  function(response) {
-    return response;
-  },
-  function(error) {
-    const {status} = error.response
-    if(status === 403 || status === 401)
-      router.replace('/')
-    // const { message } = error.response.data;
-    // if (error.response.data.data.error === "Forbidden") {
-    //     window.sessionStorage.removeItem("userData");
-    //     window.sessionStorage.removeItem("token");
-    //     window.sessionStorage.setItem("timeOut", true);
-    //     router.push({ name: "Login" });
-    // }
-
-    // switch (message) {
-    //     case "AUTH001":
-    //     case "AUTH002":
-    //         window.sessionStorage.removeItem("userData");
-    //         window.sessionStorage.removeItem("token");
-    //         if (router.currentRoute.name !== "Login") {
-    //             router.push({ name: "Login" });
-    //         }
-    //         break;
-    // }
-    return Promise.reject(error);
-  }
+    function(response) {
+      return response;
+    }
 );
 
 export default service;
