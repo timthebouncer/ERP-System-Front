@@ -43,7 +43,7 @@
                             @click="showAddNumberDialog(true)"
                     >+新增入料
                     </v-btn>
-                    <v-btn class="mr-10" large depressed color="error">取消入庫</v-btn>
+                    <v-btn class="mr-10" large depressed color="error" @click="updateStock()">取消入庫</v-btn>
                     <div class="staffName">
                         <span>Jennifer Lopez</span>
                         <v-btn class="ml-2" icon @click="logout">
@@ -126,7 +126,7 @@
                                 <v-text-field v-model="addOrderForm.livingWeight" type="number" label="毛雞重量(公斤) :" style="font-size: 22px;"/>
                             </v-col>
                             <v-col class="d-flex pb-0" cols="12" sm="6" md="6">
-                                <v-select :items="depotList" item-value="id" item-text="name" :rules="warehouseValidat" label="儲存倉庫 :" style="font-size: 17px;"/>
+                                <v-select v-model="productDepot" :items="productDepotList" item-value="id" item-text="name" :rules="warehouseValidat" label="儲存倉庫 :" style="font-size: 17px;" @change="stockInForm.depotId = productDepot"/>
                             </v-col>
                         <v-col class="d-flex pb-0 mt-4" cols="12" sm="6" md="6">
                             <PlusButton v-if="restPlusBtn" :name="'商品序號'" @changeNumber="changeNumber"/>
@@ -152,7 +152,7 @@
                             :class="{'active': position === index}"
                     >
                         <div>{{item.name}}</div>
-                        <div>{{item.weight}}{{getUnit(item.unit)}}</div>
+                        <div>{{item.weight === 0 ? '' : item.weight}}{{getUnit(item.unit)}}</div>
                     </div>
                     <i/>
                     <i/>
@@ -210,6 +210,13 @@
                     <v-btn text v-bind="attrs" @click="btConncet = false">關閉</v-btn>
                 </template>
             </v-snackbar>
+            <!--入庫成功提示-->
+            <v-snackbar v-model="inboundStatus" :top="'top'" :color="inboundMsg ? 'error' : 'success'" :timeout="2500">
+                {{inboundMsg ? inboundMsg : '入庫列印成功'}}
+                <template v-slot:action="{ attrs }">
+                    <v-btn text v-bind="attrs" @click="inboundStatus = false">關閉</v-btn>
+                </template>
+            </v-snackbar>
         </v-container>
         <AddNumberDialog :show="addNumberShow" :kg="displayValue" :materialList="materialList" :addOrderNumber="addOrderNumber" @getAddOrderForm="getAddOrderForm" @close="closeAddNumberDialog"/>
         <OrderNumberDialog
@@ -257,6 +264,8 @@
                 gStatus: false,
                 kgStatus: false,
                 tkgStatus: false,
+                tagStatus: false,
+                inboundStatus: false,
                 valid: true,
                 restPlusBtn: true,
                 defaultValue: 0,
@@ -271,6 +280,9 @@
                 position: "",
                 orderNumber: "",
                 addOrderNumber: "",
+                inventoryId: '',
+                barcodeStorage: '',
+                inboundMsg: '',
                 btColor: "success",
                 testText: "連接藍芽",
                 commodityNumber: 1,
@@ -278,31 +290,36 @@
                 commodity: [],
                 materialList: [],
                 getUnusedList: [],
-                depotList: [],
+                productDepotList: [],
+                productDepot: '',
                 addOrderForm: {},
+                stockInForm: {
+                    depotId: '',
+                    productId: '',
+                    barcode: '',
+                    amount: 0
+                },
                 warehouseValidat: [
                     v => !!v || '請選擇倉庫'
                 ],
             };
         },
-        async created() {
+        async mounted() {
+            const formData = new FormData()
+            formData.append("username", 'admin')
+            formData.append("password", '123')
+            await this.$scale.Login.login(formData).then(res => {
+                console.log(res);
+            })
             await this.$scale.Product.getProduct().then(res => {
                 if (res.status === 200) {
                     this.commodity = res.data
                 }
             })
-            await this.$scale.Depot.getList().then(res => {
+            await this.$scale.ProductDepot.productDepotList().then(res => {
                 if (res.status === 200) {
-                    this.depotList = res.data
+                    this.productDepotList = res.data
                 }
-            })
-        },
-        mounted() {
-            const formData = new FormData()
-            formData.append("username", 'admin')
-            formData.append("password", '123')
-            this.$scale.Login.login(formData).then(res => {
-                console.log(res);
             })
             this.changeUnit("kg");
             let today = new Date();
@@ -315,6 +332,11 @@
         },
         directives: {
             "long-press": LongPress
+        },
+        watch: {
+            position(){
+                this.barcodeStorage = ""
+            }
         },
         computed: {
             twTael () {
@@ -398,6 +420,7 @@
             getOrderNumber(value) {
                 this.addOrderForm = value
                 this.orderNumber = value.number;
+                this.orderName = value.name
             },
             changeNumber(value, name) {
                 if (name === "商品序號") {
@@ -410,6 +433,9 @@
                 this.log = this.log + "\n" + text;
             },
             addClass(index) {
+                this.stockInForm.productId = this.commodity[index].id
+                this.stockInForm.barcode = this.commodity[index].barcode ? this.commodity[index].barcode : this.commodity[index].barcode
+                this.stockInForm.amount = this.commodity[index].stockAmount
                 this.position = index;
                 this.restPlusBtn = false //切換標籤時reset組件
                 this.$nextTick(() => { //切換標籤時reset組件
@@ -436,18 +462,34 @@
                     this.btColor = "success";
                     this.btConncet = true;
                 }
-                // if (!status) {
-                //     this.btStatus = status;
-                //     this.testText = "連接藍芽";
-                //     this.btColor = "primary";
-                // }
             },
             getZero () {
               this.accumulateValue = 0
             },
+            updateStock() {
+                // console.log(this.stockInForm.amount, this.count);
+                // this.$scale.Inventory.updateStock({id: this.inventoryId, barcode: this.barcodeStorage, amount: this.stockInForm.amount - this.count}).then(res => {
+                //     console.log(res);
+                // })
+            },
             inboundPrint () {
                 if (this.$refs.form.validate()) {
-                    this.handleNotification()
+                    if(this.orderNumber === "") {
+                        return  this.inboundStatus = true, this.inboundMsg = '請選擇入料單號'
+                    }
+                    this.$scale.Inventory.stockIn(this.stockInForm).then(res => {
+                        if(res.status === 200) {
+                            this.barcodeStorage = res.data.barcode
+                            this.inventoryId = res.data.id
+                            this.inboundMsg = ''
+                            this.inboundStatus = true
+                        }
+                    }).catch(err => {
+                        if(err.response.data.message) {
+                            this.inboundStatus = true
+                            this.inboundMsg = '請選擇商品'
+                        }
+                    })
                 }
             },
             logout () {
