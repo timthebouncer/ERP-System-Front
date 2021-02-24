@@ -435,14 +435,13 @@
             addClass(index) {
                 this.stockInForm.productId = this.commodity[index].id
                 this.stockInForm.barcode = this.commodity[index].barcode ? this.commodity[index].barcode : this.commodity[index].barcode
-                this.stockInForm.amount = this.commodity[index].stockAmount
                 this.position = index;
                 this.restPlusBtn = false //切換標籤時reset組件
                 this.$nextTick(() => { //切換標籤時reset組件
                     this.restPlusBtn = true
+                    this.commodityNumber = 1 //切換標籤的時候數量歸1
+                    this.count = 1 //切換標籤的時候數量歸1
                 })
-                this.commodityNumber = 1 //切換標籤的時候數量歸1
-                this.count = 1 //切換標籤的時候數量歸1
             },
             connectBt(status) {
                 if (status) {
@@ -472,12 +471,13 @@
                 //     console.log(res);
                 // })
             },
-            inboundPrint () {
+            async inboundPrint () {
                 if (this.$refs.form.validate()) {
                     if(this.orderNumber === "") {
                         return  this.inboundStatus = true, this.inboundMsg = '請選擇入料單號'
                     }
-                    this.$scale.Inventory.stockIn(this.stockInForm).then(res => {
+                    this.stockInForm.amount = this.count
+                    await this.$scale.Inventory.stockIn(this.stockInForm).then(res => {
                         if(res.status === 200) {
                             this.barcodeStorage = res.data.barcode
                             this.inventoryId = res.data.id
