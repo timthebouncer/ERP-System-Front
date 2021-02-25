@@ -445,12 +445,17 @@
             },
             //商品切換
             addClass(index) {
+                //當前選擇的商品ID
                 this.stockInForm.productId = this.commodity[index].id
+                //當前選擇的商品barcode
                 this.stockInForm.barcode = this.commodity[index].barcode
+                //當前選擇的商品的總數量
                 this.stockInFormAmount = this.commodity[index].stockAmount
                 this.position = index;
-                this.restPlusBtn = false //切換標籤時reset組件
-                this.$nextTick(() => { //切換標籤時reset組件
+                //切換標籤時reset組件
+                this.restPlusBtn = false
+                //切換標籤時reset組件
+                this.$nextTick(() => {
                     this.restPlusBtn = true
                     this.commodityNumber = 1 //切換標籤的時候數量歸1
                     this.count = 1 //切換標籤的時候數量歸1
@@ -486,7 +491,7 @@
                 if(this.stockInForm.productId === "") {
                     return this.inboundStatus = true, this.inboundMsg = '請選擇商品'
                 }
-                //只有動態條碼才能取消入庫
+                //需要先入庫才能取消入庫
                 if(this.inventoryId === "") {
                     return this.inboundStatus = true, this.inboundMsg = '請先入庫'
                 }
@@ -494,14 +499,18 @@
                     return this.inboundStatus = true, this.inboundMsg = '超過商品數量'
                 }
                 this.$scale.Inventory.updateStock({
+                    //當前庫存id
                     id: this.inventoryId,
+                    //如果有動態條碼就使用，反之則拿固定條碼
                     barcode: this.barcodeStorage ? this.barcodeStorage : this.stockInForm.barcode,
-                    amount: this.stockInFormAmount - this.count //目前庫存 - 要取消的數量
+                    //目前庫存 - 要取消的數量
+                    amount: this.stockInFormAmount - this.count
                 }).then(res => {
                     if(res.status === 200) {
                         if(this.stockInForm.barcode === '') {
                             this.rePrintStatus = true
                         }
+                        //取消入庫成功後獲得當前商品數量
                         this.stockInFormAmount = res.data.amount
                         this.inboundStatus = true
                         this.inboundSuccessMsg = '取消入庫成功'
@@ -517,16 +526,19 @@
                     if(this.stockInForm.productId === "") {
                         return  this.inboundStatus = true, this.inboundMsg = '請選擇商品'
                     }
+                    //取得當前要操作入庫/取消的數量
                     this.stockInForm.amount = this.count
                     await this.$scale.Inventory.stockIn(this.stockInForm).then(res => {
                         if(res.status === 200) {
                             this.inboundSuccessMsg = '商品入庫成功'
-                            //一開始barcode為空時才做barcode緩存
+                            //barcode為空時才做barcode暫存
                             if(this.stockInForm.barcode === '') {
                                 this.barcodeStorage = res.data.barcode
                                 this.inboundPrintStatus = true
                             }
+                            //獲取當前庫存id
                             this.inventoryId = res.data.id
+                            //新增入庫成功後獲得當前商品數量
                             this.stockInFormAmount = res.data.amount
                             this.inboundMsg = ''
                             this.inboundStatus = true
