@@ -36,8 +36,8 @@
                 this.$emit('changeNumber', this.number, this.name)
             },
             minuser() {
-                if (this.number <= 0) {
-                    this.number = 0;
+                if (this.number <= 1) {
+                    this.number = 1;
                 } else {
                     this.number--;
                     this.$emit('changeNumber', this.number, this.name)

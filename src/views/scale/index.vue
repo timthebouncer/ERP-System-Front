@@ -23,7 +23,7 @@
                             depressed
                             :color="btColor"
                             @click="handleNotification()"
-                    >{{testText}}
+                    ><h3>{{testText}}</h3>
                         <v-icon>mdi-bluetooth</v-icon>
                     </v-btn>
                     <v-btn
@@ -33,7 +33,7 @@
                             depressed
                             color="error"
                             @click="handleStopNotification()"
-                    >停止連接<v-icon>mdi-bluetooth</v-icon>
+                    ><h3>停止連接</h3><v-icon>mdi-bluetooth</v-icon>
                     </v-btn>
                     <v-btn
                             class="mr-4"
@@ -41,9 +41,9 @@
                             depressed
                             color="primary"
                             @click="showAddNumberDialog(true)"
-                    >+新增入料
+                    ><h3>+新增入料</h3>
                     </v-btn>
-                    <v-btn class="mr-10" large depressed color="error" @click="updateStock()">取消入庫</v-btn>
+                    <v-btn :disabled="rePrintStatus" class="mr-10" large depressed color="error" @click="updateStock()"><h3>取消入庫</h3></v-btn>
                     <div class="staffName">
                         <span>Jennifer Lopez</span>
                         <v-btn class="ml-2" icon @click="logout">
@@ -61,7 +61,7 @@
                     </div>
                     <div class="d-flex">
                         <v-btn-toggle v-model="defaultValue" mandatory>
-                            <v-btn x-large active-class="btnColor" :disabled="kgStatus" @click="changeUnit('kg')">公斤</v-btn>
+                            <v-btn x-large active-class="btnColor" :disabled="kgStatus" @click="changeUnit('kg')"><h3>公斤</h3></v-btn>
                             <v-btn
                                     active-class="btnColor"
                                     x-large
@@ -69,7 +69,7 @@
                                     class="mx-2"
                                     @click="changeUnit('tkg')"
                                     style="border-left: 1px solid #666"
-                            >斤/兩
+                            ><h3>斤/兩</h3>
                             </v-btn>
                             <v-btn
                                     active-class="btnColor"
@@ -77,7 +77,7 @@
                                     :disabled="gStatus"
                                     @click="changeUnit('g')"
                                     style="border-left: 1px solid #666"
-                            >公克
+                            ><h3>公克</h3>
                             </v-btn>
                         </v-btn-toggle>
                     </div>
@@ -138,8 +138,8 @@
                     </v-form>
                 </div>
                 <div class="mid-btn mx-5 mt-6">
-                    <v-btn class="reprint-label">重印標籤</v-btn>
-                    <v-btn class="print mt-9" @click="inboundPrint">入庫列印</v-btn>
+                    <v-btn class="reprint-label"><h1>重印標籤</h1></v-btn>
+                    <v-btn :disabled="inboundPrintStatus" class="print mt-9" @click="inboundPrint"><h1 style="font-size: 36px;">入庫列印</h1></v-btn>
                 </div>
             </div>
             <div class="weight-control">
@@ -205,16 +205,20 @@
             </div>
             <!--藍芽連結成功提示-->
             <v-snackbar v-model="btConncet" :top="'top'" :color="btStatus ? 'success' : 'error'" :timeout="2500">
-                {{btStatus ? '藍芽連結成功' : '連接中斷!'}}
+                <h3>{{btStatus ? '藍芽連結成功' : '連接中斷!'}}</h3>
                 <template v-slot:action="{ attrs }">
-                    <v-btn text v-bind="attrs" @click="btConncet = false">關閉</v-btn>
+                    <v-btn text v-bind="attrs" @click="btConncet = false">
+                        <h3>關閉</h3>
+                    </v-btn>
                 </template>
             </v-snackbar>
             <!--入庫成功提示-->
             <v-snackbar v-model="inboundStatus" :top="'top'" :color="inboundMsg ? 'error' : 'success'" :timeout="2500">
-                {{inboundMsg ? inboundMsg : '入庫列印成功'}}
+                <h3>{{inboundMsg ? inboundMsg : inboundSuccessMsg}}</h3>
                 <template v-slot:action="{ attrs }">
-                    <v-btn text v-bind="attrs" @click="inboundStatus = false">關閉</v-btn>
+                    <v-btn text v-bind="attrs" @click="inboundStatus = false">
+                        <h3>關閉</h3>
+                    </v-btn>
                 </template>
             </v-snackbar>
         </v-container>
@@ -266,6 +270,8 @@
                 tkgStatus: false,
                 tagStatus: false,
                 inboundStatus: false,
+                inboundPrintStatus: false,
+                rePrintStatus: false,
                 valid: true,
                 restPlusBtn: true,
                 defaultValue: 0,
@@ -274,6 +280,7 @@
                 displayValue: 113.685,
                 changeValue: 0,
                 accumulateValue: 0,
+                stockInFormAmount: 0,
                 log: "",
                 today: "",
                 orderName: "",
@@ -283,6 +290,7 @@
                 inventoryId: '',
                 barcodeStorage: '',
                 inboundMsg: '',
+                inboundSuccessMsg: '',
                 btColor: "success",
                 testText: "連接藍芽",
                 commodityNumber: 1,
@@ -336,6 +344,9 @@
         watch: {
             position(){
                 this.barcodeStorage = ""
+                this.inventoryId = ""
+                this.rePrintStatus = false
+                this.inboundPrintStatus = false
             }
         },
         computed: {
@@ -432,17 +443,23 @@
             appendLog(text) {
                 this.log = this.log + "\n" + text;
             },
+            //商品切換
             addClass(index) {
+                //當前選擇的商品ID
                 this.stockInForm.productId = this.commodity[index].id
-                this.stockInForm.barcode = this.commodity[index].barcode ? this.commodity[index].barcode : this.commodity[index].barcode
-                this.stockInForm.amount = this.commodity[index].stockAmount
+                //當前選擇的商品barcode
+                this.stockInForm.barcode = this.commodity[index].barcode
+                //當前選擇的商品的總數量
+                this.stockInFormAmount = this.commodity[index].stockAmount
                 this.position = index;
-                this.restPlusBtn = false //切換標籤時reset組件
-                this.$nextTick(() => { //切換標籤時reset組件
+                //切換標籤時reset組件
+                this.restPlusBtn = false
+                //切換標籤時reset組件
+                this.$nextTick(() => {
                     this.restPlusBtn = true
+                    this.commodityNumber = 1 //切換標籤的時候數量歸1
+                    this.count = 1 //切換標籤的時候數量歸1
                 })
-                this.commodityNumber = 1 //切換標籤的時候數量歸1
-                this.count = 1 //切換標籤的時候數量歸1
             },
             connectBt(status) {
                 if (status) {
@@ -466,28 +483,65 @@
             getZero () {
               this.accumulateValue = 0
             },
+            //取消入庫
             updateStock() {
-                // console.log(this.stockInForm.amount, this.count);
-                // this.$scale.Inventory.updateStock({id: this.inventoryId, barcode: this.barcodeStorage, amount: this.stockInForm.amount - this.count}).then(res => {
-                //     console.log(res);
-                // })
+                if(this.orderNumber === "") {
+                    return this.inboundStatus = true, this.inboundMsg = '請選擇入料單號'
+                }
+                if(this.stockInForm.productId === "") {
+                    return this.inboundStatus = true, this.inboundMsg = '請選擇商品'
+                }
+                //需要先入庫才能取消入庫
+                if(this.inventoryId === "") {
+                    return this.inboundStatus = true, this.inboundMsg = '請先入庫'
+                }
+                if(this.stockInFormAmount - this.count < 0) {
+                    return this.inboundStatus = true, this.inboundMsg = '超過商品數量'
+                }
+                this.$scale.Inventory.updateStock({
+                    //當前庫存id
+                    id: this.inventoryId,
+                    //如果有動態條碼就使用，反之則拿固定條碼
+                    barcode: this.barcodeStorage ? this.barcodeStorage : this.stockInForm.barcode,
+                    //目前庫存 - 要取消的數量
+                    amount: this.stockInFormAmount - this.count
+                }).then(res => {
+                    if(res.status === 200) {
+                        if(this.stockInForm.barcode === '') {
+                            this.rePrintStatus = true
+                        }
+                        //取消入庫成功後獲得當前商品數量
+                        this.stockInFormAmount = res.data.amount
+                        this.inboundStatus = true
+                        this.inboundSuccessMsg = '取消入庫成功'
+                    }
+                })
             },
-            inboundPrint () {
+            //入庫列印
+            async inboundPrint () {
                 if (this.$refs.form.validate()) {
                     if(this.orderNumber === "") {
                         return  this.inboundStatus = true, this.inboundMsg = '請選擇入料單號'
                     }
-                    this.$scale.Inventory.stockIn(this.stockInForm).then(res => {
+                    if(this.stockInForm.productId === "") {
+                        return  this.inboundStatus = true, this.inboundMsg = '請選擇商品'
+                    }
+                    //取得當前要操作入庫/取消的數量
+                    this.stockInForm.amount = this.count
+                    await this.$scale.Inventory.stockIn(this.stockInForm).then(res => {
                         if(res.status === 200) {
-                            this.barcodeStorage = res.data.barcode
+                            this.inboundSuccessMsg = '商品入庫成功'
+                            //barcode為空時才做barcode暫存
+                            if(this.stockInForm.barcode === '') {
+                                this.barcodeStorage = res.data.barcode
+                                this.inboundPrintStatus = true
+                            }
+                            //獲取當前庫存id
                             this.inventoryId = res.data.id
+                            //新增入庫成功後獲得當前商品數量
+                            this.stockInFormAmount = res.data.amount
                             this.inboundMsg = ''
                             this.inboundStatus = true
-                        }
-                    }).catch(err => {
-                        if(err.response.data.message) {
-                            this.inboundStatus = true
-                            this.inboundMsg = '請選擇商品'
                         }
                     })
                 }
