@@ -11,6 +11,8 @@ export default new Vuex.Store({
       classItem: {id:'',className:''},
       clientItem: {id: '', name: "", phone: "", code: "", address: ""},
       receiveItem: {id: '', name: "", phone: "", code: "", address: ""},
+      discount: 0,
+      total: 0,
       payment: 1,
       shipment:1,
       temperatureCategory:1,
@@ -21,7 +23,8 @@ export default new Vuex.Store({
       orderItemRequestList:[]
     },
     workDate: '',
-    shipmentBacked: false
+    shipmentBacked: false,
+    salesDetailed: false
   },
   mutations: {},
   actions: {},
