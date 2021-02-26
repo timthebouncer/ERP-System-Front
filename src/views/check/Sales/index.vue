@@ -409,7 +409,7 @@
       </v-row>
     </div>
     <div>
-      <v-btn color="primary" style="width: 100%;" :disabled="nextDisabled" @click="submit">
+      <v-btn color="primary" style="width: 100%; font-size: large;" :disabled="nextDisabled" @click="submit">
         下一步 > 輸入出貨資料
       </v-btn>
     </div>
@@ -798,8 +798,9 @@ export default {
       this.$store.state.shipment.clientItem = this.clientData
       this.$store.state.shipment.receiveItem = this.receiveData
       this.$store.state.shipment.orderItemRequestList = this.productItem
-
-      this.$store.state.shipmentBacked = false
+      this.$store.state.shipment.discount = this.discount
+      this.$store.state.shipment.total = this.total
+      console.log(this.productItem,'productItem');
       this.$router.push('/shipment')
     },
     changeDialogInput(){
