@@ -176,48 +176,6 @@
                     <i/>
                     <i/>
                 </div>
-                <!--                <div class="weight-btn-bar">-->
-                <!--                    <div-->
-                <!--                            class="weight-control-button"-->
-                <!--                            @click="handleNotification"-->
-                <!--                            v-if="!characteristic"-->
-                <!--                    >-->
-                <!--                        <div>連接藍芽</div>-->
-                <!--                    </div>-->
-                <!--                    <div-->
-                <!--                            class="weight-control-button"-->
-                <!--                            @click="handleRestartNotification"-->
-                <!--                            v-else-->
-                <!--                    >-->
-                <!--                        <div>重啟</div>-->
-                <!--                    </div>-->
-                <!--                    <div class="weight-control-button" @click="handleStopNotification">-->
-                <!--                        <div>停止</div>-->
-                <!--                    </div>-->
-                <!--                    <div class="weight-control-button" @click="handleRecordWeight">-->
-                <!--                        <div>輸出</div>-->
-                <!--                    </div>-->
-                <!--                    <div-->
-                <!--                            class="weight-control-button"-->
-                <!--                            @click="handleRecordWeightInterval"-->
-                <!--                    >-->
-                <!--                        <div>間段輸出</div>-->
-                <!--                    </div>-->
-                <!--                    <div class="weight-control-button" @click="handleRecordWeight">-->
-                <!--                        <div>暫無</div>-->
-                <!--                    </div>-->
-                <!--                    <div class="weight-control-button" @click="handleRecordWeight">-->
-                <!--                        <div>暫無</div>-->
-                <!--                    </div>-->
-                <!--                    <div class="weight-control-button" @click="handleRecordWeight">-->
-                <!--                        <div>暫無</div>-->
-                <!--                    </div>-->
-                <!--                    <div class="weight-control-button" @click="handleRecordWeight">-->
-                <!--                        <div>暫無</div>-->
-                <!--                    </div>-->
-                <!--                </div>-->
-
-                <!--                <div class="log-wrapper">{{ log }}</div>-->
             </div>
             <!--藍芽連結成功提示-->
             <v-snackbar v-model="btConncet" :top="'top'" :color="btStatus ? 'success' : 'error'" :timeout="2500">
@@ -557,6 +515,7 @@
                         this.stockInFormAmount = res.data.amount
                         this.inboundStatus = true
                         this.inboundSuccessMsg = '取消入庫成功'
+                        this.inboundMsg = ''
                     }
                 })
             },
