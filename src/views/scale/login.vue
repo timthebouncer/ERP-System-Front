@@ -91,6 +91,13 @@
         errorText: '帳號密碼錯誤'
       }
     },
+    created() {
+      if (sessionStorage.getItem('timeOut')) {
+        this.snackbar = true
+        this.errorText = '頁面閒置太久，請重新登入'
+        sessionStorage.removeItem("timeOut")
+      }
+    },
     methods: {
       async login () {
         if (this.$refs.form.validate()) {
