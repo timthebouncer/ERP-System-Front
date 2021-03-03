@@ -5,7 +5,9 @@ import store from "./store";
 import api from './apis/check'
 import vuetify from "@/plugins/vuetify"
 import scale from "./apis/scale";
+import { VueMaskDirective } from 'v-mask'
 
+Vue.directive('mask', VueMaskDirective);
 Vue.config.productionTip = false;
 Vue.prototype.$scale = scale;
 Vue.prototype.$api = api

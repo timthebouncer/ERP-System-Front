@@ -1,5 +1,8 @@
 <template>
   <v-container class="container">
+    <v-snackbar v-model="snackbar" centered color="red" timeout="2000">
+      <span>{{ messageText }}</span>
+    </v-snackbar>
     <div class="text-h4 text-center">
       <span>出貨單</span><v-divider class="mb-1"></v-divider>
     </div>
@@ -128,14 +131,14 @@
       <v-row>
         <v-col><span>折讓</span></v-col
         ><v-col class="text-end"
-      ><span>${{ discount }}</span></v-col
-      >
+          ><span>${{ discount }}</span></v-col
+        >
       </v-row>
       <v-row>
         <v-col><span>合計</span></v-col
         ><v-col class="text-end"
-      ><span style="color: red;">${{ total }}</span></v-col
-      >
+          ><span style="color: red;">${{ total }}</span></v-col
+        >
       </v-row>
     </div>
     <div class="title-wrapper rounded">
@@ -144,25 +147,29 @@
     <div>
       <v-radio-group :value="1">
         <v-row>
-          <v-col class="col-1">
-        <span>1.</span></v-col><v-col><v-radio label="商用格式" :value="1"></v-radio></v-col>
-          <v-col>
-            <v-radio label="零售格式" :value="2"></v-radio></v-col>
+          <v-col class="col-1"> <span>1.</span></v-col
+          ><v-col><v-radio label="商用格式" :value="1"></v-radio></v-col>
+          <v-col> <v-radio label="零售格式" :value="2"></v-radio></v-col>
         </v-row>
       </v-radio-group>
       <v-radio-group :value="1">
         <v-row>
-          <v-col class="col-1">
-            <span>2.</span></v-col><v-col><v-radio label="有價格+無價格(各一份)" :value="1"></v-radio></v-col>
+          <v-col class="col-1"> <span>2.</span></v-col
+          ><v-col
+            ><v-radio label="有價格+無價格(各一份)" :value="1"></v-radio
+          ></v-col>
           <v-col>
-            <v-radio label="無價格(一式兩份)" :value="2"></v-radio></v-col>
+            <v-radio label="無價格(一式兩份)" :value="2"></v-radio
+          ></v-col>
         </v-row>
       </v-radio-group>
     </div>
     <div class="text-center">
-      <v-btn class="text-h6"
-              color="primary"
-              style="width: 70%;height: 50px;"
+      <v-btn
+        class="text-h6"
+        color="primary"
+        style="width: 70%;height: 50px;"
+        @click="submit(1)"
       >
         列印出貨單/貼箱標籤
       </v-btn>
@@ -170,17 +177,12 @@
     <div class="mt-3">
       <v-row>
         <v-col>
-          <v-btn
-                  style="width: 100%;"
-                  @click="back"
-          >
+          <v-btn style="width: 100%;" @click="back">
             返回修改
           </v-btn>
         </v-col>
         <v-col>
-          <v-btn
-                  style="width: 100%;"
-          >
+          <v-btn style="width: 100%;" @click="submit(2)">
             只列印貼箱標籤
           </v-btn>
         </v-col>
@@ -197,19 +199,77 @@ export default {
       shipmentData: {},
       workDate: "",
       discount: 0,
-      total: 0
+      total: 0,
+      messageText: "",
+      snackbar: false
     };
   },
   created() {
     this.shipmentData = this.$store.state.shipment;
     this.workDate = this.$store.state.workDate;
-    this.discount = this.$store.state.shipment.discount
-    this.total = this.$store.state.shipment.total
+    this.discount = this.$store.state.shipment.discount;
+    this.total = this.$store.state.shipment.total;
   },
   methods: {
-    back(){
+    back() {
       this.$store.state.shipmentBacked = true;
       this.$router.push("/sales");
+    },
+    submit(value) {
+      let recipientId = this.$store.state.shipment.receiveItem.id;
+      if (recipientId == "1") {
+        recipientId = "0";
+      } else if (recipientId == "2") {
+        recipientId = "1";
+      }
+
+      this.$api.Distribute.addOrder({
+        recipientId: recipientId,
+        clientId: this.$store.state.shipment.clientItem.id,
+        remark: this.$store.state.shipment.remark,
+        payment: this.$store.state.shipment.payment,
+        shipment: this.$store.state.shipment.shipment,
+        temperatureCategory: this.$store.state.shipment.temperatureCategory,
+        volume: this.$store.state.shipment.volume,
+        orderNo: this.$store.state.shipment.orderNo,
+        stockOutDate: this.$store.state.shipment.shipmentDate,
+        trackingNo: this.$store.state.shipment.trackingNo,
+        shippingFee: this.$store.state.shipment.shippingFee,
+        orderItemRequestList: this.$store.state.shipment.orderItemRequestList.map(
+          item => {
+            return {
+              barcode: item.barcode,
+              amount: item.quantity,
+              discount: item.salesPrice * item.quantity - item.money,
+              price: item.salesPrice * item.quantity,
+              remark: item.remark
+            };
+          }
+        )
+      })
+        .then(() => {
+          if(value == 1){
+            this.$store.state.successMsg = "出貨確認成功，已列印出貨單/貼箱標籤";
+          }
+          else if(value == 2){
+            this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
+          }
+          this.$store.state.successSnackbar = true;
+          this.$router.push("/salesLog");
+        })
+        .catch(err => {
+          this.messageText = err.response.data.message;
+          this.snackbar = true;
+        });
+
+      // if(value == 1){
+      //   this.$store.state.successMsg = "出貨確認成功，已列印出貨單/貼箱標籤";
+      // }
+      // else if(value == 2){
+      //   this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
+      // }
+      // this.$store.state.successSnackbar = true;
+      // this.$router.push("/salesLog");
     }
   },
   mounted() {}

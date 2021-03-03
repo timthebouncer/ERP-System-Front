@@ -32,15 +32,15 @@ const api = {
     DepotOrder: {
         //取得入料單號
         getNumber() {
-            return request.get("/depotOrder/getNumber");
+            return request.get("/materialDepotOrder/getNumber");
         },
         //新增入料
         addOrder(data) {
-            return request.post("/depotOrder/addOrder", data);
+            return request.post("/materialDepotOrder/addOrder", data);
         },
         //未使用入料列表
         getUnusedList() {
-            return request.get("/depotOrder/getUnusedList");
+            return request.get("/materialDepotOrder/getUnusedList");
         }
     },
     Material: {

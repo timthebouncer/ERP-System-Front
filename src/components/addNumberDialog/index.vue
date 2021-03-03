@@ -28,14 +28,14 @@
                 :color="deleteText ? 'error' : 'success'"
                 :timeout="2500"
         >
-            {{deleteText ? deleteText : '新增成功'}}
+            <h3>{{deleteText ? deleteText : '新增成功'}}</h3>
             <template v-slot:action="{ attrs }">
                 <v-btn
                         text
                         v-bind="attrs"
                         @click="snackbar = false"
                 >
-                    關閉
+                    <h3>關閉</h3>
                 </v-btn>
             </template>
         </v-snackbar>

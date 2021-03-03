@@ -12,7 +12,7 @@
                   <v-row>
                     <v-col class="mt-6" cols="12" sm="12">
                       <v-text-field
-                              v-model="model.account"
+                              v-model="model.username"
                               label="帳號"
                               name="login"
                               prepend-icon="mdi-account"
@@ -55,14 +55,14 @@
                 :color="errorText ? 'error' : 'success'"
                 :timeout="3000"
         >
-          {{errorText ? errorText : '登入成功'}}
+          <h3>{{errorText}}</h3>
           <template v-slot:action="{ attrs }">
             <v-btn
                     text
                     v-bind="attrs"
                     @click="snackbar = false"
             >
-              關閉
+              <h3>關閉</h3>
             </v-btn>
           </template>
         </v-snackbar>
@@ -76,8 +76,8 @@
     data () {
       return {
         model: {
-          account: '',
-          password: ''
+          username: 'admin',
+          password: '123'
         },
         loading: false,
         snackbar: false,
@@ -95,19 +95,21 @@
       async login () {
         if (this.$refs.form.validate()) {
           this.loading = true
-          this.$router.push('scale')
-          // this.$api.Login.login(this.model).then(res => {
-          //   if(res.data.success) {
-          //     this.errorText = ''
-          //     this.snackbar = true
-          //   }
-          // }).catch(err => {
-          //   if(err.response.data.data){
-          //     this.snackbar = true
-          //     this.errorText = err.response.data.data
-          //   }
-          //   this.loading = false
-          // })
+          const formData = new FormData()
+          formData.append("username", this.model.username)
+          formData.append("password", this.model.password)
+          await this.$scale.Login.login(formData).then(res => {
+            if(res.status === 200) {
+                this.loading = false
+                this.$router.push('/scale')
+            }
+          }).catch(err => {
+            if(err.response.data.msg) {
+              this.errorText = err.response.data.msg
+              this.snackbar = true
+              this.loading = false
+            }
+          })
         }
       }
     }

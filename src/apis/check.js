@@ -2,10 +2,16 @@ import request from "./https";
 
 const api= {
   Login:{
-    userLogin(formData){
-      return request.post("/api/login",formData)
+    userLogin(formData) {
+      return request.post("/api/login", formData)
     },
-  },
+    loginIdentify(){
+      return request.get('session/isAuthenticated')
+    },
+    logOut(){
+      return request.post('/api/logout')
+    }
+    },
   Commodity:{
     getSalesProduct(params){
       return request.get('/product/getSalesProduct/',{params})
@@ -29,11 +35,11 @@ const api= {
     getDistributeList(params){
       return request.get('deliveryOrder/orderList',{params})
     },
-    getDistributeDetail(record){
-      return request.get('/deliveryOrder/getDetail?orderId='+ record.orderId)
+    getDistributeDetail(orderId){
+      return request.get('/deliveryOrder/getDetail?orderId='+ orderId)
     },
-    deleteOrderList(record) {
-      return request.delete('/deliveryOrder/cancelOrder/'+ record.orderId);
+    deleteOrderList(orderId) {
+      return request.delete('/deliveryOrder/cancelOrder/'+ orderId);
     },
     addOrder(data){
       return request.post('/deliveryOrder/addOrder',data)

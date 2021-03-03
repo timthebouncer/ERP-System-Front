@@ -22,8 +22,20 @@
                             large
                             depressed
                             :color="btColor"
-                            @click="handleNotification()"
+                            @click="handleNotification"
+                            v-if="!characteristic"
                     ><h3>{{testText}}</h3>
+                        <v-icon>mdi-bluetooth</v-icon>
+                    </v-btn>
+                    <v-btn
+                            class="mr-4"
+                            large
+                            depressed
+                            color="success"
+                            @click="handleRestartNotification"
+                            v-else
+                    >
+                        <h3>重新連接</h3>
                         <v-icon>mdi-bluetooth</v-icon>
                     </v-btn>
                     <v-btn
@@ -33,7 +45,7 @@
                             depressed
                             color="error"
                             @click="handleStopNotification()"
-                    ><h3>停止連接</h3><v-icon>mdi-bluetooth</v-icon>
+                    ><h3>停止連接</h3><v-icon>mdi-bluetooth-off</v-icon>
                     </v-btn>
                     <v-btn
                             class="mr-4"
@@ -55,7 +67,7 @@
             <div class="mid d-flex pa-2 pb-4">
                 <div class="weight-wrap">
                     <div class="weight-scale">
-                        <div v-if="kgStatus">{{ displayValue.toFixed(3) }}</div>
+                        <div v-if="kgStatus">{{ deductionValue && displayValue !== 0 ? (Number(displayValue) - deductionValue).toFixed(3) : Number(displayValue).toFixed(3) }}</div>
                         <div v-else-if="tkgStatus">{{Math.floor(changeValue)}}斤{{twTael}}兩</div>
                         <div v-else>{{ changeValue }}</div>
                     </div>
@@ -81,7 +93,7 @@
                             </v-btn>
                         </v-btn-toggle>
                     </div>
-                    <div class="d-flex" style="margin: 45px 0 -100px 0">
+                    <v-btn-toggle class="d-flex" style="margin: 45px 0 -100px 0">
                         <v-btn
                                 text
                                 large
@@ -89,11 +101,18 @@
                                 v-long-press="800"
                                 @long-press-start="onLongPressStart"
                                 @click="accumulate"
-                        >累加(公斤) {{accumulateValue}}
+                        >
+                            <h3>
+                                累加(公斤) {{accumulateValue}}
+                            </h3>
                         </v-btn>
-                        <v-btn class="mx-2" x-large>扣重</v-btn>
-                        <v-btn x-large>歸零</v-btn>
-                    </div>
+                        <v-btn class="mx-2" x-large active-class="btnColor" style="border-left: 1px solid #666" @click="deduction()">
+                            <h3>扣重</h3>
+                        </v-btn>
+                        <v-btn x-large active-class="btnColor" style="border-left: 1px solid #666" @click="toZero()">
+                            <h3>歸零</h3>
+                        </v-btn>
+                    </v-btn-toggle>
                 </div>
                 <div class="pl-5">
                     <v-form
@@ -160,48 +179,6 @@
                     <i/>
                     <i/>
                 </div>
-                <!--                <div class="weight-btn-bar">-->
-                <!--                    <div-->
-                <!--                            class="weight-control-button"-->
-                <!--                            @click="handleNotification"-->
-                <!--                            v-if="!characteristic"-->
-                <!--                    >-->
-                <!--                        <div>連接藍芽</div>-->
-                <!--                    </div>-->
-                <!--                    <div-->
-                <!--                            class="weight-control-button"-->
-                <!--                            @click="handleRestartNotification"-->
-                <!--                            v-else-->
-                <!--                    >-->
-                <!--                        <div>重啟</div>-->
-                <!--                    </div>-->
-                <!--                    <div class="weight-control-button" @click="handleStopNotification">-->
-                <!--                        <div>停止</div>-->
-                <!--                    </div>-->
-                <!--                    <div class="weight-control-button" @click="handleRecordWeight">-->
-                <!--                        <div>輸出</div>-->
-                <!--                    </div>-->
-                <!--                    <div-->
-                <!--                            class="weight-control-button"-->
-                <!--                            @click="handleRecordWeightInterval"-->
-                <!--                    >-->
-                <!--                        <div>間段輸出</div>-->
-                <!--                    </div>-->
-                <!--                    <div class="weight-control-button" @click="handleRecordWeight">-->
-                <!--                        <div>暫無</div>-->
-                <!--                    </div>-->
-                <!--                    <div class="weight-control-button" @click="handleRecordWeight">-->
-                <!--                        <div>暫無</div>-->
-                <!--                    </div>-->
-                <!--                    <div class="weight-control-button" @click="handleRecordWeight">-->
-                <!--                        <div>暫無</div>-->
-                <!--                    </div>-->
-                <!--                    <div class="weight-control-button" @click="handleRecordWeight">-->
-                <!--                        <div>暫無</div>-->
-                <!--                    </div>-->
-                <!--                </div>-->
-
-                <!--                <div class="log-wrapper">{{ log }}</div>-->
             </div>
             <!--藍芽連結成功提示-->
             <v-snackbar v-model="btConncet" :top="'top'" :color="btStatus ? 'success' : 'error'" :timeout="2500">
@@ -245,7 +222,6 @@
     import AccumulateDialog from "../../components/accumulateDialog";
     import LongPress from "vue-directive-long-press";
     import {UNIT} from "../../mixin/enums"
-
     const SERVICE_ID = "00004353-0000-1000-8000-00805f9b34fb";
     export default {
         components: {
@@ -277,10 +253,11 @@
                 defaultValue: 0,
                 list: [],
                 lastValue: "0",
-                displayValue: 113.685,
+                displayValue: 0.000,
                 changeValue: 0,
                 accumulateValue: 0,
                 stockInFormAmount: 0,
+                deductionValue: 0,
                 log: "",
                 today: "",
                 orderName: "",
@@ -304,7 +281,9 @@
                 stockInForm: {
                     depotId: '',
                     productId: '',
+                    unit: '',
                     barcode: '',
+                    weight: '',
                     amount: 0
                 },
                 warehouseValidat: [
@@ -313,12 +292,6 @@
             };
         },
         async mounted() {
-            const formData = new FormData()
-            formData.append("username", 'admin')
-            formData.append("password", '123')
-            await this.$scale.Login.login(formData).then(res => {
-                console.log(res);
-            })
             await this.$scale.Product.getProduct().then(res => {
                 if (res.status === 200) {
                     this.commodity = res.data
@@ -342,11 +315,21 @@
             "long-press": LongPress
         },
         watch: {
-            position(){
+            position() {
                 this.barcodeStorage = ""
                 this.inventoryId = ""
                 this.rePrintStatus = false
                 this.inboundPrintStatus = false
+            },
+            //當磅秤機重量改變時
+            displayValue() {
+                if(this.kgStatus) {
+                    this.changeUnit('kg')
+                }else if(this.tkgStatus) {
+                    this.changeUnit('tkg')
+                }else{
+                    this.changeUnit('g')
+                }
             }
         },
         computed: {
@@ -358,7 +341,10 @@
         },
         methods: {
             accumulate() {
-                this.accumulateValue += this.displayValue
+                //防止累加按鈕連續操作
+                if(this.displayValue === 0.000) return
+                //累加的值如果有扣重的重量要扣掉
+                this.accumulateValue = Number((this.accumulateValue+(this.displayValue-this.deductionValue)).toFixed(3))
                 this.displayValue = 0.000
                 this.changeValue = 0.000
             },
@@ -368,21 +354,22 @@
             changeUnit(value) {
                 if (value === "kg") {
                     return (
-                        (this.changeValue = this.displayValue),
+                        //為了扣重後不要進來跑，當物品放上去後才跑
+                        (this.changeValue = this.deductionValue && this.displayValue !== 0 ? this.displayValue - this.deductionValue :this.displayValue),
                             (this.kgStatus = true),
                             (this.gStatus = false),
                             (this.tkgStatus = false)
                     );
                 } else if (value === "tkg") {
                     return (
-                        (this.changeValue = this.displayValue / 0.6),
+                        (this.changeValue = this.deductionValue && this.displayValue !== 0 ? (this.displayValue - this.deductionValue) / 0.6 : this.displayValue / 0.6),
                             (this.kgStatus = false),
                             (this.gStatus = false),
                             (this.tkgStatus = true)
                     );
                 } else if (value === "g") {
                     return (
-                        (this.changeValue = this.displayValue * 1000),
+                        (this.changeValue = this.deductionValue && this.displayValue !== 0 ? (this.displayValue*1000 - this.deductionValue*1000) : this.displayValue * 1000),
                             (this.kgStatus = false),
                             (this.gStatus = true),
                             (this.tkgStatus = false)
@@ -451,6 +438,10 @@
                 this.stockInForm.barcode = this.commodity[index].barcode
                 //當前選擇的商品的總數量
                 this.stockInFormAmount = this.commodity[index].stockAmount
+                //取得當前選擇的商品單位
+                this.stockInForm.unit = this.commodity[index].unit
+                //取得當前選擇的商品重量
+                this.stockInForm.weight = this.commodity[index].weight
                 this.position = index;
                 //切換標籤時reset組件
                 this.restPlusBtn = false
@@ -480,8 +471,24 @@
                     this.btConncet = true;
                 }
             },
-            getZero () {
-              this.accumulateValue = 0
+            //累加歸零
+            getZero() {
+                this.accumulateValue = 0
+            },
+            //平板歸零
+            toZero() {
+                this.changeValue = 0
+                this.deductionValue = 0
+                this.displayValue = 0
+            },
+            //平板扣重
+            deduction() {
+                //紀錄第一次扣重的物品重量
+                if(this.deductionValue === 0) {
+                    this.deductionValue = this.displayValue
+                    this.displayValue = 0
+                    this.changeValue = 0
+                }
             },
             //取消入庫
             updateStock() {
@@ -514,6 +521,7 @@
                         this.stockInFormAmount = res.data.amount
                         this.inboundStatus = true
                         this.inboundSuccessMsg = '取消入庫成功'
+                        this.inboundMsg = ''
                     }
                 })
             },
@@ -521,10 +529,10 @@
             async inboundPrint () {
                 if (this.$refs.form.validate()) {
                     if(this.orderNumber === "") {
-                        return  this.inboundStatus = true, this.inboundMsg = '請選擇入料單號'
+                        return this.inboundStatus = true, this.inboundMsg = '請選擇入料單號'
                     }
                     if(this.stockInForm.productId === "") {
-                        return  this.inboundStatus = true, this.inboundMsg = '請選擇商品'
+                        return this.inboundStatus = true, this.inboundMsg = '請選擇商品'
                     }
                     //取得當前要操作入庫/取消的數量
                     this.stockInForm.amount = this.count
@@ -547,7 +555,11 @@
                 }
             },
             logout () {
-              this.$router.push('/slogin')
+              this.$scale.Logout.logout().then(res => {
+                  if(res.status === 200) {
+                      this.$router.push('/slogin')
+                  }
+              })
             },
             getUnit(unit) {
                 let unitName = UNIT.find(item => item.value === unit);
@@ -570,11 +582,11 @@
                     let myCharacteristic = await service.getCharacteristic(
                         characteristicUuid
                     );
+                    this.connectBt(true)
                     await myCharacteristic.startNotifications();
                     this.characteristic = myCharacteristic;
                     this.appendLog("> Notifications started");
-                    this.connectBt(true)
-                    myCharacteristic.addEventListener(
+                    this.characteristic.addEventListener(
                         "characteristicvaluechanged",
                         this.handleNotifications
                     );
@@ -590,15 +602,17 @@
                 await myCharacteristic.startNotifications();
                 this.characteristic = myCharacteristic;
                 this.appendLog("> Notifications started");
+                this.connectBt(true)
                 myCharacteristic.addEventListener(
                     "characteristicvaluechanged",
                     this.handleNotifications
                 );
             },
             async handleStopNotification() {
-                this.connectBt(false)
                 if (this.characteristic) {
                     try {
+                        this.connectBt(false)
+                        this.toZero()
                         await this.characteristic.stopNotifications();
                         this.appendLog("> Notifications stopped");
                         this.characteristic.removeEventListener(
@@ -614,7 +628,7 @@
                 let noti = Buffer.from(event.target.value.buffer);
                 if (!(this.lastValue == noti.toString("ascii"))) {
                     this.lastValue = noti.toString("ascii");
-                    this.displayValue = noti.toString("ascii");
+                    this.displayValue = Number(noti.toString("ascii"));
                 }
             },
             handleRecordWeightInterval() {
