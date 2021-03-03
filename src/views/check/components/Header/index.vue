@@ -63,7 +63,7 @@
       </v-menu>
       <v-spacer></v-spacer>
       <span style="font-size: large; color: #fff0e9;">名字</span>
-      <v-btn icon>
+      <v-btn icon @click="userLogout">
         <v-icon color="#f7b573">mdi-export</v-icon>
       </v-btn>
     </v-toolbar>
@@ -112,6 +112,14 @@ export default {
       }
 
 
+    },
+    userLogout(){
+      this.$api.Login.logOut()
+      .then(()=>{
+        sessionStorage.removeItem('token')
+        this.$router.push('/')
+        this.menuName = ''
+      })
     },
     openMenu(attrs){
       console.log(attrs);
