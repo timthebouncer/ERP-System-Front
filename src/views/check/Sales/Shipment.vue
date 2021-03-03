@@ -211,9 +211,6 @@ export default {
       fab: false,
       snackbar: false,
       messageText: "",
-      rules: {
-        trackingNo:{ regex: v => (/(\d{4})(?=\d)/g,'$1-').test(v) || 'fail' }
-      }
     };
   },
   // computed: {
@@ -330,6 +327,7 @@ export default {
       this.orderNo = this.$store.state.shipment.orderNo;
       this.payment = this.$store.state.shipment.payment;
       this.shipmentEvent = this.$store.state.shipment.shipment;
+      this.trackingNo = this.$store.state.shipment.trackingNo;
       this.temperatureCategory = this.$store.state.shipment.temperatureCategory;
       this.volume = this.$store.state.shipment.volume;
       this.shippingFee = this.$store.state.shipment.shippingFee;
