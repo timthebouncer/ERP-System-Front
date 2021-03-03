@@ -553,6 +553,13 @@ export default {
       total: 0
     };
   },
+  async created() {
+    const res = await this.$api.Login.loginIdentify()
+    console.log(res)
+    if(res.data === false){
+      this.$router.push('/')
+    }
+  },
   methods: {
     classRadioChange(value) {
       this.className = this.items[0].items.find(x => x.id == value).className;

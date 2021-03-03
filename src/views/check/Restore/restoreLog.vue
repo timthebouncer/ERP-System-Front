@@ -66,6 +66,13 @@ export default {
       contentStatus:''
     };
   },
+  async created() {
+    const res = await this.$api.Login.loginIdentify()
+    console.log(res)
+    if(res.data === false){
+      this.$router.push('/')
+    }
+  },
   mounted() {
     window.addEventListener('scroll', () => {
       const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
