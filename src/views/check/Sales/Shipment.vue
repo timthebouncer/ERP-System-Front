@@ -84,7 +84,7 @@
           ><v-radio-group
             class="mt-2"
             v-model="shipmentEvent"
-            @change="changeShip"
+            @change="computedShippingFee"
           >
             <v-row class="justify-space-between">
               <v-col class="pl-0 pr-0"
@@ -100,13 +100,17 @@
       <v-row v-if="shipmentEvent == '2'" class="mt-0">
         <v-col class="col-3"><span>物流編號:</span></v-col>
         <v-col class="col-8 pa-0"
-          ><v-text-field outlined v-model="trackingNo"></v-text-field
+          ><v-text-field outlined v-model="trackingNo" v-mask="'####-####-####'"></v-text-field
         ></v-col>
       </v-row>
       <v-row class="mt-0" v-if="shipmentEvent != 3">
         <v-col class="col-3 align-self-center"><span>溫層類別:</span></v-col>
         <v-col class="col-9 pl-0 pr-0"
-          ><v-radio-group class="mt-2" v-model="temperatureCategory">
+          ><v-radio-group
+            class="mt-2"
+            v-model="temperatureCategory"
+            @change="computedShippingFee"
+          >
             <v-row class="justify-space-between">
               <v-col class="pl-0 pr-0"
                 ><v-radio :value="1" label="常溫"></v-radio
@@ -121,7 +125,11 @@
       <v-row class="mt-0" v-if="shipmentEvent != 3">
         <v-col class="col-3"><span>材積單位:</span></v-col>
         <v-col class="col-9 pt-0"
-          ><v-radio-group class="mt-2" v-model="volume">
+          ><v-radio-group
+            class="mt-2"
+            v-model="volume"
+            @change="computedShippingFee"
+          >
             <v-row class="">
               <v-col class=""
                 ><v-radio :value="1" label="60公分"></v-radio
@@ -169,19 +177,12 @@
     <div>
       <v-row>
         <v-col>
-          <v-btn
-            color="primary"
-            @click="back"
-          >
+          <v-btn color="primary" @click="back">
             客戶/商品資料 < 上一步
           </v-btn>
         </v-col>
         <v-col>
-          <v-btn
-            color="primary"
-            :disabled="nextDisabled"
-            @click="submit"
-          >
+          <v-btn color="primary" :disabled="nextDisabled" @click="submit">
             下一步 > 出貨單
           </v-btn>
         </v-col>
@@ -209,7 +210,10 @@ export default {
       nextDisabled: true,
       fab: false,
       snackbar: false,
-      messageText: ''
+      messageText: "",
+      rules: {
+        trackingNo:{ regex: v => (/(\d{4})(?=\d)/g,'$1-').test(v) || 'fail' }
+      }
     };
   },
   // computed: {
@@ -237,14 +241,12 @@ export default {
           this.volume = 1;
         }
       }
-      this.computedShippingFee()
     },
     shipmentEvent() {
-      this.computedShippingFee()
       this.checkNextDisable();
     },
     volume() {
-      this.computedShippingFee()
+      console.log(this.volume);
     },
     trackingNo() {
       this.checkNextDisable();
@@ -270,20 +272,17 @@ export default {
         this.checkNextDisable();
       });
     },
-    changeShip() {
-      console.log(this.shipmentEvent);
-    },
     back() {
       this.$store.state.shipmentBacked = true;
       this.$store.state.shipment.shipmentDate = this.date;
       this.$store.state.shipment.orderNo = this.orderNo;
       this.$store.state.shipment.payment = this.payment;
       this.$store.state.shipment.shipment = this.shipmentEvent;
-      this.$store.state.shipment.trackingNo = this.trackingNo
-      this.$store.state.shipment.temperatureCategory = this.temperatureCategory
-      this.$store.state.shipment.volume = this.volume
-      this.$store.state.shipment.shippingFee = this.shippingFee
-      this.$store.state.shipment.remark = this.remark
+      this.$store.state.shipment.trackingNo = this.trackingNo;
+      this.$store.state.shipment.temperatureCategory = this.temperatureCategory;
+      this.$store.state.shipment.volume = this.volume;
+      this.$store.state.shipment.shippingFee = this.shippingFee;
+      this.$store.state.shipment.remark = this.remark;
       this.$router.push("/sales");
     },
     checkNextDisable() {
@@ -302,88 +301,39 @@ export default {
       }
     },
     submit() {
-      let recipientId = this.$store.state.shipment.receiveItem.id;
-      if (recipientId == "1") {
-        recipientId = "0";
-      } else if (recipientId == "2") {
-        recipientId = "1";
-      }
-
       this.$store.state.shipment.shipmentDate = this.date;
       this.$store.state.shipment.orderNo = this.orderNo;
       this.$store.state.shipment.payment = this.payment;
       this.$store.state.shipment.shipment = this.shipmentEvent;
-      this.$store.state.shipment.trackingNo = this.trackingNo
-      this.$store.state.shipment.temperatureCategory = this.temperatureCategory
-      this.$store.state.shipment.volume = this.volume
-      this.$store.state.shipment.shippingFee = this.shippingFee
-      this.$store.state.shipment.remark = this.remark
-      this.$store.state.salesDetailed = true
-      this.$router.push('/salesDetail')
-
-      /*
-      this.$api.Distribute.addOrder({
-        recipientId: recipientId,
-        clientId: this.$store.state.shipment.clientItem.id,
-        remark: this.$store.state.shipment.remark,
-        payment: this.$store.state.shipment.payment,
-        shipment: this.$store.state.shipment.shipment,
-        temperatureCategory: this.$store.state.shipment.temperatureCategory,
-        volume: this.$store.state.shipment.volume,
-        orderNo: this.$store.state.shipment.orderNo,
-        stockOutDate: this.$store.state.shipment.shipmentDate,
-        trackingNo: this.$store.state.shipment.trackingNo,
-        shippingFee: this.$store.state.shipment.shippingFee,
-        orderItemRequestList: this.$store.state.shipment.orderItemRequestList.map(item => {
-          return {
-            barcode: item.barcode,
-            amount: item.quantity,
-            discount: (item.salesPrice * item.quantity) - item.money,
-            price: (item.salesPrice * item.quantity),
-            remark: item.remark
-          };
-        })
-      })
-        .then(() => {
-          this.snackbar = true;
-          this.messageText = "出貨確認成功";
-        })
-        .catch((err) => {
-          // const stock = this.orderData.map(item => {
-          //   return item.amount;
-          // });
-          // const quantity = this.selectList.some(
-          //   (item, i) => item.amount < stock[i]
-          // );
-          // if (quantity) {
-          //   this.$message.error("出貨量大於庫存量");
-          // } else {
-          //   this.$message.error("無此商品條碼");
-          // }
-          console.log(err);
-        });
-      */
-
+      this.$store.state.shipment.trackingNo = this.trackingNo;
+      this.$store.state.shipment.temperatureCategory = this.temperatureCategory;
+      this.$store.state.shipment.volume = this.volume;
+      this.$store.state.shipment.shippingFee = this.shippingFee;
+      this.$store.state.shipment.remark = this.remark;
+      this.$store.state.salesDetailed = true;
+      this.$router.push("/salesDetail");
     },
     computedShippingFee() {
-      let value = shippingRule[
-      "" + this.shipmentEvent + this.temperatureCategory + this.volume
-              ];
+      let value =
+        shippingRule[
+          "" + this.shipmentEvent + this.temperatureCategory + this.volume
+        ];
       // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-      this.shippingFee = value
-    }
+      this.shippingFee = value;
+    },
   },
   mounted() {
     this.toTop();
+    this.computedShippingFee();
     if (this.$store.state.shipmentBacked) {
       this.date = this.$store.state.shipment.shipmentDate;
       this.orderNo = this.$store.state.shipment.orderNo;
       this.payment = this.$store.state.shipment.payment;
       this.shipmentEvent = this.$store.state.shipment.shipment;
-      this.temperatureCategory = this.$store.state.shipment.temperatureCategory
-      this.volume = this.$store.state.shipment.volume
-      this.shippingFee = this.$store.state.shipment.shippingFee
-      this.remark = this.$store.state.shipment.remark
+      this.temperatureCategory = this.$store.state.shipment.temperatureCategory;
+      this.volume = this.$store.state.shipment.volume;
+      this.shippingFee = this.$store.state.shipment.shippingFee;
+      this.remark = this.$store.state.shipment.remark;
     }
   }
 };

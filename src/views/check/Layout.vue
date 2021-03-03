@@ -2,8 +2,9 @@
   <div class="app-class">
     <HeaderOption />
     <v-main>
-      <span class="font-weight-light">工作日期:{{ today }}</span>
-      <router-link to="/"></router-link>
+      <v-snackbar v-model="$store.state.successSnackbar" centered color="primary" timeout="2500">
+        <p class="text-center ma-0">{{ $store.state.successMsg }}</p>
+      </v-snackbar>
       <span v-if="!$store.state.salesDetailed" class="font-weight-light">工作日期:{{ today }}</span>
       <router-link to="/Sales"></router-link>
       <router-link to="/Restore"></router-link>
@@ -21,6 +22,8 @@ export default {
   data(){
     return{
       today: "",
+      snackbar: false,
+      messageText: ''
     }
   },
   mounted() {
