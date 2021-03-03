@@ -93,7 +93,7 @@
                             </v-btn>
                         </v-btn-toggle>
                     </div>
-                    <div class="d-flex" style="margin: 45px 0 -100px 0">
+                    <v-btn-toggle class="d-flex" style="margin: 45px 0 -100px 0">
                         <v-btn
                                 text
                                 large
@@ -101,15 +101,18 @@
                                 v-long-press="800"
                                 @long-press-start="onLongPressStart"
                                 @click="accumulate"
-                        >累加(公斤) {{accumulateValue}}
+                        >
+                            <h3>
+                                累加(公斤) {{accumulateValue}}
+                            </h3>
                         </v-btn>
-                        <v-btn class="mx-2" x-large @click="deduction()">
+                        <v-btn class="mx-2" x-large active-class="btnColor" style="border-left: 1px solid #666" @click="deduction()">
                             <h3>扣重</h3>
                         </v-btn>
-                        <v-btn x-large @click="toZero()">
+                        <v-btn x-large active-class="btnColor" style="border-left: 1px solid #666" @click="toZero()">
                             <h3>歸零</h3>
                         </v-btn>
-                    </div>
+                    </v-btn-toggle>
                 </div>
                 <div class="pl-5">
                     <v-form
@@ -338,7 +341,7 @@
         },
         methods: {
             accumulate() {
-                this.accumulateValue += this.displayValue
+                this.accumulateValue = Number((this.accumulateValue+this.displayValue).toFixed(3))
                 this.displayValue = 0.000
                 this.changeValue = 0.000
             },
@@ -523,10 +526,10 @@
             async inboundPrint () {
                 if (this.$refs.form.validate()) {
                     if(this.orderNumber === "") {
-                        return  this.inboundStatus = true, this.inboundMsg = '請選擇入料單號'
+                        return this.inboundStatus = true, this.inboundMsg = '請選擇入料單號'
                     }
                     if(this.stockInForm.productId === "") {
-                        return  this.inboundStatus = true, this.inboundMsg = '請選擇商品'
+                        return this.inboundStatus = true, this.inboundMsg = '請選擇商品'
                     }
                     //取得當前要操作入庫/取消的數量
                     this.stockInForm.amount = this.count
