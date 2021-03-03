@@ -100,7 +100,7 @@
       <v-row v-if="shipmentEvent == '2'" class="mt-0">
         <v-col class="col-3"><span>物流編號:</span></v-col>
         <v-col class="col-8 pa-0"
-          ><v-text-field outlined v-model="trackingNo"></v-text-field
+          ><v-text-field outlined v-model="trackingNo" @input="onChangeTrackNo"></v-text-field
         ></v-col>
       </v-row>
       <v-row class="mt-0" v-if="shipmentEvent != 3">
@@ -210,7 +210,10 @@ export default {
       nextDisabled: true,
       fab: false,
       snackbar: false,
-      messageText: ""
+      messageText: "",
+      rules: {
+        trackingNo:{ regex: v => (/(\d{4})(?=\d)/g,'$1-').test(v) || 'fail' }
+      }
     };
   },
   // computed: {
@@ -298,13 +301,6 @@ export default {
       }
     },
     submit() {
-      let recipientId = this.$store.state.shipment.receiveItem.id;
-      if (recipientId == "1") {
-        recipientId = "0";
-      } else if (recipientId == "2") {
-        recipientId = "1";
-      }
-
       this.$store.state.shipment.shipmentDate = this.date;
       this.$store.state.shipment.orderNo = this.orderNo;
       this.$store.state.shipment.payment = this.payment;
@@ -316,49 +312,6 @@ export default {
       this.$store.state.shipment.remark = this.remark;
       this.$store.state.salesDetailed = true;
       this.$router.push("/salesDetail");
-
-      /*
-      this.$api.Distribute.addOrder({
-        recipientId: recipientId,
-        clientId: this.$store.state.shipment.clientItem.id,
-        remark: this.$store.state.shipment.remark,
-        payment: this.$store.state.shipment.payment,
-        shipment: this.$store.state.shipment.shipment,
-        temperatureCategory: this.$store.state.shipment.temperatureCategory,
-        volume: this.$store.state.shipment.volume,
-        orderNo: this.$store.state.shipment.orderNo,
-        stockOutDate: this.$store.state.shipment.shipmentDate,
-        trackingNo: this.$store.state.shipment.trackingNo,
-        shippingFee: this.$store.state.shipment.shippingFee,
-        orderItemRequestList: this.$store.state.shipment.orderItemRequestList.map(item => {
-          return {
-            barcode: item.barcode,
-            amount: item.quantity,
-            discount: (item.salesPrice * item.quantity) - item.money,
-            price: (item.salesPrice * item.quantity),
-            remark: item.remark
-          };
-        })
-      })
-        .then(() => {
-          this.snackbar = true;
-          this.messageText = "出貨確認成功";
-        })
-        .catch((err) => {
-          // const stock = this.orderData.map(item => {
-          //   return item.amount;
-          // });
-          // const quantity = this.selectList.some(
-          //   (item, i) => item.amount < stock[i]
-          // );
-          // if (quantity) {
-          //   this.$message.error("出貨量大於庫存量");
-          // } else {
-          //   this.$message.error("無此商品條碼");
-          // }
-          console.log(err);
-        });
-      */
     },
     computedShippingFee() {
       let value =
@@ -367,6 +320,13 @@ export default {
         ];
       // eslint-disable-next-line vue/no-side-effects-in-computed-properties
       this.shippingFee = value;
+    },
+    onChangeTrackNo() {
+      console.log(this.trackingNo);
+      let str = this.trackingNo.substring(0,this.trackingNo.length-1)
+      this.trackingNo = this.trackingNo.replace(/[^0-9.]/g, '')
+      // this.trackingNo = this.trackingNo.replace(/.(?=.{4})/g,'-')
+      // this.trackingNo = this.trackingNo.replace(/(\d{4})(?=\d)/g,'$1-','')
     }
   },
   mounted() {

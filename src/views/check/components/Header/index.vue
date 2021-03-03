@@ -24,17 +24,17 @@
           <v-col cols="5">
             <v-list style="background-color: #fff0e9;">
               <v-list-item
-                ><v-btn color="primary" @click="toggleMenu('出貨')"
+                ><v-btn color="primary" @click="toggleMenu('出貨')" :disabled="btnDisable.salesBtn"
                   ><span style="font-size: large; color: #fff0e9;">出貨</span></v-btn
                 ></v-list-item
               >
               <v-list-item
-                ><v-btn color="primary" @click="toggleMenu('取消入庫')"
+                ><v-btn color="primary" @click="toggleMenu('取消入庫')" :disabled="btnDisable.cancelRestoreBtn"
                   ><span style="font-size: large; color: #fff0e9;">取消入庫</span></v-btn
                 ></v-list-item
               >
               <v-list-item
-                ><v-btn color="primary" @click="toggleMenu('重新入庫')"
+                ><v-btn color="primary" @click="toggleMenu('重新入庫')" :disabled="btnDisable.restoreBtn"
                   ><span style="font-size: large; color: #fff0e9;">重新入庫</span></v-btn
                 ></v-list-item
               >
@@ -43,17 +43,17 @@
           <v-col cols="7">
             <v-list style="background-color: #fff0e9;">
               <v-list-item class="pl-0"
-                ><v-btn color="primary" @click="toggleMenu('出貨清單')"
+                ><v-btn color="primary" @click="toggleMenu('出貨清單')" :disabled="btnDisable.salesLogBtn"
                   ><span style="font-size: large; color: #fff0e9;">出貨清單</span></v-btn
                 ></v-list-item
               >
               <v-list-item class="pl-0"
-                ><v-btn color="primary" @click="toggleMenu('取消入庫清單')"
+                ><v-btn color="primary" @click="toggleMenu('取消入庫清單')" :disabled="btnDisable.cancelRestoreLogBtn"
                   ><span style="font-size: large; color: #fff0e9;">取消入庫清單</span></v-btn
                 ></v-list-item
               >
               <v-list-item class="pl-0"
-                ><v-btn color="primary" @click="toggleMenu('重新入庫清單')"
+                ><v-btn color="primary" @click="toggleMenu('重新入庫清單')" :disabled="btnDisable.restoreLogBtn"
                   ><span style="font-size: large; color: #fff0e9;">重新入庫清單</span></v-btn
                 ></v-list-item
               >
@@ -78,40 +78,84 @@ export default {
       menuPositionX:100,
       menuPositionY:50,
       showMenu: false,
-      menuName: ''
+      menuName: '',
+      btnDisable: {
+        salesBtn: false,
+        salesLogBtn: false,
+        restoreBtn: false,
+        restoreLogBtn: false,
+        cancelRestoreBtn: false,
+        cancelRestoreLogBtn: false
+      }
     };
+  },
+  watch: {
+    $route(){
+      this.changeMenuName()
+    }
   },
   methods: {
     toggleMenu(name) {
-      this.menuName = name
-      this.showMenu = false
 
+      this.showMenu = false
       switch (name) {
         case '出貨':
-        this.$router.push('/Sales')
+        this.$router.push('/sales')
         break;
         case '出貨清單':
         this.$router.push('/salesLog')
         break;
         case '重新入庫':
-        this.$router.push('/Restore')
-        this.menuName = '重新入庫'
+        this.$router.push('/restore')
         break;
         case '重新入庫清單':
         this.$router.push('/restoreLog')
-        this.menuName = '重新入庫清單'
         break;
         case '取消入庫':
         this.$router.push('/cancelRestore')
-        this.menuName = '取消入庫'
         break;
         case '取消入庫清單':
         this.$router.push('/cancelRestoreLog')
-        this.menuName = '取消入庫清單'
         break;
       }
-
-
+    },
+    changeMenuName(){
+      let data = {
+        salesBtn: false,
+        salesLogBtn: false,
+        restoreBtn: false,
+        restoreLogBtn: false,
+        cancelRestoreBtn: false,
+        cancelRestoreLogBtn: false
+      }
+      this.btnDisable = data
+      let routeName = this.$route.name
+      switch (routeName) {
+        case 'sales':
+          this.btnDisable.salesBtn = true
+          this.menuName = '出貨'
+          break;
+        case 'salesLog':
+          this.btnDisable.salesLogBtn = true
+          this.menuName = '出貨清單'
+          break;
+        case 'restore':
+          this.btnDisable.restoreBtn = true
+          this.menuName = '重新入庫'
+          break;
+        case 'restoreLog':
+          this.btnDisable.restoreLogBtn = true
+          this.menuName = '重新入庫清單'
+          break;
+        case 'cancelRestore':
+          this.btnDisable.cancelRestoreBtn = true
+          this.menuName = '取消入庫'
+          break;
+        case 'cancelRestoreLog':
+          this.btnDisable.cancelRestoreLogBtn = true
+          this.menuName = '取消入庫清單'
+          break;
+      }
     },
     openMenu(attrs){
       console.log(attrs);
@@ -120,7 +164,7 @@ export default {
     doNothing() {}
   },
   mounted() {
-    this.menuName = '出貨'
+    this.changeMenuName()
     this.menuPositionX = window.innerWidth/2 - 150
   }
 };

@@ -24,7 +24,10 @@ export default new Vuex.Store({
     },
     workDate: '',
     shipmentBacked: false,
-    salesDetailed: false
+    salesDetailed: false,
+    successSnackbar: false,
+    successMsg: false,
+    menuName: ''
   },
   mutations: {},
   actions: {},
