@@ -25,13 +25,6 @@ service.interceptors.request.use(
 service.interceptors.response.use(
     function(response) {
         return response;
-    },
-    function(error) {
-        if (error.response.data.code === "401") {
-            window.sessionStorage.setItem("timeOut", true);
-            router.push({ name: "scaleLogin" });
-        }
-        return Promise.reject(error);
     }
 );
 
