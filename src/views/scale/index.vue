@@ -341,7 +341,10 @@
         },
         methods: {
             accumulate() {
-                this.accumulateValue = Number((this.accumulateValue+this.displayValue).toFixed(3))
+                //防止累加按鈕連續操作
+                if(this.displayValue === 0.000) return
+                //累加的值如果有扣重的重量要扣掉
+                this.accumulateValue = Number((this.accumulateValue+(this.displayValue-this.deductionValue)).toFixed(3))
                 this.displayValue = 0.000
                 this.changeValue = 0.000
             },
