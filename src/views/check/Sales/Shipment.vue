@@ -100,7 +100,7 @@
       <v-row v-if="shipmentEvent == '2'" class="mt-0">
         <v-col class="col-3"><span>物流編號:</span></v-col>
         <v-col class="col-8 pa-0"
-          ><v-text-field outlined v-model="trackingNo" @input="onChangeTrackNo"></v-text-field
+          ><v-text-field outlined v-model="trackingNo" v-mask="'####-####-####'"></v-text-field
         ></v-col>
       </v-row>
       <v-row class="mt-0" v-if="shipmentEvent != 3">
@@ -321,13 +321,6 @@ export default {
       // eslint-disable-next-line vue/no-side-effects-in-computed-properties
       this.shippingFee = value;
     },
-    onChangeTrackNo() {
-      console.log(this.trackingNo);
-      let str = this.trackingNo.substring(0,this.trackingNo.length-1)
-      this.trackingNo = this.trackingNo.replace(/[^0-9.]/g, '')
-      // this.trackingNo = this.trackingNo.replace(/.(?=.{4})/g,'-')
-      // this.trackingNo = this.trackingNo.replace(/(\d{4})(?=\d)/g,'$1-','')
-    }
   },
   mounted() {
     this.toTop();

@@ -222,7 +222,7 @@ export default {
       } else if (recipientId == "2") {
         recipientId = "1";
       }
-      /*
+
       this.$api.Distribute.addOrder({
         recipientId: recipientId,
         clientId: this.$store.state.shipment.clientItem.id,
@@ -261,15 +261,15 @@ export default {
           this.messageText = err.response.data.message;
           this.snackbar = true;
         });
-        */
-      if(value == 1){
-        this.$store.state.successMsg = "出貨確認成功，已列印出貨單/貼箱標籤";
-      }
-      else if(value == 2){
-        this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
-      }
-      this.$store.state.successSnackbar = true;
-      this.$router.push("/salesLog");
+
+      // if(value == 1){
+      //   this.$store.state.successMsg = "出貨確認成功，已列印出貨單/貼箱標籤";
+      // }
+      // else if(value == 2){
+      //   this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
+      // }
+      // this.$store.state.successSnackbar = true;
+      // this.$router.push("/salesLog");
     }
   },
   mounted() {}

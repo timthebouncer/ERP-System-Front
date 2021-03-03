@@ -29,11 +29,11 @@ const api= {
     getDistributeList(params){
       return request.get('deliveryOrder/orderList',{params})
     },
-    getDistributeDetail(record){
-      return request.get('/deliveryOrder/getDetail?orderId='+ record.orderId)
+    getDistributeDetail(orderId){
+      return request.get('/deliveryOrder/getDetail?orderId='+ orderId)
     },
-    deleteOrderList(record) {
-      return request.delete('/deliveryOrder/cancelOrder/'+ record.orderId);
+    deleteOrderList(orderId) {
+      return request.delete('/deliveryOrder/cancelOrder/'+ orderId);
     },
     addOrder(data){
       return request.post('/deliveryOrder/addOrder',data)
