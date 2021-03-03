@@ -30,14 +30,14 @@
                 :color="'error'"
                 :timeout="2500"
         >
-            {{'請選擇入庫單號'}}
+            <h3>{{'請選擇入庫單號'}}</h3>
             <template v-slot:action="{ attrs }">
                 <v-btn
                         text
                         v-bind="attrs"
                         @click="noChoose = false"
                 >
-                    關閉
+                    <h3>關閉</h3>
                 </v-btn>
             </template>
         </v-snackbar>
