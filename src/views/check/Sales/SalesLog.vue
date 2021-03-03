@@ -131,7 +131,9 @@ export default {
         this.$store.state.shipment.orderItemRequestList = data.orderDetailItemResponseList.map(
                 item=>{
                   return{
+                    id:item.id,
                     barcode: item.barcode,
+                    name: item.productName,
                     quantity: item.amount,
                     salesPrice: item.price,
                     money: item.price - item.discount,
