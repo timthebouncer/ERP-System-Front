@@ -8,12 +8,7 @@
           ></v-card-text
         >
         <v-card-actions class="justify-center">
-          <v-btn
-            color=""
-            text
-            outlined
-            @click="delOrderDialogVisible = false"
-          >
+          <v-btn color="" text outlined @click="delOrderDialogVisible = false">
             取消
           </v-btn>
           <v-btn color="primary" @click="deleteOrder(delOrderId)">
@@ -33,12 +28,16 @@
         transition-key="orderId"
       >
         <template slot-scope="{ item, index }">
-          <v-row class="pt-2 pb-2 pl-1 pr-1" v-if="item.remark!='註銷'" @click="onDetail(item.orderId)">
+          <v-row
+            class="pt-2 pb-2 pl-1 pr-1"
+            v-if="item.remark != '註銷'"
+            @click="onDetail(item.orderId)"
+          >
             <v-col>{{ item.orderNo }}</v-col>
             <v-col class="text-center">{{ item.clientName }}</v-col>
             <v-col class="text-end">${{ item.totalPrice }}</v-col>
           </v-row>
-          <v-divider v-if="item.remark!='註銷'"></v-divider>
+          <v-divider v-if="item.remark != '註銷'"></v-divider>
         </template>
         <template v-slot:left="{ item }">
           <div
@@ -81,24 +80,25 @@ export default {
       pageSize: 15,
       total: 0,
       delOrderDialogVisible: false,
-      delOrderId:''
+      delOrderId: "",
+      clientListRes: []
     };
   },
   methods: {
-      onPrint(id){
-          console.log(id,'order id');
-      },
+    onPrint(id) {
+      console.log(id, "order id");
+    },
     onDelOrderDialog(id) {
-        this.delOrderDialogVisible = true
-        this.delOrderId = id
+      this.delOrderDialogVisible = true;
+      this.delOrderId = id;
     },
-    deleteOrder(id){
+    deleteOrder(id) {
       this.$api.Distribute.deleteOrderList(id).then(() => {
-        this.delOrderDialogVisible = false
-        this.getDistributeList()
-      })
+        this.delOrderDialogVisible = false;
+        this.getDistributeList();
+      });
     },
-    getDistributeList(){
+    getDistributeList() {
       this.$api.Distribute.getDistributeList({
         orderNo: "",
         startDate: this.startDate,
@@ -110,44 +110,97 @@ export default {
         this.tableData = res.data.content;
       });
     },
-    onDetail(id){
-      this.$api.Distribute.getDistributeDetail(id).then(response=>{
-        console.log(response.data);
-        let data = response.data
-        this.$store.state.shipment.shipmentDate = data.salesDay
-        this.$store.state.shipment.orderNo
-        this.$store.state.shipment.classItem = {id:data.classId,className:data.className}
-        this.$store.state.shipment.clientItem = {id: data.clientId, name: data.clientName, phone: data.phoneNumber, code: "", address: ""}
-        this.$store.state.shipment.receiveItem = {id: '', name: "", phone: data.receiverPhone, code: data.receivePostCode, address: data.receiveAddress}
-        this.$store.state.shipment.discount = 0
-        this.$store.state.shipment.total = 0
-        this.$store.state.shipment.payment = data.payment
-        this.$store.state.shipment.shipment = data.shipment
-        this.$store.state.shipment.temperatureCategory = data.temperatureCategory
-        this.$store.state.shipment.volume = data.volume
-        this.$store.state.shipment.shippingFee = data.shippingFee
-        this.$store.state.shipment.trackingNo = data.trackingNo
-        this.$store.state.shipment.remark = data.remark
+    async onDetail(id) {
+      await this.$api.Customer.onlyCustomerList().then(res => {
+        this.clientListRes = res.data;
+      });
+
+      this.$api.Distribute.getDistributeDetail(id).then(response => {
+        let discount = 0,
+          total = 0;
+        let data = response.data;
+        this.$store.state.shipment.orderId = id
+        this.$store.state.shipment.shipmentDate = data.salesDay;
+        this.$store.state.shipment.orderNo = data.orderNo;
+        this.$store.state.shipment.classItem = {
+          id: data.classId,
+          className: data.className
+        };
+        this.$store.state.shipment.clientItem = {
+          id: data.clientId,
+          name: data.clientName,
+          phone: data.phoneNumber,
+          code: "",
+          address: ""
+        };
+        this.$store.state.shipment.defaultReceiveInfo = data.defaultReceiveInfo;
+        let clientData = {};
+        clientData = this.clientListRes.filter(item => {
+          return data.clientId == item.id;
+        });
+        let receiveId, receiveName, receivePhone, receiveCode, receiveAddress;
+        if (data.defaultReceiveInfo == 0) {
+          receiveId = "1";
+          receiveName = clientData[0].name;
+          receivePhone = clientData[0].tel;
+          receiveCode = clientData[0].postCode;
+          receiveAddress = clientData[0].address;
+        } else if (data.defaultReceiveInfo == 1) {
+          receiveId = "2";
+          receiveName = clientData[0].companyName;
+          receivePhone = clientData[0].companyTel;
+          receiveCode = clientData[0].companyPostCode;
+          receiveAddress = clientData[0].companyAddress;
+        } else {
+          receiveId = data.recipientId;
+          receiveName = data.receiver;
+          receivePhone = data.receiverPhone;
+          receiveCode = data.receivePostCode;
+          receiveAddress = data.receiveAddress;
+        }
+        this.$store.state.shipment.receiveItem = {
+          id: receiveId,
+          name: receiveName,
+          phone: receivePhone,
+          code: receiveCode,
+          address: receiveAddress
+        };
+
+        this.$store.state.shipment.payment = data.payment;
+        this.$store.state.shipment.shipment = data.shipment;
+        this.$store.state.shipment.temperatureCategory =
+          data.temperatureCategory;
+        this.$store.state.shipment.volume = data.volume;
+        this.$store.state.shipment.shippingFee = data.shippingFee;
+        this.$store.state.shipment.trackingNo = data.trackingNo;
+        this.$store.state.shipment.remark = data.remark;
         this.$store.state.shipment.orderItemRequestList = data.orderDetailItemResponseList.map(
-                item=>{
-                  return{
-                    id:item.id,
-                    barcode: item.barcode,
-                    name: item.productName,
-                    quantity: item.amount,
-                    salesPrice: item.price,
-                    money: item.price - item.discount,
-                    unit: item.unit,
-                    remark: item.remark
-                  }
-                }
-        )
+          item => {
+            discount += item.discount;
+            total += item.totalPrice;
+            return {
+              productId: item.id,
+              barcode: item.barcode,
+              name: item.productName,
+              quantity: item.amount,
+              salesPrice: item.clientPrice,
+              money: item.totalPrice,
+              unit: item.unit,
+              description: item.remark
+            };
+          }
+        );
+        this.$store.state.shipment.discount = discount;
+        this.$store.state.shipment.total = total;
+        this.$store.state.salesDetailed = true;
+        this.$store.state.shipmentEdited = true;
+        console.log(this.$store.state.shipment);
         this.$router.push("/salesDetail");
-      })
+      });
     }
   },
   mounted() {
-    this.getDistributeList()
+    this.getDistributeList();
   }
 };
 </script>

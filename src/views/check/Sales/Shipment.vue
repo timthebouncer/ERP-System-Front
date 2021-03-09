@@ -15,8 +15,8 @@
       @click="toTop"
       ><v-icon>mdi-chevron-up</v-icon></v-btn
     >
-    <v-snackbar v-model="snackbar" top color="primary" timeout="2000">
-      <span>{{ messageText }}</span>
+    <v-snackbar v-model="errSnackbar" centered color="red" timeout="2000">
+      <p class="text-center ma-0">{{ messageText }}</p>
     </v-snackbar>
     <div class="title-wrapper rounded">
       出貨資料
@@ -97,10 +97,14 @@
             </v-row> </v-radio-group
         ></v-col>
       </v-row>
-      <v-row v-if="shipmentEvent == '2'" class="mt-0">
+      <v-row v-if="shipmentEvent == 2" class="mt-0">
         <v-col class="col-3"><span>物流編號:</span></v-col>
         <v-col class="col-8 pa-0"
-          ><v-text-field outlined v-model="trackingNo" v-mask="'####-####-####'"></v-text-field
+          ><v-text-field
+            outlined
+            v-model="trackingNo"
+            v-mask="'####-####-####'"
+          ></v-text-field
         ></v-col>
       </v-row>
       <v-row class="mt-0" v-if="shipmentEvent != 3">
@@ -209,8 +213,8 @@ export default {
       remark: "",
       nextDisabled: true,
       fab: false,
-      snackbar: false,
       messageText: "",
+      errSnackbar: false
     };
   },
   // computed: {
@@ -284,7 +288,10 @@ export default {
     },
     checkNextDisable() {
       if (this.orderNo != "" && this.shippingFee != "") {
-        if (this.shipmentEvent == 2 && this.trackingNo == "") {
+        if (
+          this.shipmentEvent == 2 &&
+          (this.trackingNo == "" || this.trackingNo == null)
+        ) {
           this.nextDisabled = true;
         } else {
           this.nextDisabled = false;
@@ -298,6 +305,21 @@ export default {
       }
     },
     submit() {
+      // console.log(this.trackingNo.length,'trackNo len');
+      if (this.shipmentEvent == 2) {
+        if (this.trackingNo == null) {
+          this.errSnackbar = true;
+          this.messageText = "物流編號請輸入12個數字!";
+          return;
+        } else {
+          if (this.trackingNo.length < 14) {
+            this.errSnackbar = true;
+            this.messageText = "物流編號請輸入12個數字!";
+            return;
+          }
+        }
+      }
+
       this.$store.state.shipment.shipmentDate = this.date;
       this.$store.state.shipment.orderNo = this.orderNo;
       this.$store.state.shipment.payment = this.payment;
@@ -317,7 +339,7 @@ export default {
         ];
       // eslint-disable-next-line vue/no-side-effects-in-computed-properties
       this.shippingFee = value;
-    },
+    }
   },
   mounted() {
     this.toTop();

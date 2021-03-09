@@ -177,7 +177,14 @@
     <div class="mt-3">
       <v-row>
         <v-col>
-          <v-btn style="width: 100%;" @click="back">
+          <v-btn
+            style="width: 100%;"
+            @click="back"
+            v-if="$store.state.shipmentEdited"
+          >
+            修改
+          </v-btn>
+          <v-btn style="width: 100%;" @click="back" v-else>
             返回修改
           </v-btn>
         </v-col>
@@ -222,45 +229,90 @@ export default {
       } else if (recipientId == "2") {
         recipientId = "1";
       }
-
-      this.$api.Distribute.addOrder({
-        recipientId: recipientId,
-        clientId: this.$store.state.shipment.clientItem.id,
-        remark: this.$store.state.shipment.remark,
-        payment: this.$store.state.shipment.payment,
-        shipment: this.$store.state.shipment.shipment,
-        temperatureCategory: this.$store.state.shipment.temperatureCategory,
-        volume: this.$store.state.shipment.volume,
-        orderNo: this.$store.state.shipment.orderNo,
-        stockOutDate: this.$store.state.shipment.shipmentDate,
-        trackingNo: this.$store.state.shipment.trackingNo,
-        shippingFee: this.$store.state.shipment.shippingFee,
-        orderItemRequestList: this.$store.state.shipment.orderItemRequestList.map(
-          item => {
-            return {
-              barcode: item.barcode,
-              amount: item.quantity,
-              discount: item.salesPrice * item.quantity - item.money,
-              price: item.salesPrice * item.quantity,
-              remark: item.remark
-            };
-          }
-        )
-      })
-        .then(() => {
-          if(value == 1){
-            this.$store.state.successMsg = "出貨確認成功，已列印出貨單/貼箱標籤";
-          }
-          else if(value == 2){
-            this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
-          }
-          this.$store.state.successSnackbar = true;
-          this.$router.push("/salesLog");
+      if (this.$store.state.shipmentEdited) {
+        this.$api.Distribute.editOrder({
+          orderId: this.$store.state.shipment.orderId,
+          recipientId: recipientId,
+          defaultReceiveInfo: this.$store.state.shipment.defaultReceiveInfo,
+          remark: this.$store.state.shipment.remark,
+          payment: this.$store.state.shipment.payment,
+          shipment: this.$store.state.shipment.shipment,
+          temperatureCategory: this.$store.state.shipment.temperatureCategory,
+          volume: this.$store.state.shipment.volume,
+          orderNo: this.$store.state.shipment.orderNo,
+          stockOutDate: this.$store.state.shipment.shipmentDate,
+          trackingNo: this.$store.state.shipment.trackingNo,
+          shippingFee: this.$store.state.shipment.shippingFee,
+          orderItemRequestList: this.$store.state.shipment.orderItemRequestList.map(
+            item => {
+              return {
+                id: item.productId,
+                barcode: item.barcode,
+                amount: item.quantity,
+                discount: item.salesPrice * item.quantity - item.money,
+                price: item.salesPrice * item.quantity,
+                remark: item.remark
+              };
+            }
+          )
         })
-        .catch(err => {
-          this.messageText = err.response.data.message;
-          this.snackbar = true;
-        });
+          .then(() => {
+            if (value == 1) {
+              this.$store.state.successMsg =
+                "出貨確認成功，已列印出貨單/貼箱標籤";
+            } else if (value == 2) {
+              this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
+            }
+            this.$store.state.successSnackbar = true;
+            this.$router.push("/salesLog");
+          })
+          .catch(err => {
+            this.messageText = err.response.data.message;
+            this.snackbar = true;
+          });
+      } else {
+        console.log(this.$store.state.shipment.orderItemRequestList);
+        this.$api.Distribute.addOrder({
+          recipientId: recipientId,
+          clientId: this.$store.state.shipment.clientItem.id,
+          remark: this.$store.state.shipment.remark,
+          payment: this.$store.state.shipment.payment,
+          shipment: this.$store.state.shipment.shipment,
+          temperatureCategory: this.$store.state.shipment.temperatureCategory,
+          volume: this.$store.state.shipment.volume,
+          orderNo: this.$store.state.shipment.orderNo,
+          stockOutDate: this.$store.state.shipment.shipmentDate,
+          trackingNo: this.$store.state.shipment.trackingNo,
+          shippingFee: this.$store.state.shipment.shippingFee,
+          defaultReceiveInfo: this.$store.state.shipment.defaultReceiveInfo,
+          orderItemRequestList: this.$store.state.shipment.orderItemRequestList.map(
+            item => {
+              return {
+                barcode: item.barcode,
+                amount: item.quantity,
+                discount: item.salesPrice * item.quantity - item.money,
+                price: item.salesPrice * item.quantity,
+                remark: item.remark
+              };
+            }
+          )
+        })
+          .then(() => {
+            console.log(this.$store.state.shipment.orderItemRequestList);
+            if (value == 1) {
+              this.$store.state.successMsg =
+                "出貨確認成功，已列印出貨單/貼箱標籤";
+            } else if (value == 2) {
+              this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
+            }
+            this.$store.state.successSnackbar = true;
+            this.$router.push("/salesLog");
+          })
+          .catch(err => {
+            this.messageText = err.response.data.message;
+            this.snackbar = true;
+          });
+      }
 
       // if(value == 1){
       //   this.$store.state.successMsg = "出貨確認成功，已列印出貨單/貼箱標籤";
