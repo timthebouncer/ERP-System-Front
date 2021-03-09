@@ -181,6 +181,7 @@
         :key="item.title"
         v-model="item.active"
         no-action
+        :disabled="item.key!='receive' && $store.state.shipmentEdited"
       >
         <template v-slot:activator>
           <v-list-item-content v-if="item.key == 'receive'">
@@ -308,7 +309,7 @@
             v-model="productId"
             :items="productItemData"
             item-text="barcode"
-            item-value="id"
+            item-value="productId"
             dense
             @change="setBarcode"
             filled
@@ -435,7 +436,7 @@ export default {
           active: true,
           items: [
             { id: '', className: "" },
-          ]
+          ],
         },
         {
           key: "client",
@@ -596,6 +597,9 @@ export default {
       this.hasClient = true;
       let defaultReceiveInfo = data[0].defaultReceiveInfo
       this.items[2].defaultReceiveInfo = defaultReceiveInfo
+      if(this.$store.state.shipmentEdited){
+        defaultReceiveInfo = this.$store.state.shipment.defaultReceiveInfo
+      }
       if(defaultReceiveInfo == 0){
         this.receiveData = Object.assign({}, this.clientData)
         this.receiveData.id = '1'
@@ -655,7 +659,7 @@ export default {
         this.receiveData = this.items[2].items.find(x => x.id == value);
         this.items[2].selectedIndex = this.items[2].items.findIndex(x => x.id == value)
       }
-
+      this.$store.state.shipment.defaultReceiveInfo = this.items[2].selectedIndex
       this.items[2].active = false;
       this.hasReceive = true;
       this.checkNexted();
@@ -695,20 +699,19 @@ export default {
       this.dialogVisible = true;
     },
     setBarcode(id) {
-      console.log(id);
-      this.productData = Object.assign({},this.productItemData.find(x=>x.id==id))
+      this.productData = Object.assign({},this.productItemData.find(x=>x.productId==id))
       this.quantityDialog = 1
       this.remarkDialog = ''
       this.salesDialogVisible = true;
     },
     addSales(id) {
-      if(this.productItem.findIndex(item=>item.id == id) == -1){
+      if(this.productItem.findIndex(item=>item.productId == id) == -1){
         this.productData.quantity = this.quantityDialog
         this.productData.description = this.remarkDialog
         this.productItem.push(this.productData)
       }
       else {
-        let data = this.productItem.find(item=>item.id == id)
+        let data = this.productItem.find(item=>item.productId == id)
         if((data.quantity+this.quantityDialog)>data.amount){
           data.quantity = data.amount
         }
@@ -753,6 +756,9 @@ export default {
       this.delProductDialogVisible = true;
     },
     deleteProduct(item) {
+      if(this.$store.state.shipmentEdited){
+        this.$api.Distribute.deleteCommodityDiscount(item.productId)
+      }
       this.productItem = this.productItem.filter(i => i !== item);
       this.delProductDialogVisible = false;
       this.onCalculation();
@@ -821,7 +827,6 @@ export default {
         this.clientListRes = res.data
       })
     })
-
     if(this.$store.state.shipmentBacked){
       this.classRadioChange(this.$store.state.shipment.classItem.id)
       this.clientRadioChange(this.$store.state.shipment.clientItem.id)

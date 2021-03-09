@@ -8,9 +8,11 @@ export default new Vuex.Store({
     shipment:{
       shipmentDate: '',
       orderNo: '',
+      orderId: '',
       classItem: {id:'',className:''},
       clientItem: {id: '', name: "", phone: "", code: "", address: ""},
       receiveItem: {id: '', name: "", phone: "", code: "", address: ""},
+      defaultReceiveInfo: 0,
       discount: 0,
       total: 0,
       payment: 1,
@@ -25,6 +27,7 @@ export default new Vuex.Store({
     workDate: '',
     shipmentBacked: false,
     salesDetailed: false,
+    shipmentEdited: false,
     successSnackbar: false,
     successMsg: '',
     menuName: ''

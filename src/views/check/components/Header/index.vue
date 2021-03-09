@@ -136,6 +136,7 @@ export default {
     toggleMenu(name) {
       this.resetShipmentData()
       this.showMenu = false;
+      this.$store.state.shipmentEdited = false;
       switch (name) {
         case "出貨":
           this.$router.push("/sales");
