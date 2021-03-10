@@ -1,6 +1,22 @@
 <template>
     <div>
         <v-container fluid class="wrapper">
+            <div style="position: absolute; top:-500px">
+                <svg id="barcode"
+                     :jsbarcode-format="'auto'"
+                     :jsbarcode-value="barcodeStorage"
+                     jsbarcode-textmargin="0"
+                     jsbarcode-fontoptions="bold">
+                </svg>
+                <canvas id="canvasTest" v-show="false" width="550" height="550"></canvas>
+                <img
+                        v-show="false"
+                        class="barcodeImg"
+                        :src="barcodeImageUrl"
+                        alt="avatar"
+                        style="width: 190px; height: 45px;"
+                />
+            </div>
             <div class="top pa-3">
                 <div class="title d-flex align-center">
 <!--                    <div-->
@@ -216,6 +232,8 @@
 </template>
 
 <script>
+    import { fabric } from "fabric";
+    import JsBarcode from "jsbarcode";
     import PlusButton from "../../components/plusButton";
     import AddNumberDialog from "../../components/addNumberDialog";
     import OrderNumberDialog from "../../components/orderNumberDialog";
@@ -286,12 +304,27 @@
                     weight: '',
                     amount: 0
                 },
+                svgForm: {
+                    name: '',
+                    unit: '',
+                    weight: 0,
+                    barcode: '',
+                    productNo: 1,
+                    price: 0,
+                    today: '',
+                    pSolarDay: 1,
+                    rSolarDay: 1,
+                },
+                svgString: '',
+                barcodeBase64: '',
+                barcodeImageUrl: '',
                 warehouseValidat: [
                     v => !!v || '請選擇倉庫'
                 ],
             };
         },
         async mounted() {
+            this.canvas = new fabric.Canvas('canvasTest')
             await this.$scale.Product.getProduct().then(res => {
                 if (res.status === 200) {
                     this.commodity = res.data
@@ -307,9 +340,9 @@
             this.today =
                 today.getFullYear() +
                 "-" +
-                (today.getMonth() + 1) +
+                (today.getMonth()+1<10 ? '0' : '')+(today.getMonth() + 1) +
                 "-" +
-                today.getDate();
+                (today.getDate()<10 ? '0' : '')+today.getDate();
         },
         directives: {
             "long-press": LongPress
@@ -442,6 +475,16 @@
                 this.stockInForm.unit = this.commodity[index].unit
                 //取得當前選擇的商品重量
                 this.stockInForm.weight = this.commodity[index].weight
+                //取得當前選擇的商品barcodeBase64
+                this.barcodeBase64 = this.commodity[index].barcodeBase64
+                //SVG
+                this.svgString = this.commodity[index].svgString
+                this.svgForm.name = this.commodity[index].name
+                this.svgForm.unit = this.getUnit(this.commodity[index].unit)
+                this.svgForm.weight = this.commodity[index].weight
+                this.svgForm.barcode = this.commodity[index].barcode
+                this.svgForm.price = this.commodity[index].price
+
                 this.position = index;
                 //切換標籤時reset組件
                 this.restPlusBtn = false
@@ -525,6 +568,74 @@
                     }
                 })
             },
+            loadFromJson(svgJSON) {
+                return new Promise(resolve => {
+                    this.canvas.loadFromJSON(
+                        svgJSON,
+                        () => {
+                            this.canvas.renderAll.bind(this.canvas)
+                            resolve(true)
+                        },
+                        (o, obj) => {
+                            this.canvas._objects.push(obj)
+                        }
+                    )
+                })
+            },
+            changeBarcode() {
+                function loadImage() {
+                    return new Promise(resolve => {
+                        this.barcodeImageUrl = 'data:image/png;base64,' + this.barcodeBase64
+                        resolve(true)
+                    })
+                }
+
+                return new Promise(async resolve => {
+                    await loadImage.bind(this)()
+                    let imgElement
+                    await this.$nextTick(() => {
+                        imgElement = document.getElementsByClassName('barcodeImg')[0]
+                    })
+                    this.canvas.getObjects().map(o => {
+                        if (o.name === 'barcode' && this.barcodeImageUrl) {
+                            let { width, height, left, top, scaleX, scaleY } = o
+                            this.canvas.remove(o)
+                            let element
+                            element = new fabric.Image(imgElement, {
+                                left: left,
+                                top: top,
+                                name: 'barcode'
+                            })
+                            element.scaleX = (width * scaleX) / element.width
+                            element.scaleY = (height * scaleY) / element.height
+                            this.canvas.add(element)
+                            this.canvas.renderAll()
+                        }
+                    })
+                    let tosvg = this.canvas.toSVG({
+                        left: 25,
+                        top: 25,
+                        width: 500,
+                        height: 500
+                    })
+                    console.log(JSON.stringify(this.canvas));
+                    this.imageDataUrl = this.canvas.toDataURL({
+                        left: 25,
+                        top: 25,
+                        width: 500,
+                        height: 500,
+                        format: 'png'
+                    })
+                    //base64 to image
+                    fetch(this.imageDataUrl)
+                        .then(res => res.blob())
+                        .then(blob => {
+                            const file = new File([blob], "File name",{ type: "image/png" })
+                            let fileURL = URL.createObjectURL(file);
+                            window.open(fileURL);
+                        })
+                })
+            },
             //入庫列印
             async inboundPrint () {
                 if (this.$refs.form.validate()) {
@@ -536,12 +647,16 @@
                     }
                     //取得當前要操作入庫/取消的數量
                     this.stockInForm.amount = this.count
-                    await this.$scale.Inventory.stockIn(this.stockInForm).then(res => {
+                    await this.$scale.Inventory.stockIn(this.stockInForm).then(async res => {
                         if(res.status === 200) {
                             this.inboundSuccessMsg = '商品入庫成功'
                             //barcode為空時才做barcode暫存
                             if(this.stockInForm.barcode === '') {
                                 this.barcodeStorage = res.data.barcode
+                                this.barcodeBase64 = res.data.barcodeBase64
+                                // setTimeout(() => {
+                                //     JsBarcode("#barcode").init()
+                                // }, 500)
                                 this.inboundPrintStatus = true
                             }
                             //獲取當前庫存id
@@ -550,6 +665,36 @@
                             this.stockInFormAmount = res.data.amount
                             this.inboundMsg = ''
                             this.inboundStatus = true
+                            //svg塞值
+                            let svgJSON = this.svgString ? JSON.parse(this.svgString) : null
+                            //正向太陽日 今天是一年中的第幾天
+                            let pSolarDay = Math.ceil(( new Date() - new Date(new Date().getFullYear().toString()))/(24*60*60*1000));
+                            //反向太陽日 一年幾天-正向太陽日+今天
+                            let rSolarDay = 365-pSolarDay+1;
+                            if(svgJSON) {
+                                await svgJSON.objects.map(async items => {
+                                    if(items.name === "productName") {
+                                        items.text = `商品名稱:${this.svgForm.name}`
+                                    }else if(items.name === "unit") {
+                                        items.text = `計價單位:${this.svgForm.unit}`
+                                    }else if(items.name === "weight") {
+                                        items.text = `重量:${this.svgForm.weight}`
+                                    }else if(items.name === "price") {
+                                        items.text = `價格:${this.svgForm.price}元`
+                                    }else if(items.name === "productNo") {
+                                        items.text = `${this.svgForm.productNo}`
+                                    }else if(items.name === "today") {
+                                        items.text = `${this.today}`
+                                    }else if(items.name === "pSolarDay") {
+                                        items.text = `正向太陽日:${pSolarDay}`
+                                    }else if(items.name === "rSolarDay") {
+                                        items.text = `反向太陽日:${rSolarDay}`
+                                    }
+                                })
+                            }
+                            this.canvas.clear()
+                            await this.loadFromJson(svgJSON)
+                            await this.changeBarcode()
                         }
                     })
                 }
@@ -799,9 +944,11 @@
     }
 
     .active {
-        width: calc(17.05%);
+        //width: calc(17.05%);
         transition: 0.3s;
-        box-shadow: 0 5px 8px rgba(0, 0, 0, 0.2), 0 3px 6px rgba(0, 0, 0, 0.2);
+        background-color: #179bd5;
+        color: #ffffff;
+        /*box-shadow: 0 5px 8px rgba(0, 0, 0, 0.2), 0 3px 6px rgba(0, 0, 0, 0.2);*/
     }
 
     h2 {
