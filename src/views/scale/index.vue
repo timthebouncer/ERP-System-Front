@@ -702,7 +702,8 @@
             logout () {
               this.$scale.Logout.logout().then(res => {
                   if(res.status === 200) {
-                      this.$router.push('/slogin')
+                      sessionStorage.removeItem('token')
+                      this.$router.push('/login')
                   }
               })
             },

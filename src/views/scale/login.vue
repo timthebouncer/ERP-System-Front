@@ -76,8 +76,8 @@
     data () {
       return {
         model: {
-          username: 'admin',
-          password: '123'
+          username: '',
+          password: ''
         },
         loading: false,
         snackbar: false,
