@@ -1,20 +1,23 @@
 <template>
   <v-container class="container">
-    <v-btn  v-scroll="onScroll"
-            v-show="fab"
-            fab
-            dark
-            fixed
-            right
-            bottom
-            small
-            color="primary"
-            style="margin-right: -10px;"
-            @click="toTop"><v-icon>mdi-chevron-up</v-icon></v-btn>
+    <v-btn
+      v-scroll="onScroll"
+      v-show="fab"
+      fab
+      dark
+      fixed
+      right
+      bottom
+      small
+      color="primary"
+      style="margin-right: -10px;"
+      @click="toTop"
+      ><v-icon>mdi-chevron-up</v-icon></v-btn
+    >
     <v-snackbar v-model="snackbar" top color="primary" timeout="2000">
       <span>{{ messageText }}</span>
     </v-snackbar>
-<!--    新增客戶資料 新增收件資料 彈窗-->
+    <!--    新增客戶資料 新增收件資料 彈窗-->
     <v-dialog v-model="dialogVisible" hide-overlay fullscreen>
       <v-card style="background-color: #fff0e9;">
         <v-card-title class="justify-center">
@@ -47,7 +50,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-<!--    新增商品 彈窗-->
+    <!--    新增商品 彈窗-->
     <v-dialog v-model="salesDialogVisible">
       <v-card style="background-color: #fff0e9;">
         <v-card-text>
@@ -55,20 +58,22 @@
             ><v-col class="col-4"
               ><span class="text-h6 font-weight-black">商品條碼</span></v-col
             ><v-col class="col-8"
-              ><span class="text-h6">{{productData.barcode}}</span></v-col
+              ><span class="text-h6">{{ productData.barcode }}</span></v-col
             ></v-row
           >
           <v-row class="align-content-center"
             ><v-col class="col-4"
               ><span class="text-h6 font-weight-black">商品名稱</span></v-col
             ><v-col class="col-8"
-              ><span class="text-h6">{{productData.name}}</span></v-col
+              ><span class="text-h6">{{ productData.name }}</span></v-col
             ></v-row
           >
           <v-row class="align-content-center"
             ><v-col class="col-4"
               ><span class="text-h6 font-weight-black">計價單位</span></v-col
-            ><v-col class="col-8"><span class="text-h6">{{productData.unit}}</span></v-col></v-row
+            ><v-col class="col-8"
+              ><span class="text-h6">{{ productData.unit }}</span></v-col
+            ></v-row
           >
           <v-row class="align-content-center"
             ><v-col class="col-4"
@@ -76,11 +81,17 @@
             ><v-col class="col-8"
               ><ul class="counter">
                 <li>
-                  <input type="button" value="-" @click="()=>{
-                    if(this.quantityDialog>1){
-                      this.quantityDialog--
-                    }
-                  }"/>
+                  <input
+                    type="button"
+                    value="-"
+                    @click="
+                      () => {
+                        if (this.quantityDialog > 1) {
+                          this.quantityDialog--;
+                        }
+                      }
+                    "
+                  />
                 </li>
                 <li style="width: 100%; height: 50px;">
                   <input
@@ -91,17 +102,28 @@
                   />
                 </li>
                 <li>
-                  <input type="button" value="+" @click="()=>{
-                    if(this.quantityDialog<productData.amount){
-                      this.quantityDialog++
-                    }
-                  }"/>
+                  <input
+                    type="button"
+                    value="+"
+                    @click="
+                      () => {
+                        if (this.quantityDialog < productData.amount) {
+                          this.quantityDialog++;
+                        }
+                      }
+                    "
+                  />
                 </li></ul></v-col
           ></v-row>
           <v-row class="align-content-center"
             ><v-col class="col-4"
               ><span class="text-h6 font-weight-black">備註</span></v-col
-            ><v-col class="col-8"><v-textarea solo rows="3" v-model="remarkDialog"></v-textarea></v-col
+            ><v-col class="col-8"
+              ><v-textarea
+                solo
+                rows="3"
+                v-model="remarkDialog"
+              ></v-textarea></v-col
           ></v-row>
         </v-card-text>
         <v-card-actions class="justify-center">
@@ -114,7 +136,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-<!--    刪除商品 彈窗-->
+    <!--    刪除商品 彈窗-->
     <v-dialog v-model="delProductDialogVisible">
       <v-card style="background-color: #fff0e9;">
         <v-card-text class="text-center"
@@ -137,28 +159,37 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-<!--    編輯備註 彈窗-->
+    <!--    編輯備註 彈窗-->
     <v-dialog v-model="changeProductDialogVisible">
       <v-card style="background-color: #fff0e9;">
         <v-card-text>
           <v-row class="align-content-center"
-          ><v-col class="col-4"
-          ><span class="text-h6 font-weight-black">商品條碼</span></v-col
-          ><v-col class="col-8"
-          ><span class="text-h6">{{changeProductDialogItem.barcode}}</span></v-col
-          ></v-row
+            ><v-col class="col-4"
+              ><span class="text-h6 font-weight-black">商品條碼</span></v-col
+            ><v-col class="col-8"
+              ><span class="text-h6">{{
+                changeProductDialogItem.barcode
+              }}</span></v-col
+            ></v-row
           >
           <v-row class="align-content-center"
-          ><v-col class="col-4"
-          ><span class="text-h6 font-weight-black">商品名稱</span></v-col
-          ><v-col class="col-8"
-          ><span class="text-h6">{{changeProductDialogItem.name}}</span></v-col
-          ></v-row
+            ><v-col class="col-4"
+              ><span class="text-h6 font-weight-black">商品名稱</span></v-col
+            ><v-col class="col-8"
+              ><span class="text-h6">{{
+                changeProductDialogItem.name
+              }}</span></v-col
+            ></v-row
           >
           <v-row class="align-content-center"
-          ><v-col class="col-4"
-          ><span class="text-h6 font-weight-black">備註</span></v-col
-          ><v-col class="col-8"><v-textarea solo rows="3" v-model="changeProductDialogDes"></v-textarea></v-col
+            ><v-col class="col-4"
+              ><span class="text-h6 font-weight-black">備註</span></v-col
+            ><v-col class="col-8"
+              ><v-textarea
+                solo
+                rows="3"
+                v-model="changeProductDialogDes"
+              ></v-textarea></v-col
           ></v-row>
         </v-card-text>
         <v-card-actions class="justify-center">
@@ -174,14 +205,14 @@
     <div class="top-wrapper rounded">
       客戶資訊
     </div>
-<!--    客戶資訊 -->
+    <!--    客戶資訊 -->
     <v-list class="rounded elevation-10">
       <v-list-group
         v-for="item in items"
         :key="item.title"
         v-model="item.active"
         no-action
-        :disabled="item.key!='receive' && $store.state.shipmentEdited"
+        :disabled="item.key != 'receive' && $store.state.shipmentEdited"
       >
         <template v-slot:activator>
           <v-list-item-content v-if="item.key == 'receive'">
@@ -189,21 +220,33 @@
               <v-list-item-title v-text="item.title"></v-list-item-title>
             </v-col>
             <v-col v-if="hasReceive">
-              <v-list-item-title v-if="receiveData.id == 1" class="text-center">同客戶資料<span v-if="item.defaultReceiveInfo==0">(預設地址)</span></v-list-item-title>
-              <v-list-item-title v-else-if="receiveData.id == 2" class="text-center">同公司資料<span v-if="item.defaultReceiveInfo==1">(預設地址)</span></v-list-item-title>
-              <v-list-item-title v-else class="text-center"><span v-if="item.defaultReceiveInfo==item.selectedIndex">(預設地址)</span></v-list-item-title>
+              <v-list-item-title v-if="receiveData.id == 1" class="text-center"
+                >同客戶資料<span v-if="item.defaultReceiveInfo == 0"
+                  >(預設地址)</span
+                ></v-list-item-title
+              >
+              <v-list-item-title
+                v-else-if="receiveData.id == 2"
+                class="text-center"
+                >同公司資料<span v-if="item.defaultReceiveInfo == 1"
+                  >(預設地址)</span
+                ></v-list-item-title
+              >
+              <v-list-item-title v-else class="text-center"
+                ><span v-if="item.defaultReceiveInfo == item.selectedIndex"
+                  >(預設地址)</span
+                ></v-list-item-title
+              >
             </v-col>
             <div v-if="hasReceive">
-            <v-list-item class="justify-space-between ma-0 pa-0">
-              <v-col class="">{{ receiveData.name }}</v-col
-              ><v-col class="">{{ receiveData.phone }}</v-col
-              >
-            </v-list-item>
-            <v-list-item class="justify-space-between ma-0 pa-0">
-              <v-col class="col-1">{{ receiveData.code }}</v-col
-              ><v-col class="col-10">{{ receiveData.address }}</v-col
-              >
-            </v-list-item>
+              <v-list-item class="justify-space-between ma-0 pa-0">
+                <v-col class="">{{ receiveData.name }}</v-col
+                ><v-col class="">{{ receiveData.phone }}</v-col>
+              </v-list-item>
+              <v-list-item class="justify-space-between ma-0 pa-0">
+                <v-col class="col-1">{{ receiveData.code }}</v-col
+                ><v-col class="col-10">{{ receiveData.address }}</v-col>
+              </v-list-item>
             </div>
           </v-list-item-content>
           <v-list-item-content v-else>
@@ -229,7 +272,11 @@
 
         <!--        客戶類別 List-->
         <template v-if="item.key == 'class'">
-          <v-radio-group @change="classRadioChange" class="mt-0" :value="classData.id">
+          <v-radio-group
+            @change="classRadioChange"
+            class="mt-0"
+            :value="classData.id"
+          >
             <v-list-item v-for="child in item.items" :key="child.id">
               <v-list-item-action class="mr-4">
                 <v-radio :value="child.id" :key="child.id"></v-radio>
@@ -251,7 +298,8 @@
                 <v-row class="justify-space-between ma-0 text-center"
                   ><span class="col-4">{{ child.name }}</span
                   ><span class="col-6">{{ child.phone }}</span
-                  ><span class=""></span></v-row>
+                  ><span class=""></span
+                ></v-row>
               </v-list-item-content>
             </v-list-item>
           </v-radio-group>
@@ -273,16 +321,16 @@
               </v-list-item-action>
               <v-list-item-content>
                 <div>
-                <v-row class="justify-space-between ma-0"
-                  ><span class="">{{ child.name }}</span
-                  ><span class="">{{ child.phone }}</span
-                  ><span></span
-                ></v-row>
-                <v-row class="justify-space-between ma-0"
-                  ><span class="col-1">{{ child.code }}</span
-                  ><span class="col-10">{{ child.address }}</span
-                  ><span></span
-                ></v-row>
+                  <v-row class="justify-space-between ma-0"
+                    ><span class="">{{ child.name }}</span
+                    ><span class="">{{ child.phone }}</span
+                    ><span></span
+                  ></v-row>
+                  <v-row class="justify-space-between ma-0"
+                    ><span class="col-1">{{ child.code }}</span
+                    ><span class="col-10">{{ child.address }}</span
+                    ><span></span
+                  ></v-row>
                 </div>
               </v-list-item-content>
             </v-list-item>
@@ -319,8 +367,13 @@
     <div class="footer-wrapper rounded">
       商品資料
     </div>
-<!--    商品資料 List-->
-    <swipe-list ref="swipeList" class="productList" :items="productItem" transition-key="id">
+    <!--    商品資料 List-->
+    <swipe-list
+      ref="swipeList"
+      class="productList"
+      :items="productItem"
+      transition-key="id"
+    >
       <template slot-scope="{ item, index }">
         <v-row>
           <v-col class="col-6">
@@ -377,8 +430,11 @@
         <v-divider></v-divider>
       </template>
 
-      <template v-slot:left="{ item , index }">
-        <div class="swipeout-action action-panel-left" @click="onChangeDesDialog(item,index)">
+      <template v-slot:left="{ item, index }">
+        <div
+          class="swipeout-action action-panel-left"
+          @click="onChangeDesDialog(item, index)"
+        >
           <div>
             <span>編輯備註</span>
           </div>
@@ -410,7 +466,12 @@
       </v-row>
     </div>
     <div>
-      <v-btn color="primary" style="width: 100%; font-size: large;" :disabled="nextDisabled" @click="submit">
+      <v-btn
+        color="primary"
+        style="width: 100%; font-size: large;"
+        :disabled="nextDisabled"
+        @click="submit"
+      >
         下一步 > 輸入出貨資料
       </v-btn>
     </div>
@@ -426,7 +487,7 @@ export default {
   },
   data() {
     return {
-      fab:false,
+      fab: false,
       snackbar: false,
       messageText: "",
       items: [
@@ -434,9 +495,7 @@ export default {
           key: "class",
           title: "客戶類別:",
           active: true,
-          items: [
-            { id: '', className: "" },
-          ],
+          items: [{ id: "", className: "" }]
         },
         {
           key: "client",
@@ -449,16 +508,16 @@ export default {
           title: "收件資料:",
           active: false,
           defaultReceiveInfo: 0,
-          selectedIndex:0,
+          selectedIndex: 0,
           items: []
         }
       ],
       productItemData: [],
       productItem: [],
       productId: "",
-      productData:{
-        id: '',
-        productId:'',
+      productData: {
+        id: "",
+        productId: "",
         barcode: "",
         name: "",
         unit: "",
@@ -471,8 +530,8 @@ export default {
       },
       dialogVisible: false,
       salesDialogVisible: false,
-      quantityDialog:1,
-      remarkDialog:'',
+      quantityDialog: 1,
+      remarkDialog: "",
       delProductDialogVisible: false,
       changeProductDialogVisible: false,
       delProductDialogItem: {},
@@ -481,8 +540,8 @@ export default {
       changeProductDesIndex: 0,
       dialogTitle: "",
       dialogData: [{ title: "", value: "" }],
-      classData: {id:"",className:""},
-      clientListRes:[],
+      classData: { id: "", className: "" },
+      clientListRes: [],
       clientData: {
         id: "",
         name: "",
@@ -512,118 +571,120 @@ export default {
       total: 0
     };
   },
-  watch:{
-    quantityDialog(){
-      if(this.quantityDialog == ''){
-        return
-      }
-      else{
-        if(this.quantityDialog==0){
-          this.quantityDialog = 1
-        }
-        else if(this.quantityDialog>this.productData.amount){
-          this.quantityDialog = this.productData.amount
+  watch: {
+    quantityDialog() {
+      if (this.quantityDialog == "") {
+        return;
+      } else {
+        if (this.quantityDialog == 0) {
+          this.quantityDialog = 1;
+        } else if (this.quantityDialog > this.productData.amount) {
+          this.quantityDialog = this.productData.amount;
         }
       }
     }
   },
   methods: {
-    onScroll (e) {
-      if (typeof window === 'undefined') return
-      const top = window.pageYOffset ||   e.target.scrollTop || 0
-      this.fab = top > 20
+    onScroll(e) {
+      if (typeof window === "undefined") return;
+      const top = window.pageYOffset || e.target.scrollTop || 0;
+      this.fab = top > 20;
     },
-    toTop () {
-      this.$vuetify.goTo(0)
+    toTop() {
+      this.$vuetify.goTo(0);
     },
     classRadioChange(value) {
-      this.clientData = {}
-      this.companyData = {}
-      this.receiveData = {}
-      this.items[2].items = []
-      this.hasClient = false
-      this.hasReceive = false
+      this.clientData = {};
+      this.companyData = {};
+      this.receiveData = {};
+      this.items[2].items = [];
+      this.hasClient = false;
+      this.hasReceive = false;
       this.classData = this.items[0].items.find(x => x.id == value);
       this.items[0].active = false;
-      this.items[1].items = []
-      this.clientListRes.map(item=>{
-        if(value == item.classes.id){
+      this.items[1].items = [];
+      this.clientListRes.map(item => {
+        if (value == item.classes.id) {
           let data = {
             id: item.id,
             name: item.name,
             phone: item.tel,
             code: item.postCode,
             address: item.address
-          }
-          this.items[1].items.push(data)
+          };
+          this.items[1].items.push(data);
         }
-      })
+      });
       this.hasClass = true;
       this.items[1].active = false;
       this.items[1].active = true;
       this.checkNexted();
     },
     clientRadioChange(value) {
-      this.companyData = {}
-      this.receiveData = {}
-      this.hasReceive = false
+      this.companyData = {};
+      this.receiveData = {};
+      this.hasReceive = false;
       this.clientData = this.items[1].items.find(x => x.id == value);
       this.items[1].active = false;
-      let data = {}
-      data = this.clientListRes.filter(item=>{
-        return value==item.id
-      })
-      console.log(this.clientListRes,'clientRadioChange clientList');
+      let data = {};
+      data = this.clientListRes.filter(item => {
+        return value == item.id;
+      });
+      console.log(this.clientListRes, "clientRadioChange clientList");
       let tmpData = {
-        id: '2',
+        id: "2",
         name: data[0].companyName,
         phone: data[0].companyTel,
         code: data[0].companyPostCode,
         address: data[0].companyAddress
-      }
-      this.companyData = tmpData
-      let list = []
-      list = data[0].recipientList
+      };
+      this.companyData = tmpData;
+      let list = [];
+      list = data[0].recipientList;
       // (預設地址)
       let receivedList = [
-        { id: '1', name: "同客戶資料", phone: "", code: "", address: "" },
-        { id: '2', name: "同公司資料", phone: "", code: "", address: "" }
-      ]
-      list.map(items=>{
-        let item = {id: items.id, name: items.receiver, phone: items.tel, code: items.postCode, address: items.address}
-        receivedList.push(item)
-      })
-      this.items[2].items = receivedList
+        { id: "1", name: "同客戶資料", phone: "", code: "", address: "" },
+        { id: "2", name: "同公司資料", phone: "", code: "", address: "" }
+      ];
+      list.map(items => {
+        let item = {
+          id: items.id,
+          name: items.receiver,
+          phone: items.tel,
+          code: items.postCode,
+          address: items.address
+        };
+        receivedList.push(item);
+      });
+      this.items[2].items = receivedList;
       this.hasClient = true;
-      let defaultReceiveInfo = data[0].defaultReceiveInfo
-      this.items[2].defaultReceiveInfo = defaultReceiveInfo
-      if(this.$store.state.shipmentEdited){
-        defaultReceiveInfo = this.$store.state.shipment.defaultReceiveInfo
+      let defaultReceiveInfo = data[0].defaultReceiveInfo;
+      this.items[2].defaultReceiveInfo = defaultReceiveInfo;
+      if (this.$store.state.shipmentEdited) {
+        defaultReceiveInfo = this.$store.state.shipment.defaultReceiveInfo;
       }
-      if(defaultReceiveInfo == 0){
-        this.receiveData = Object.assign({}, this.clientData)
-        this.receiveData.id = '1'
-        this.items[2].selectedIndex = 0
-        this.hasReceive = true
-      }
-      else if(defaultReceiveInfo == 1){
-        this.receiveData = Object.assign({},this.companyData)
-        this.items[2].selectedIndex = 1
-        this.hasReceive = true
-      }
-      else{
-        this.receiveData = this.items[2].items[defaultReceiveInfo]
-        this.items[2].selectedIndex = defaultReceiveInfo
-        this.hasReceive = true
+      if (defaultReceiveInfo == 0) {
+        this.receiveData = Object.assign({}, this.clientData);
+        this.receiveData.id = "1";
+        this.items[2].selectedIndex = 0;
+        this.hasReceive = true;
+      } else if (defaultReceiveInfo == 1) {
+        this.receiveData = Object.assign({}, this.companyData);
+        this.items[2].selectedIndex = 1;
+        this.hasReceive = true;
+      } else {
+        this.receiveData = this.items[2].items[defaultReceiveInfo];
+        this.items[2].selectedIndex = defaultReceiveInfo;
+        this.hasReceive = true;
       }
 
       this.$api.Commodity.getSalesProduct({
-        searchKey: '',
-        barcode: '',
+        searchKey: "",
+        barcode: "",
         clientId: value
-      }).then(res=>{
-        this.productItemData = []
-        res.data.map((item,index)=>{
+      }).then(res => {
+        this.productItemData = [];
+        res.data.map((item, index) => {
           let data = {
             id: index,
             productId: item.productId,
@@ -636,30 +697,30 @@ export default {
             description: "",
             quantity: 1,
             money: 0
-          }
-          this.productItemData.push(data)
-        })
+          };
+          this.productItemData.push(data);
+        });
         console.log(this.productItemData);
-      })
+      });
 
       this.checkNexted();
     },
     receiveRadioChange(value) {
-      if(value == '1'){
-        this.receiveData = Object.assign({},this.clientData)
-        this.receiveData.id = '1'
-        this.items[2].selectedIndex = 0
-      }
-      else if(value == '2'){
-        this.receiveData = Object.assign({},this.companyData)
-        this.receiveData.id = '2'
-        this.items[2].selectedIndex = 1
-      }
-      else{
+      if (value == "1") {
+        this.receiveData = Object.assign({}, this.clientData);
+        this.receiveData.id = "1";
+        this.items[2].selectedIndex = 0;
+      } else if (value == "2") {
+        this.receiveData = Object.assign({}, this.companyData);
+        this.receiveData.id = "2";
+        this.items[2].selectedIndex = 1;
+      } else {
         this.receiveData = this.items[2].items.find(x => x.id == value);
-        this.items[2].selectedIndex = this.items[2].items.findIndex(x => x.id == value)
+        this.items[2].selectedIndex = this.items[2].items.findIndex(
+          x => x.id == value
+        );
       }
-      this.$store.state.shipment.defaultReceiveInfo = this.items[2].selectedIndex
+      this.$store.state.shipment.defaultReceiveInfo = this.items[2].selectedIndex;
       this.items[2].active = false;
       this.hasReceive = true;
       this.checkNexted();
@@ -672,9 +733,8 @@ export default {
         this.total !== 0
       ) {
         this.nextDisabled = false;
-      }
-      else{
-        this.nextDisabled = true
+      } else {
+        this.nextDisabled = true;
       }
     },
     addClientData(type) {
@@ -699,24 +759,25 @@ export default {
       this.dialogVisible = true;
     },
     setBarcode(id) {
-      this.productData = Object.assign({},this.productItemData.find(x=>x.productId==id))
-      this.quantityDialog = 1
-      this.remarkDialog = ''
+      this.productData = Object.assign(
+        {},
+        this.productItemData.find(x => x.productId == id)
+      );
+      this.quantityDialog = 1;
+      this.remarkDialog = "";
       this.salesDialogVisible = true;
     },
     addSales(id) {
-      if(this.productItem.findIndex(item=>item.productId == id) == -1){
-        this.productData.quantity = this.quantityDialog
-        this.productData.description = this.remarkDialog
-        this.productItem.push(this.productData)
-      }
-      else {
-        let data = this.productItem.find(item=>item.productId == id)
-        if((data.quantity+this.quantityDialog)>data.amount){
-          data.quantity = data.amount
-        }
-        else{
-          data.quantity += this.quantityDialog
+      if (this.productItem.findIndex(item => item.productId == id) == -1) {
+        this.productData.quantity = this.quantityDialog;
+        this.productData.description = this.remarkDialog;
+        this.productItem.push(this.productData);
+      } else {
+        let data = this.productItem.find(item => item.productId == id);
+        if (data.quantity + this.quantityDialog > data.amount) {
+          data.quantity = data.amount;
+        } else {
+          data.quantity += this.quantityDialog;
         }
       }
 
@@ -756,33 +817,35 @@ export default {
       this.delProductDialogVisible = true;
     },
     deleteProduct(item) {
-      if(this.$store.state.shipmentEdited){
-        this.$api.Distribute.deleteCommodityDiscount(item.productId)
+      if (this.$store.state.shipmentEdited) {
+        this.$api.Distribute.deleteCommodityDiscount(item.productId);
       }
       this.productItem = this.productItem.filter(i => i !== item);
       this.delProductDialogVisible = false;
       this.onCalculation();
     },
-    deleteDialogCancel(item){
-      this.delProductDialogVisible = false
-      let index
-      index = this.productItem.findIndex(x=>x == item)
-      this.$refs.swipeList.closeActions(index)
+    deleteDialogCancel(item) {
+      this.delProductDialogVisible = false;
+      let index;
+      index = this.productItem.findIndex(x => x == item);
+      this.$refs.swipeList.closeActions(index);
     },
-    onChangeDesDialog(item,index) {
-      this.changeProductDialogItem = item
-      this.changeProductDialogDes = item.description
-      this.changeProductDesIndex = index
-      this.changeProductDialogVisible = true
+    onChangeDesDialog(item, index) {
+      this.changeProductDialogItem = item;
+      this.changeProductDialogDes = item.description;
+      this.changeProductDesIndex = index;
+      this.changeProductDialogVisible = true;
     },
     changeProductDes() {
-      this.productItem[this.changeProductDesIndex].description = this.changeProductDialogDes
-      this.changeProductDialogVisible = false
-      this.$refs.swipeList.closeActions(this.changeProductDesIndex)
+      this.productItem[
+        this.changeProductDesIndex
+      ].description = this.changeProductDialogDes;
+      this.changeProductDialogVisible = false;
+      this.$refs.swipeList.closeActions(this.changeProductDesIndex);
     },
-    changeDesDialogCancel(){
-      this.changeProductDialogVisible = false
-      this.$refs.swipeList.closeActions(this.changeProductDesIndex)
+    changeDesDialogCancel() {
+      this.changeProductDialogVisible = false;
+      this.$refs.swipeList.closeActions(this.changeProductDesIndex);
     },
     onCalculation() {
       let _this = this;
@@ -799,49 +862,49 @@ export default {
       });
       this.checkNexted();
     },
-    submit(){
-      this.$store.state.shipment.classItem = this.classData
-      this.$store.state.shipment.clientItem = this.clientData
-      this.$store.state.shipment.receiveItem = this.receiveData
-      this.$store.state.shipment.orderItemRequestList = this.productItem
-      this.$store.state.shipment.discount = this.discount
-      this.$store.state.shipment.total = this.total
-      console.log(this.productItem,'productItem');
-      this.$router.push('/shipment')
+    submit() {
+      this.$store.state.shipment.classItem = this.classData;
+      this.$store.state.shipment.clientItem = this.clientData;
+      this.$store.state.shipment.receiveItem = this.receiveData;
+      this.$store.state.shipment.orderItemRequestList = this.productItem;
+      this.$store.state.shipment.discount = this.discount;
+      this.$store.state.shipment.total = this.total;
+      console.log(this.productItem, "productItem");
+      this.$router.push("/shipment");
     },
-    changeDialogInput(){
-      console.log('dialog input change')
+    changeDialogInput() {
+      console.log("dialog input change");
     }
   },
   async mounted() {
-    const formData = new FormData()
-    formData.append("username",'admin')
-    formData.append("password", '123')
-    await this.$api.Login.userLogin(formData).then(async ()=>{
-      await this.$api.Customer.getClass().then(res => {
-        this.items[0].items = res.data.map(item => {
-          return item
-        })
-      })
-      await this.$api.Customer.onlyCustomerList().then(res => {
-        this.clientListRes = res.data
-      })
-    })
-    if(this.$store.state.shipmentBacked){
-      this.classRadioChange(this.$store.state.shipment.classItem.id)
-      this.clientRadioChange(this.$store.state.shipment.clientItem.id)
-      this.receiveRadioChange(this.$store.state.shipment.receiveItem.id)
+    // const formData = new FormData()
+    // formData.append("username",'admin')
+    // formData.append("password", '123')
+    // await this.$api.Login.userLogin(formData).then(async ()=>{
+    await this.$api.Customer.getClass().then(res => {
+      this.items[0].items = res.data.map(item => {
+        return item;
+      });
+      this.$api.Customer.onlyCustomerList().then(res => {
+        this.clientListRes = res.data;
+      });
+    }).catch(()=>{})
+
+    // })
+    if (this.$store.state.shipmentBacked) {
+      this.classRadioChange(this.$store.state.shipment.classItem.id);
+      this.clientRadioChange(this.$store.state.shipment.clientItem.id);
+      this.receiveRadioChange(this.$store.state.shipment.receiveItem.id);
       // this.classData = this.$store.state.shipment.classItem
       // this.clientData = this.$store.state.shipment.clientItem
       // this.receiveData = this.$store.state.shipment.receiveItem
-      this.productItem = this.$store.state.shipment.orderItemRequestList
+      this.productItem = this.$store.state.shipment.orderItemRequestList;
 
-      this.hasClass = true
-      this.hasClient = true
-      this.hasReceive = true
-      this.onCalculation()
+      this.hasClass = true;
+      this.hasClient = true;
+      this.hasReceive = true;
+      this.onCalculation();
     }
-
   }
 };
 </script>

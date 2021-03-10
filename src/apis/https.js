@@ -23,9 +23,17 @@ service.interceptors.request.use(
 );
 
 service.interceptors.response.use(
-    function(response) {
-        return response;
+  function(response) {
+    return response;
+  },
+  function(error) {
+    console.log(error, "res error");
+    const { status } = error.response;
+    if (status === 403 || status === 401) {
+      window.sessionStorage.removeItem("token");
+      router.replace("/login");
     }
+  }
 );
 
 export default service;

@@ -76,8 +76,8 @@
     data () {
       return {
         model: {
-          username: 'admin',
-          password: '123'
+          username: '',
+          password: ''
         },
         loading: false,
         snackbar: false,
@@ -100,8 +100,10 @@
           formData.append("password", this.model.password)
           await this.$scale.Login.login(formData).then(res => {
             if(res.status === 200) {
-                this.loading = false
-                this.$router.push('/scale')
+              console.log('登入成功');
+              sessionStorage.setItem('token', res.data.code);
+              this.loading = false
+                this.$router.push("/")
             }
           }).catch(err => {
             if(err.response.data.msg) {

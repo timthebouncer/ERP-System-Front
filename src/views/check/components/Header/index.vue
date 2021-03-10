@@ -171,6 +171,8 @@ export default {
       let routeName = this.$route.name;
       switch (routeName) {
         case "sales":
+        case "shipment":
+        case "salesDetail":
           this.btnDisable.salesBtn = true;
           this.menuName = "出貨";
           break;
@@ -222,7 +224,7 @@ export default {
       this.$api.Login.logOut()
       .then(()=>{
         sessionStorage.removeItem('token')
-        this.$router.push('/')
+        this.$router.push('/login')
         this.menuName = ''
       })
     }
