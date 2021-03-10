@@ -19,6 +19,7 @@
           v-model="userPassword"
           :type="'password'"
           hide-details
+          @change="loginHandler"
         ></v-text-field>
       </div>
       <div class="login-btn">
@@ -40,6 +41,9 @@ export default {
     if (sessionStorage.getItem('username')){
       this.userAccount = sessionStorage.getItem('username')
     }
+    // if(sessionStorage.getItem('token') === '200'){
+    //   this.$router.push("/sales");
+    // }
   },
   methods: {
     loginHandler() {
@@ -49,7 +53,7 @@ export default {
       this.$api.Login.userLogin(formData)
         .then((res) => {
           sessionStorage.setItem('token', res.data.code);
-          this.$router.push("/sales");
+          this.$router.push("/");
         })
         .catch(() => {
           console.log("fail");

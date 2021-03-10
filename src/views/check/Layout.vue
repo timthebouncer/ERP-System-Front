@@ -29,6 +29,10 @@ export default {
   mounted() {
     this.today = moment(new Date()).format("YYYY-MM-DD");
     this.$store.state.workDate = this.today
+    if(this.$route.path == '/'){
+      this.$router.push('/sales')
+    }
+
   }
 }
 </script>

@@ -2,11 +2,13 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 
 Vue.use(VueRouter)
-
-const routes = [
+console.log('check is mobile?');
+const isMobile = screen.width>600?false:true
+let routes
+const routes1 = [
   {
-    path: '/',
-    name: 'check',
+    path: '/login',
+    name: 'login',
     component: () => import('../views/check/Login/Login'),
   },
   {
@@ -56,16 +58,19 @@ const routes = [
       },
     ],
   },
+]
+
+const routes2 =[
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('../views/scale/login.vue'),
+  },
   {
     path: '/',
     name: 'scale',
     component: () => import('../views/scale/layout.vue'),
     children: [
-      {
-        path: '/slogin',
-        name: 'scaleLogin',
-        component: () => import('../views/scale/login.vue'),
-      },
       {
         path: '/scale',
         name: 'scaleMain',
@@ -74,7 +79,12 @@ const routes = [
     ],
   },
 ]
-
+if(isMobile){
+  routes = routes1
+}
+else{
+  routes = routes2
+}
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
@@ -87,22 +97,38 @@ router.beforeEach((to, from, next) => {
   if(token === '200'){
     verify = true
   }
-  //第一步:用Token判斷
-  if (verify) {
-    console.log(1)
-    next()
-  } else  {
-    //第二步:判斷要去的頁面是不是check
-    //不是check
-    if (to.name !== 'check') {
-      console.log(2)
-      next('/')
-      //是check
-    } else {
-      console.log(3)
+  if(to.path !== '/login'){
+    if(verify){
       next()
     }
+    else{
+      next({name: "login"})
+    }
+  }else if(to.path == '/login' && verify){
+    next('/')
   }
+  else{
+    next()
+  }
+  //第一步:用Token判斷
+  // if (verify) {
+  //   console.log(1)
+  //   console.log(from)
+  //   console.log(to.name);
+  //   next()
+  // } else  {
+  //   //第二步:判斷要去的頁面是不是check
+  //   //不是check
+  //   if (to.name !== 'check') {
+  //     console.log(2)
+  //     next('/')
+  //     //是check
+  //   } else {
+  //     console.log(3)
+  //     next()
+  //   }
+  // }
+
   // const user = sessionStorage.getItem('username')
   // const token = sessionStorage.getItem('token')
   // console.log(user)
