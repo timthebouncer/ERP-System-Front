@@ -1,5 +1,8 @@
 <template>
   <v-container>
+    <v-snackbar v-model="delSnackbar" centered color="primary" timeout="2000">
+      <p class="text-center ma-0">{{ messageText }}</p>
+    </v-snackbar>
     <v-dialog v-model="delOrderDialogVisible">
       <v-card style="background-color: #fff0e9;">
         <v-card-text class="text-center"
@@ -42,7 +45,7 @@
         <template v-slot:left="{ item }">
           <div
             class="swipeout-action action-panel-left"
-            @click="onPrint(item.orderId)"
+            @click="onPrint"
           >
             <div>
               <span>列印貼箱標籤</span>
@@ -52,7 +55,7 @@
         <template v-slot:right="{ item }">
           <div
             class="swipeout-action action-panel-right"
-            @click="onDelOrderDialog(item.orderId)"
+            @click="onDelOrderDialog(item)"
           >
             <div>
               <span>取消訂單</span>
@@ -81,21 +84,28 @@ export default {
       total: 0,
       delOrderDialogVisible: false,
       delOrderId: "",
-      clientListRes: []
+      delOrderNo: "",
+      clientListRes: [],
+      delSnackbar: false,
+      messageText: ''
     };
   },
   methods: {
-    onPrint(id) {
-      console.log(id, "order id");
+    onPrint() {
+      this.delSnackbar = true
+      this.messageText = '已列印貼箱標籤'
     },
-    onDelOrderDialog(id) {
+    onDelOrderDialog(item) {
       this.delOrderDialogVisible = true;
-      this.delOrderId = id;
+      this.delOrderId = item.orderId;
+      this.delOrderNo = item.orderNo;
     },
     deleteOrder(id) {
       this.$api.Distribute.deleteOrderList(id).then(() => {
         this.delOrderDialogVisible = false;
         this.getDistributeList();
+        this.delSnackbar = true
+        this.messageText = this.delOrderNo + '  取消成功'
       });
     },
     getDistributeList() {
