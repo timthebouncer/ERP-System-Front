@@ -885,11 +885,10 @@ export default {
       this.items[0].items = res.data.map(item => {
         return item;
       });
-      this.$api.Customer.onlyCustomerList().then(res => {
-        this.clientListRes = res.data;
-      });
-    }).catch(()=>{})
-
+    })
+    await this.$api.Customer.onlyCustomerList().then(res => {
+      this.clientListRes = res.data;
+    });
     // })
     if (this.$store.state.shipmentBacked) {
       this.classRadioChange(this.$store.state.shipment.classItem.id);
