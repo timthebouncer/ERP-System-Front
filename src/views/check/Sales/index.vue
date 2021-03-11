@@ -663,6 +663,9 @@ export default {
       if (this.$store.state.shipmentEdited) {
         defaultReceiveInfo = this.$store.state.shipment.defaultReceiveInfo;
       }
+      else{
+        this.$store.state.shipment.defaultReceiveInfo = defaultReceiveInfo
+      }
       if (defaultReceiveInfo == 0) {
         this.receiveData = Object.assign({}, this.clientData);
         this.receiveData.id = "1";

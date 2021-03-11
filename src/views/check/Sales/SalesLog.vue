@@ -33,7 +33,7 @@
         <template slot-scope="{ item, index }">
           <v-row
             class="pt-2 pb-2 pl-1 pr-1"
-            v-if="item.remark != '註銷'"
+            v-if="item.action != 'CANCEL_ORDER'"
             @click="onDetail(item.orderId)"
           >
             <v-col>{{ item.orderNo }}</v-col>

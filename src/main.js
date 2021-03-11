@@ -18,3 +18,9 @@ new Vue({
   vuetify,
   render: h => h(App)
 }).$mount("#app");
+
+// function handleOrientation(event){
+//   store.state.testO = screen.orientation.angle
+//   window.location.reload()
+// }
+// window.addEventListener('orientationchange',handleOrientation)
