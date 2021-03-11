@@ -663,6 +663,9 @@ export default {
       if (this.$store.state.shipmentEdited) {
         defaultReceiveInfo = this.$store.state.shipment.defaultReceiveInfo;
       }
+      else{
+        this.$store.state.shipment.defaultReceiveInfo = defaultReceiveInfo
+      }
       if (defaultReceiveInfo == 0) {
         this.receiveData = Object.assign({}, this.clientData);
         this.receiveData.id = "1";
@@ -885,11 +888,10 @@ export default {
       this.items[0].items = res.data.map(item => {
         return item;
       });
-      this.$api.Customer.onlyCustomerList().then(res => {
-        this.clientListRes = res.data;
-      });
-    }).catch(()=>{})
-
+    })
+    await this.$api.Customer.onlyCustomerList().then(res => {
+      this.clientListRes = res.data;
+    });
     // })
     if (this.$store.state.shipmentBacked) {
       this.classRadioChange(this.$store.state.shipment.classItem.id);
