@@ -17,7 +17,7 @@
     <v-snackbar v-model="snackbar" top color="primary" timeout="2000">
       <span>{{ messageText }}</span>
     </v-snackbar>
-    <v-snackbar v-model="errSnackbar" top color="red" timeout="2000">
+    <v-snackbar v-model="errSnackbar" centered color="red" timeout="2000">
       <span>{{ messageText }}</span>
     </v-snackbar>
     <!--    新增客戶資料 新增收件資料 彈窗-->
@@ -373,6 +373,8 @@
       商品資料
     </div>
     <!--    商品資料 List-->
+    <div v-if="productItem.length==0" class="text-h4 text-center grey--text mt-3">+請掃條碼添加商品</div>
+    <div v-else>
     <swipe-list
       ref="swipeList"
       class="productList"
@@ -479,6 +481,7 @@
       >
         下一步 > 輸入出貨資料
       </v-btn>
+    </div>
     </div>
   </v-container>
 </template>
