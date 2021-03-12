@@ -61,6 +61,12 @@ const api= {
     onlyCustomerList() {
       return request.get('/client/clientList?searchKey=')
     },
+    add(data) {
+      return request.post('/client/addClient', data)
+    },
+    update(data) {
+      return request.put('/client/updateClient', data)
+    },
   }
 }
 export default api;

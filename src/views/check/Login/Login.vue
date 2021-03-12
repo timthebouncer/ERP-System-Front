@@ -12,27 +12,27 @@
                 <v-row>
                   <v-col class="mt-6" cols="12" sm="12">
                     <v-text-field
-                            v-model="model.username"
-                            label="帳號"
-                            name="login"
-                            prepend-icon="mdi-account"
-                            type="text"
-                            required
-                            :rules="accountValidat"
-                            @keyup.enter="login"
+                      v-model="model.username"
+                      label="帳號"
+                      name="login"
+                      prepend-icon="mdi-account"
+                      type="text"
+                      required
+                      :rules="accountValid"
+                      @keyup.enter="login"
                     ></v-text-field>
 
                     <v-text-field
-                            class="mt-6"
-                            id="password"
-                            v-model="model.password"
-                            label="密碼"
-                            name="password"
-                            prepend-icon="mdi-lock"
-                            type="password"
-                            required
-                            :rules="passwordValidat"
-                            @keyup.enter="login"
+                      class="mt-6"
+                      id="password"
+                      v-model="model.password"
+                      label="密碼"
+                      name="password"
+                      prepend-icon="mdi-lock"
+                      type="password"
+                      required
+                      :rules="passwordValid"
+                      @keyup.enter="login"
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -40,8 +40,15 @@
             </v-card-text>
             <v-card-actions>
               <v-col style="display: flex; justify-content: center">
-                <v-btn :loading="loading" class="mt-2" @click="login" width="200" height="45">
-                  <span v-if="!loading">登入</span> <span v-else>登入中...</span>
+                <v-btn
+                  :loading="loading"
+                  class="mt-2"
+                  @click="login"
+                  width="200"
+                  height="45"
+                >
+                  <span v-if="!loading">登入</span>
+                  <span v-else>登入中...</span>
                 </v-btn>
               </v-col>
             </v-card-actions>
@@ -50,18 +57,14 @@
       </v-row>
       <!--帳號密碼錯誤提示-->
       <v-snackbar
-              v-model="snackbar"
-              :top="'top'"
-              :color="errorText ? 'error' : 'success'"
-              :timeout="3000"
+        v-model="snackbar"
+        :top="'top'"
+        :color="errorText ? 'error' : 'success'"
+        :timeout="3000"
       >
-        <h3>{{errorText}}</h3>
+        <h3>{{ errorText }}</h3>
         <template v-slot:action="{ attrs }">
-          <v-btn
-                  text
-                  v-bind="attrs"
-                  @click="snackbar = false"
-          >
+          <v-btn text v-bind="attrs" @click="snackbar = false">
             <h3>關閉</h3>
           </v-btn>
         </template>
@@ -71,51 +74,48 @@
 </template>
 
 <script>
-  export default {
-    name: 'Login',
-    data () {
-      return {
-        model: {
-          username: '',
-          password: ''
-        },
-        loading: false,
-        snackbar: false,
-        valid: true,
-        accountValidat: [
-          v => !!v || '請填寫帳號'
-        ],
-        passwordValidat: [
-          v => !!v || '請填寫密碼'
-        ],
-        errorText: '帳號密碼錯誤'
-      }
-    },
-    methods: {
-      async login () {
-        if (this.$refs.form.validate()) {
-          this.loading = true
-          const formData = new FormData()
-          formData.append("username", this.model.username)
-          formData.append("password", this.model.password)
-          await this.$scale.Login.login(formData).then(res => {
-            if(res.status === 200) {
-              sessionStorage.setItem('token', res.data.code);
-              this.loading = false
-              this.$router.push("/")
-            }
-          }).catch(err => {
-            if(err.response.data.msg) {
-              this.errorText = err.response.data.msg
-              this.snackbar = true
-              this.loading = false
+export default {
+  name: "Login",
+  data() {
+    return {
+      model: {
+        username: "",
+        password: ""
+      },
+      loading: false,
+      snackbar: false,
+      valid: true,
+      accountValid: [v => !!v || "請填寫帳號"],
+      passwordValid: [v => !!v || "請填寫密碼"],
+      errorText: "帳號密碼錯誤"
+    };
+  },
+  methods: {
+    async login() {
+      if (this.$refs.form.validate()) {
+        this.loading = true;
+        const formData = new FormData();
+        formData.append("username", this.model.username);
+        formData.append("password", this.model.password);
+        await this.$scale.Login.login(formData)
+          .then(res => {
+            if (res.status === 200) {
+              sessionStorage.setItem("token", res.data.code);
+              this.loading = false;
+              this.$router.push("/");
             }
           })
-        }
+          .catch(err => {
+            if (err.response.data.msg) {
+              this.errorText = err.response.data.msg;
+              this.snackbar = true;
+              this.loading = false;
+            }
+          });
       }
     }
   }
+};
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>
