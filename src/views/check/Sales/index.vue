@@ -17,6 +17,9 @@
     <v-snackbar v-model="snackbar" top color="primary" timeout="2000">
       <span>{{ messageText }}</span>
     </v-snackbar>
+    <v-snackbar v-model="errSnackbar" top color="red" timeout="2000">
+      <span>{{ messageText }}</span>
+    </v-snackbar>
     <!--    新增客戶資料 新增收件資料 彈窗-->
     <v-dialog v-model="dialogVisible" hide-overlay fullscreen>
       <v-card style="background-color: #fff0e9;">
@@ -44,7 +47,7 @@
           <v-btn color="" text outlined @click="dialogVisible = false">
             取消
           </v-btn>
-          <v-btn color="primary" @click="dialogVisible = false">
+          <v-btn color="primary" @click="addDialog">
             儲存
           </v-btn>
         </v-card-actions>
@@ -307,7 +310,8 @@
             <v-btn
               text
               class="font-weight-bold text-h5"
-              @click="addClientData('client')"
+              @click="openDataDialog('client')"
+              :disabled="classData.id==''"
               ><v-icon>mdi-plus-circle-outline</v-icon>新增客戶資料</v-btn
             >
           </v-list-item>
@@ -339,7 +343,8 @@
             <v-btn
               text
               class="font-weight-bold text-h5"
-              @click="addClientData('receive')"
+              @click="openDataDialog('receive')"
+              :disabled="clientData.id==''"
               ><v-icon>mdi-plus-circle-outline</v-icon>新增收件資料</v-btn
             >
           </v-list-item>
@@ -489,6 +494,7 @@ export default {
     return {
       fab: false,
       snackbar: false,
+      errSnackbar: false,
       messageText: "",
       items: [
         {
@@ -594,7 +600,11 @@ export default {
       this.$vuetify.goTo(0);
     },
     classRadioChange(value) {
-      this.clientData = {};
+      this.clientData = {id: "",
+        name: "",
+        phone: "",
+        code: "",
+        address: ""};
       this.companyData = {};
       this.receiveData = {};
       this.items[2].items = [];
@@ -662,9 +672,8 @@ export default {
       this.items[2].defaultReceiveInfo = defaultReceiveInfo;
       if (this.$store.state.shipmentEdited) {
         defaultReceiveInfo = this.$store.state.shipment.defaultReceiveInfo;
-      }
-      else{
-        this.$store.state.shipment.defaultReceiveInfo = defaultReceiveInfo
+      } else {
+        this.$store.state.shipment.defaultReceiveInfo = defaultReceiveInfo;
       }
       if (defaultReceiveInfo == 0) {
         this.receiveData = Object.assign({}, this.clientData);
@@ -740,25 +749,24 @@ export default {
         this.nextDisabled = true;
       }
     },
-    addClientData(type) {
+    openDataDialog(type) {
       if (type === "client") {
         this.dialogTitle = "新增客戶資料";
         this.dialogData = [
-          { title: "*客戶名稱", value: "", required: true },
-          { title: "*客戶電話", value: "", required: true },
-          { title: "郵遞區號", value: "", required: false },
-          { title: "聯絡地址", value: "", required: false }
+          { title: "*客戶名稱", value: "", required: true, key: "name" },
+          { title: "*客戶電話", value: "", required: true, key: "phone" },
+          { title: "郵遞區號", value: "", required: false, key: "code" },
+          { title: "聯絡地址", value: "", required: false, key: "address" }
         ];
       } else {
         this.dialogTitle = "新增收件資料";
         this.dialogData = [
-          { title: "收件人", value: "", required: false },
-          { title: "收件電話", value: "", required: false },
-          { title: "郵遞區號", value: "", required: false },
-          { title: "收件地址", value: "", required: false }
+          { title: "收件人", value: "", required: false, key: "name" },
+          { title: "收件電話", value: "", required: false, key: "phone" },
+          { title: "郵遞區號", value: "", required: false, key: "code" },
+          { title: "*收件地址", value: "", required: false, key: "address" }
         ];
       }
-
       this.dialogVisible = true;
     },
     setBarcode(id) {
@@ -866,6 +874,11 @@ export default {
       this.checkNexted();
     },
     submit() {
+      if(this.receiveData.address.trim() == ''){
+        this.errSnackbar = true
+        this.messageText = '地址為空，請至後台系統填寫!'
+        return
+      }
       this.$store.state.shipment.classItem = this.classData;
       this.$store.state.shipment.clientItem = this.clientData;
       this.$store.state.shipment.receiveItem = this.receiveData;
@@ -874,6 +887,88 @@ export default {
       this.$store.state.shipment.total = this.total;
       console.log(this.productItem, "productItem");
       this.$router.push("/shipment");
+    },
+    addDialog() {
+      if (this.dialogTitle == "新增客戶資料") {
+        let data = {
+          name: this.dialogData.find(x => x.key == "name").value.trim(),
+          tel: this.dialogData.find(x => x.key == "phone").value.trim(),
+          postCode: this.dialogData.find(x => x.key == "code").value.trim(),
+          address: this.dialogData.find(x => x.key == "address").value.trim()
+        };
+        if (data.name == "" || data.tel == "") {
+          this.errSnackbar = true;
+          this.messageText = "請輸入必填項目!";
+          return;
+        }
+        this.addClientData(data);
+      } else if (this.dialogTitle == "新增收件資料") {
+        let data = {
+          id: "",
+          receiver: this.dialogData.find(x => x.key == "name").value.trim(),
+          tel: this.dialogData.find(x => x.key == "phone").value.trim(),
+          postCode: this.dialogData.find(x => x.key == "code").value.trim(),
+          address: this.dialogData.find(x => x.key == "address").value.trim()
+        };
+        if (data.address == "") {
+          this.errSnackbar = true;
+          this.messageText = "請輸入必填項目!";
+          return;
+        }
+        let receiveList = [];
+        this.items[2].items.map((item, index) => {
+          if (index > 1) {
+            let data = {
+              id: item.id,
+              receiver: item.name,
+              tel: item.phone,
+              postCode: item.code,
+              address: item.address
+            };
+            receiveList.push(data);
+          }
+        });
+        receiveList.push(data);
+        this.updateClientData(receiveList);
+      }
+    },
+    addClientData(data) {
+      this.$api.Customer.add({
+        ...data,
+        classesId: this.classData.id,
+        defaultReceiveInfo: 0
+      })
+        .then(async res => {
+          let classId = res.data.classes.id;
+          let clientId = res.data.id;
+          this.dialogVisible = false;
+          await this.$api.Customer.onlyCustomerList().then(res => {
+            this.clientListRes = res.data;
+          });
+          this.classRadioChange(classId);
+          this.clientRadioChange(clientId);
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    },
+    updateClientData(receiveList) {
+      this.$api.Customer.update({
+        classesId: this.classData.id,
+        clientId: this.clientData.id,
+        defaultReceiveInfo: this.items[2].items.length,
+        recipientList: receiveList
+      }).then(async () => {
+        let classId = this.classData.id;
+        let clientId = this.clientData.id;
+        this.dialogVisible = false;
+        await this.$api.Customer.onlyCustomerList().then(res => {
+          this.clientListRes = res.data;
+        });
+        this.classRadioChange(classId);
+        this.clientRadioChange(clientId);
+        this.items[2].active = false;
+      });
     },
     changeDialogInput() {
       console.log("dialog input change");
@@ -888,7 +983,7 @@ export default {
       this.items[0].items = res.data.map(item => {
         return item;
       });
-    })
+    });
     await this.$api.Customer.onlyCustomerList().then(res => {
       this.clientListRes = res.data;
     });

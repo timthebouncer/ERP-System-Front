@@ -40,7 +40,7 @@
             <v-col class="text-center">{{ item.clientName }}</v-col>
             <v-col class="text-end">${{ item.totalPrice }}</v-col>
           </v-row>
-          <v-divider v-if="item.remark != '註銷'"></v-divider>
+          <v-divider v-if="item.action != 'CANCEL_ORDER'"></v-divider>
         </template>
         <template v-slot:left="{ item }">
           <div
