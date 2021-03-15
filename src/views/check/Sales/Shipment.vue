@@ -23,8 +23,8 @@
     </div>
     <div>
       <v-row class="ma-0">
-        <v-col class="col-3 align-self-center"><span>出貨日期:</span></v-col>
-        <v-col class="col-9"
+        <v-col class="col-4 align-self-center"><span>出貨日期:</span></v-col>
+        <v-col class="col-8"
           ><v-menu
             v-model="menuVisible"
             :close-on-content-click="false"
@@ -52,8 +52,8 @@
         ></v-col>
       </v-row>
       <v-row class="ma-0">
-        <v-col class="col-3 align-self-center"><span>出貨單號:</span></v-col>
-        <v-col class="col-9"
+        <v-col class="col-4 align-self-center"><span>出貨單號:</span></v-col>
+        <v-col class="col-8"
           ><span>{{ orderNo }}</span></v-col
         >
       </v-row>
@@ -87,8 +87,8 @@
             @change="computedShippingFee"
           >
             <v-row class="justify-space-between">
-              <v-col class="pl-0 pr-0"
-                ><v-radio :value="1" label="親送"></v-radio
+              <v-col class="pl-1 pr-0"
+                ><v-radio :value="1" label="親送" style="width: 65px;"></v-radio
               ></v-col>
               <v-col class="pl-0 pr-0"
                 ><v-radio :value="2" label="黑貓宅配"></v-radio
@@ -116,7 +116,7 @@
             @change="computedShippingFee"
           >
             <v-row class="justify-space-between">
-              <v-col class="pl-0 pr-0"
+              <v-col class="pl-1 pr-0"
                 ><v-radio :value="1" label="常溫"></v-radio
               ></v-col>
               <v-col class="pl-0 pr-0"
@@ -180,12 +180,12 @@
     </v-row>
     <div>
       <v-row>
-        <v-col>
-          <v-btn color="primary" @click="back">
+        <v-col class="pr-0">
+          <v-btn color="primary" @click="back" >
             客戶/商品資料 < 上一步
           </v-btn>
         </v-col>
-        <v-col>
+        <v-col >
           <v-btn color="primary" :disabled="nextDisabled" @click="submit">
             下一步 > 出貨單
           </v-btn>
@@ -360,6 +360,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.container {
+  padding: 12px 5px 12px 5px;
+}
 .title-wrapper {
   background-color: #c2c2c2;
 }
