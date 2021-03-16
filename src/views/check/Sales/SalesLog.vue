@@ -190,7 +190,7 @@ export default {
               barcode: item.barcode,
               name: item.productName,
               quantity: item.amount,
-              salesPrice: item.clientPrice,
+              salesPrice: item.clientPrice==0?item.price:item.clientPrice,
               money: item.totalPrice,
               unit: item.unit,
               description: item.remark

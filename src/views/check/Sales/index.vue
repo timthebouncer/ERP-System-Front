@@ -837,7 +837,7 @@ export default {
     },
     adder(index) {
       let item = this.productItem[index];
-      let amount = this.productItemData.find(x => x.barcode = item.barcode).amount
+      let amount = this.productItemData.find(x => x.barcode == item.barcode).amount
       if (item.quantity < amount) {
         item.quantity++;
         item.money =
