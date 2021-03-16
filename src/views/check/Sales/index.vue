@@ -56,6 +56,12 @@
     <!--    新增商品 彈窗-->
     <v-dialog v-model="salesDialogVisible">
       <v-card style="background-color: #fff0e9;">
+        <v-system-bar color="#fff0e9"
+          ><v-spacer></v-spacer
+          ><v-btn icon @click="salesDialogVisible = false"
+            ><v-icon color="#000000" size="25">mdi-close</v-icon></v-btn
+          ></v-system-bar
+        >
         <v-card-text class="pl-1 pr-2">
           <v-row class="align-content-center"
             ><v-col class="col-4"
@@ -133,7 +139,7 @@
           <v-btn color="" text outlined @click="salesDialogVisible = false">
             取消
           </v-btn>
-          <v-btn color="primary" @click="addSales(productData.id)">
+          <v-btn color="primary" @click="addSales(productData.barcode)">
             儲存
           </v-btn>
         </v-card-actions>
@@ -165,6 +171,12 @@
     <!--    編輯備註 彈窗-->
     <v-dialog v-model="changeProductDialogVisible">
       <v-card style="background-color: #fff0e9;">
+        <v-system-bar color="#fff0e9"
+          ><v-spacer></v-spacer
+          ><v-btn icon @click="changeDesDialogCancel"
+            ><v-icon color="#000000" size="25">mdi-close</v-icon></v-btn
+          ></v-system-bar
+        >
         <v-card-text class="pl-1 pr-2">
           <v-row class="align-content-center"
             ><v-col class="col-4"
@@ -298,8 +310,8 @@
               </v-list-item-action>
               <v-list-item-content>
                 <v-row class="justify-space-between ma-0 text-center"
-                  ><span class="col-4">{{ child.name }}</span
-                  ><span class="col-6">{{ child.phone }}</span
+                  ><span class="col-7">{{ child.name }}</span
+                  ><span class="col-4">{{ child.phone }}</span
                   ><span class=""></span
                 ></v-row>
               </v-list-item-content>
@@ -368,10 +380,10 @@
           <!--            :autofocus="inputFocused"-->
           <!--          ></v-autocomplete>-->
           <v-text-field
+            id="barcodeInput"
             v-model="productId"
             @input="setBarcode"
             solo
-            :autofocus="inputFocused"
           ></v-text-field> </v-col
       ></v-row>
     </div>
@@ -716,7 +728,7 @@ export default {
             unit: this.getUnit(item.unit),
             amount: item.amount,
             salesPrice: item.clientPrice,
-            listPrice: item.clientPrice,
+            listPrice: item.price,
             description: "",
             quantity: 1,
             money: 0
@@ -724,8 +736,9 @@ export default {
           this.productItemData.push(data);
         });
       });
-      this.inputFocused = true;
+
       this.checkNexted();
+      document.getElementById('barcodeInput').focus()
     },
     receiveRadioChange(value) {
       if (value == "1") {
@@ -745,7 +758,7 @@ export default {
       this.$store.state.shipment.defaultReceiveInfo = this.items[2].selectedIndex;
       this.items[2].active = false;
       this.hasReceive = true;
-      this.inputFocused = true;
+      document.getElementById('barcodeInput').focus()
       this.checkNexted();
     },
     checkNexted() {
@@ -800,15 +813,15 @@ export default {
       // this.remarkDialog = "";
       // this.salesDialogVisible = true;
     },
-    addSales(id) {
-      if (this.productItem.findIndex(item => item.productId == id) == -1) {
+    addSales(barcode) {
+      if (this.productItem.findIndex(item => item.barcode == barcode) == -1) {
         this.productData.quantity = this.quantityDialog;
         this.productData.description = this.remarkDialog;
         this.productItem.push(this.productData);
       } else {
-        let data = this.productItem.find(item => item.productId == id);
-        if (data.quantity + this.quantityDialog > data.amount) {
-          data.quantity = data.amount;
+        let data = this.productItem.find(item => item.barcode == barcode);
+        if (data.quantity + this.quantityDialog > this.productData.amount) {
+          data.quantity = this.productData.amount;
         } else {
           data.quantity += this.quantityDialog;
         }
@@ -824,7 +837,8 @@ export default {
     },
     adder(index) {
       let item = this.productItem[index];
-      if (item.quantity < item.amount) {
+      let amount = this.productItemData.find(x => x.barcode = item.barcode).amount
+      if (item.quantity < amount) {
         item.quantity++;
         item.money =
           (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *

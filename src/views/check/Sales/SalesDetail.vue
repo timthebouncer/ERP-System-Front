@@ -249,8 +249,8 @@ export default {
                 id: item.productId,
                 barcode: item.barcode,
                 amount: item.quantity,
-                discount: item.salesPrice * item.quantity - item.money,
-                price: item.salesPrice * item.quantity,
+                discount: (item.salesPrice === 0 ? item.listPrice : item.salesPrice) * item.quantity - item.money,
+                price: item.money,
                 remark: item.remark
               };
             }
@@ -264,6 +264,7 @@ export default {
               this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
             }
             this.$store.state.successSnackbar = true;
+            this.$store.state.salesDetailed = false;
             this.$router.push("/salesLog");
           })
           .catch(err => {
@@ -290,8 +291,8 @@ export default {
               return {
                 barcode: item.barcode,
                 amount: item.quantity,
-                discount: item.salesPrice * item.quantity - item.money,
-                price: item.salesPrice * item.quantity,
+                discount: (item.salesPrice === 0 ? item.listPrice : item.salesPrice) * item.quantity - item.money,
+                price: item.money,
                 remark: item.remark
               };
             }
@@ -306,6 +307,7 @@ export default {
               this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
             }
             this.$store.state.successSnackbar = true;
+            this.$store.state.salesDetailed = false;
             this.$router.push("/salesLog");
           })
           .catch(err => {
