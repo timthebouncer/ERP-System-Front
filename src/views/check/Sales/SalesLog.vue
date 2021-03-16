@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="container">
     <v-snackbar v-model="delSnackbar" centered color="primary" timeout="2000">
       <p class="text-center ma-0">{{ messageText }}</p>
     </v-snackbar>
@@ -43,10 +43,7 @@
           <v-divider v-if="item.action != 'CANCEL_ORDER'"></v-divider>
         </template>
         <template v-slot:left="{ item }">
-          <div
-            class="swipeout-action action-panel-left"
-            @click="onPrint"
-          >
+          <div class="swipeout-action action-panel-left" @click="onPrint">
             <div>
               <span>列印貼箱標籤</span>
             </div>
@@ -87,13 +84,13 @@ export default {
       delOrderNo: "",
       clientListRes: [],
       delSnackbar: false,
-      messageText: ''
+      messageText: ""
     };
   },
   methods: {
     onPrint() {
-      this.delSnackbar = true
-      this.messageText = '已列印貼箱標籤'
+      this.delSnackbar = true;
+      this.messageText = "已列印貼箱標籤";
     },
     onDelOrderDialog(item) {
       this.delOrderDialogVisible = true;
@@ -104,8 +101,8 @@ export default {
       this.$api.Distribute.deleteOrderList(id).then(() => {
         this.delOrderDialogVisible = false;
         this.getDistributeList();
-        this.delSnackbar = true
-        this.messageText = this.delOrderNo + '  取消成功'
+        this.delSnackbar = true;
+        this.messageText = this.delOrderNo + "  取消成功";
       });
     },
     getDistributeList() {
@@ -129,7 +126,7 @@ export default {
         let discount = 0,
           total = 0;
         let data = response.data;
-        this.$store.state.shipment.orderId = id
+        this.$store.state.shipment.orderId = id;
         this.$store.state.shipment.shipmentDate = data.salesDay;
         this.$store.state.shipment.orderNo = data.orderNo;
         this.$store.state.shipment.classItem = {
@@ -215,6 +212,9 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.container {
+  padding: 12px 5px 12px 5px;
+}
 .title-wrapper {
   background-color: #c2c2c2;
 }

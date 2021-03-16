@@ -8,30 +8,30 @@
     </div>
     <div style="font-size: large;">
       <v-row>
-        <v-col class="col-3">工作日期:</v-col>
+        <v-col class="col-3 pr-0">工作日期:</v-col>
         <v-col>{{ workDate }}</v-col>
       </v-row>
       <v-row>
-        <v-col class="col-3">出貨日期:</v-col>
+        <v-col class="col-3 pr-0">出貨日期:</v-col>
         <v-col>{{ shipmentData.shipmentDate }}</v-col>
       </v-row>
       <v-row>
-        <v-col class="col-3">出貨單號:</v-col>
+        <v-col class="col-3 pr-0">出貨單號:</v-col>
         <v-col>{{ shipmentData.orderNo }}</v-col>
       </v-row>
       <v-row>
-        <v-col class="col-3">客戶類別:</v-col>
+        <v-col class="col-3 pr-0">客戶類別:</v-col>
         <v-col>{{ shipmentData.classItem.className }}</v-col>
       </v-row>
       <v-row>
-        <v-col class="col-3">客戶資料:</v-col>
+        <v-col class="col-3 pr-0">客戶資料:</v-col>
         <v-col>
           <p>{{ shipmentData.clientItem.name }}</p>
           <p>{{ shipmentData.clientItem.phone }}</p>
         </v-col>
       </v-row>
       <v-row>
-        <v-col class="col-3">收件資料:</v-col>
+        <v-col class="col-3 pr-0">收件資料:</v-col>
         <v-col>
           <p>{{ shipmentData.receiveItem.name }}</p>
           <p>{{ shipmentData.receiveItem.phone }}</p>
@@ -42,13 +42,13 @@
         </v-col>
       </v-row>
       <v-row>
-        <v-col class="col-3">付款方式:</v-col>
+        <v-col class="col-3 pr-0">付款方式:</v-col>
         <v-col v-if="shipmentData.payment == 1">貨到付款</v-col>
         <v-col v-else-if="shipmentData.payment == 2">匯款</v-col>
         <v-col v-else>現金</v-col>
       </v-row>
       <v-row>
-        <v-col class="col-3">出貨方式:</v-col>
+        <v-col class="col-3 pr-0">出貨方式:</v-col>
         <v-col>
           <p>
             <span v-if="shipmentData.shipment == 1">親送</span>
@@ -59,22 +59,23 @@
             <span v-if="shipmentData.temperatureCategory == 2">冷藏</span>
             <span v-if="shipmentData.temperatureCategory == 3">冷凍</span>
             <span>/</span>
-            <span v-if="shipmentData.volume == 1">常溫</span>
-            <span v-if="shipmentData.volume == 2">冷藏</span>
-            <span v-if="shipmentData.volume == 3">冷凍</span>
+            <span v-if="shipmentData.volume == 1">60公分</span>
+            <span v-if="shipmentData.volume == 2">90公分</span>
+            <span v-if="shipmentData.volume == 3">120公分</span>
+            <span v-if="shipmentData.volume == 4">150公分</span>
           </p>
         </v-col>
       </v-row>
       <v-row v-if="shipmentData.shipment == 2">
-        <v-col class="col-3">物流編號:</v-col>
+        <v-col class="col-3 pr-0">物流編號:</v-col>
         <v-col>{{ shipmentData.trackingNo }}</v-col>
       </v-row>
       <v-row>
-        <v-col class="col-3">運費金額:</v-col>
+        <v-col class="col-3 pr-0">運費金額:</v-col>
         <v-col>{{ shipmentData.shippingFee }}</v-col>
       </v-row>
       <v-row>
-        <v-col class="col-2">備註:</v-col>
+        <v-col class="col-2 pr-0">備註:</v-col>
         <v-col
           ><v-textarea
             rows="3"
@@ -249,8 +250,8 @@ export default {
                 id: item.productId,
                 barcode: item.barcode,
                 amount: item.quantity,
-                discount: item.salesPrice * item.quantity - item.money,
-                price: item.salesPrice * item.quantity,
+                discount: (item.salesPrice === 0 ? item.listPrice : item.salesPrice) * item.quantity - item.money,
+                price: item.money,
                 remark: item.remark
               };
             }
@@ -264,6 +265,7 @@ export default {
               this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
             }
             this.$store.state.successSnackbar = true;
+            this.$store.state.salesDetailed = false;
             this.$router.push("/salesLog");
           })
           .catch(err => {
@@ -290,8 +292,8 @@ export default {
               return {
                 barcode: item.barcode,
                 amount: item.quantity,
-                discount: item.salesPrice * item.quantity - item.money,
-                price: item.salesPrice * item.quantity,
+                discount: (item.salesPrice === 0 ? item.listPrice : item.salesPrice) * item.quantity - item.money,
+                price: item.money,
                 remark: item.remark
               };
             }
@@ -306,6 +308,7 @@ export default {
               this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
             }
             this.$store.state.successSnackbar = true;
+            this.$store.state.salesDetailed = false;
             this.$router.push("/salesLog");
           })
           .catch(err => {
@@ -329,6 +332,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.container {
+  padding: 12px 5px 12px 5px;
+}
 .title-wrapper {
   background-color: #c2c2c2;
 }
