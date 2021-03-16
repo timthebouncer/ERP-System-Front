@@ -59,9 +59,10 @@
             <span v-if="shipmentData.temperatureCategory == 2">冷藏</span>
             <span v-if="shipmentData.temperatureCategory == 3">冷凍</span>
             <span>/</span>
-            <span v-if="shipmentData.volume == 1">常溫</span>
-            <span v-if="shipmentData.volume == 2">冷藏</span>
-            <span v-if="shipmentData.volume == 3">冷凍</span>
+            <span v-if="shipmentData.volume == 1">60公分</span>
+            <span v-if="shipmentData.volume == 2">90公分</span>
+            <span v-if="shipmentData.volume == 3">120公分</span>
+            <span v-if="shipmentData.volume == 4">150公分</span>
           </p>
         </v-col>
       </v-row>
