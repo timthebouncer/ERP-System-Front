@@ -216,7 +216,7 @@ export default {
     this.shipmentData = this.$store.state.shipment;
     this.workDate = this.$store.state.workDate;
     this.discount = this.$store.state.shipment.discount;
-    this.total = this.$store.state.shipment.total;
+    this.total = this.$store.state.shipment.total + this.$store.state.shipment.shippingFee;
   },
   methods: {
     back() {
