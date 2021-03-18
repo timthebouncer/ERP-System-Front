@@ -173,7 +173,7 @@
                     </v-form>
                 </div>
                 <div class="mid-btn mx-5 mt-6">
-                    <v-btn class="reprint-label"><h1>重印標籤</h1></v-btn>
+                    <v-btn :disabled="rePrintTagStatus" class="reprint-label" @click="rePrintTag"><h1>重印標籤</h1></v-btn>
                     <v-btn :disabled="inboundPrintStatus" class="print mt-9" @click="inboundPrint"><h1 style="font-size: 36px;">入庫列印</h1></v-btn>
                 </div>
             </div>
@@ -240,6 +240,7 @@
     import AccumulateDialog from "../../components/accumulateDialog";
     import LongPress from "vue-directive-long-press";
     import {UNIT} from "../../mixin/enums"
+    import axios from "axios";
     const SERVICE_ID = "00004353-0000-1000-8000-00805f9b34fb";
     export default {
         components: {
@@ -266,6 +267,7 @@
                 inboundStatus: false,
                 inboundPrintStatus: false,
                 rePrintStatus: false,
+                rePrintTagStatus: true,
                 valid: true,
                 restPlusBtn: true,
                 defaultValue: 0,
@@ -302,7 +304,8 @@
                     unit: '',
                     barcode: '',
                     weight: '',
-                    amount: 0
+                    amount: 0,
+                    orderId: ''
                 },
                 svgForm: {
                     name: '',
@@ -486,6 +489,8 @@
                 this.svgForm.price = this.commodity[index].price
 
                 this.position = index;
+                //切換標籤時重置重印標籤狀態
+                this.rePrintTagStatus = true
                 //切換標籤時reset組件
                 this.restPlusBtn = false
                 //切換標籤時reset組件
@@ -568,6 +573,47 @@
                     }
                 })
             },
+            async rePrintTag() {
+                if(this.orderNumber === "") {
+                    return this.inboundStatus = true, this.inboundMsg = '請選擇入料單號'
+                }
+                if(this.stockInForm.productId === "") {
+                    return this.inboundStatus = true, this.inboundMsg = '請選擇商品'
+                }
+                if(this.productDepot === "") {
+                    return this.inboundStatus = true, this.inboundMsg = '請選擇儲存倉庫'
+                }
+                //svg塞值
+                let svgJSON = this.svgString ? JSON.parse(this.svgString) : null
+                //正向太陽日 今天是一年中的第幾天
+                let pSolarDay = Math.ceil((new Date() - new Date(new Date().getFullYear().toString())) / (24 * 60 * 60 * 1000));
+                //反向太陽日 一年幾天-正向太陽日+今天
+                let rSolarDay = 365 - pSolarDay + 1;
+                if (svgJSON) {
+                    await svgJSON.objects.map(async items => {
+                        if (items.name === "productName") {
+                            items.text = `商品名稱:${this.svgForm.name}`
+                        } else if (items.name === "unit") {
+                            items.text = `計價單位:${this.svgForm.unit}`
+                        } else if (items.name === "weight") {
+                            items.text = `重量:${this.svgForm.weight}`
+                        } else if (items.name === "price") {
+                            items.text = `價格:${this.svgForm.price}元`
+                        } else if (items.name === "productNo") {
+                            items.text = `${this.commodityNumber}`
+                        } else if (items.name === "today") {
+                            items.text = `${this.today}`
+                        } else if (items.name === "pSolarDay") {
+                            items.text = `正向太陽日:${pSolarDay}`
+                        } else if (items.name === "rSolarDay") {
+                            items.text = `反向太陽日:${rSolarDay}`
+                        }
+                    })
+                    this.canvas.clear()
+                    await this.loadFromJson(svgJSON)
+                    await this.changeBarcode()
+                }
+            },
             loadFromJson(svgJSON) {
                 return new Promise(resolve => {
                     this.canvas.loadFromJSON(
@@ -589,7 +635,6 @@
                         resolve(true)
                     })
                 }
-
                 return new Promise(async resolve => {
                     await loadImage.bind(this)()
                     let imgElement
@@ -612,28 +657,58 @@
                             this.canvas.renderAll()
                         }
                     })
-                    let tosvg = this.canvas.toSVG({
-                        left: 25,
-                        top: 25,
-                        width: 500,
-                        height: 500
-                    })
-                    console.log(JSON.stringify(this.canvas));
-                    this.imageDataUrl = this.canvas.toDataURL({
-                        left: 25,
-                        top: 25,
-                        width: 500,
-                        height: 500,
-                        format: 'png'
-                    })
-                    //base64 to image
-                    fetch(this.imageDataUrl)
-                        .then(res => res.blob())
-                        .then(blob => {
-                            const file = new File([blob], "File name",{ type: "image/png" })
-                            let fileURL = URL.createObjectURL(file);
-                            window.open(fileURL);
+                    if(this.count > 1){
+                        let status = true
+                        for(let i = this.commodityNumber; i < Number(this.count)+Number(this.commodityNumber); i++){
+                            this.canvas.getObjects().map(items => {
+                                if(items.name === "productNo") {
+                                    items.text = `${i}`
+                                }
+                            })
+                            if(status) {
+                                let canvasStr = JSON.stringify(this.canvas)
+                                let file = new File([canvasStr], 'text.txt', {type: 'text/plain'})
+                                let formData = new FormData()
+                                formData.append("file", file)
+                                await axios.post('http://127.0.0.1:8099/print/printTag', formData).then(res => {
+                                    if(res.data.status === 200) {
+                                        status = true
+                                        console.log(res.data.status);
+                                    }
+                                }).catch((error) => {
+                                    status = false
+                                    console.error(error)
+                                })
+                            }else{
+                                return this.inboundStatus = true, this.inboundMsg = '列印發生錯誤'
+                            }
+                        }
+                    }else{
+                        let canvasStr = JSON.stringify(this.canvas)
+                        let file = new File([canvasStr], 'text.txt', {type: 'text/plain'})
+                        let formData = new FormData()
+                        formData.append("file", file)
+                        await axios.post('http://127.0.0.1:8099/print/printTag', formData).then(res => {
+                            console.log(res.data.status)
+                        }).catch((error) => {
+                            console.error(error)
                         })
+                    }
+                    // this.imageDataUrl = this.canvas.toDataURL({
+                    //     left: 25,
+                    //     top: 25,
+                    //     width: 500,
+                    //     height: 500,
+                    //     format: 'png'
+                    // })
+                    // //base64 to image
+                    // fetch(this.imageDataUrl)
+                    //     .then(res => res.blob())
+                    //     .then(blob => {
+                    //         const file = new File([blob], "File name",{ type: "image/png" })
+                    //         let fileURL = URL.createObjectURL(file);
+                    //         window.open(fileURL);
+                    //     })
                 })
             },
             //入庫列印
@@ -647,9 +722,12 @@
                     }
                     //取得當前要操作入庫/取消的數量
                     this.stockInForm.amount = this.count
+                    this.stockInForm.orderId = this.addOrderForm.id
                     await this.$scale.Inventory.stockIn(this.stockInForm).then(async res => {
                         if(res.status === 200) {
                             this.inboundSuccessMsg = '商品入庫成功'
+                            //入庫之後才能重印標籤
+                            this.rePrintTagStatus = false
                             //barcode為空時才做barcode暫存
                             if(this.stockInForm.barcode === '') {
                                 this.barcodeStorage = res.data.barcode
@@ -682,7 +760,7 @@
                                     }else if(items.name === "price") {
                                         items.text = `價格:${this.svgForm.price}元`
                                     }else if(items.name === "productNo") {
-                                        items.text = `${this.svgForm.productNo}`
+                                        items.text = `${this.commodityNumber}`
                                     }else if(items.name === "today") {
                                         items.text = `${this.today}`
                                     }else if(items.name === "pSolarDay") {
@@ -691,10 +769,10 @@
                                         items.text = `反向太陽日:${rSolarDay}`
                                     }
                                 })
+                                this.canvas.clear()
+                                await this.loadFromJson(svgJSON)
+                                await this.changeBarcode()
                             }
-                            this.canvas.clear()
-                            await this.loadFromJson(svgJSON)
-                            await this.changeBarcode()
                         }
                     })
                 }
