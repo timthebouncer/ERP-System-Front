@@ -437,6 +437,8 @@
                       class="numberCount"
                       type="number"
                       v-model="item.quantity"
+                      @input="item = productCountInput(item)"
+                      @change="item = productCountChange(item)"
                       style="text-align: center"
                     />
                   </li>
@@ -450,7 +452,7 @@
                   $<input
                     type="number"
                     v-model="item.money"
-                    @change="onCalculation"
+                    @change="item = productMoneyChange(item)"
                     style="text-align: center;border: #999 thin solid; width: 100px;margin-left: 5px; font-size: large;"
                   />
                 </p>
@@ -738,7 +740,7 @@ export default {
       });
 
       this.checkNexted();
-      document.getElementById('barcodeInput').focus()
+      document.getElementById("barcodeInput").focus();
     },
     receiveRadioChange(value) {
       if (value == "1") {
@@ -758,7 +760,7 @@ export default {
       this.$store.state.shipment.defaultReceiveInfo = this.items[2].selectedIndex;
       this.items[2].active = false;
       this.hasReceive = true;
-      document.getElementById('barcodeInput').focus()
+      document.getElementById("barcodeInput").focus();
       this.checkNexted();
     },
     checkNexted() {
@@ -837,7 +839,8 @@ export default {
     },
     adder(index) {
       let item = this.productItem[index];
-      let amount = this.productItemData.find(x => x.barcode == item.barcode).amount
+      let amount = this.productItemData.find(x => x.barcode == item.barcode)
+        .amount;
       if (item.quantity < amount) {
         item.quantity++;
         item.money =
@@ -1014,6 +1017,52 @@ export default {
     },
     changeDialogInput() {
       console.log("dialog input change");
+    },
+    productCountInput(item) {
+      if (item.quantity == "") {
+        return;
+      } else {
+        if (item.quantity == 0) {
+          item.quantity = 1;
+          item.money =
+            (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
+            item.quantity;
+          return item;
+        } else if (item.quantity > item.amount) {
+          item.quantity = item.amount;
+          item.money =
+            (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
+            item.quantity;
+          return item;
+        }
+        item.money =
+          (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
+          item.quantity;
+        return item;
+      }
+    },
+    productCountChange(item) {
+      if (item.quantity == "" || item.quantity == undefined) {
+        item.quantity = 1;
+        item.money =
+          (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
+          item.quantity;
+        this.onCalculation();
+        return item;
+      }
+      this.onCalculation();
+      return item;
+    },
+    productMoneyChange(item) {
+      let price = (item.salesPrice === 0 ? item.listPrice : item.salesPrice) * item.quantity
+      if(item.money == undefined || item.money == ""){
+        item.money = 0
+      }
+      if(item.money > price){
+        item.money = price
+      }
+      this.onCalculation()
+      return item
     }
   },
   async mounted() {
