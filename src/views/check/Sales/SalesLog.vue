@@ -184,14 +184,20 @@ export default {
         this.$store.state.shipment.orderItemRequestList = data.orderDetailItemResponseList.map(
           item => {
             discount += item.discount;
-            total += item.totalPrice;
+            total +=
+              (item.clientPrice == 0 ? item.price : item.clientPrice) *
+                item.amount -
+              item.discount;
             return {
               productId: item.id,
               barcode: item.barcode,
               name: item.productName,
               quantity: item.amount,
-              salesPrice: item.clientPrice==0?item.price:item.clientPrice,
-              money: item.totalPrice,
+              salesPrice: item.clientPrice == 0 ? item.price : item.clientPrice,
+              money:
+                (item.clientPrice == 0 ? item.price : item.clientPrice) *
+                  item.amount -
+                item.discount,
               unit: item.unit,
               description: item.remark
             };
