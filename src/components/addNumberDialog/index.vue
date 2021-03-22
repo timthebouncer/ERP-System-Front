@@ -81,8 +81,11 @@
                 await this.$scale.DepotOrder.addOrder(this.orderForm).then(res => {
                     this.loading = true
                     if(res.status === 200){
-                        this.$emit('getAddOrderForm', this.orderForm, this.addOrderNumber, this.material.name)
+                        this.$emit('getAddOrderForm', this.orderForm, this.addOrderNumber, this.material.name, res.data)
                         this.$emit('close')
+                        sessionStorage.setItem('addOrderForm', JSON.stringify(this.orderForm))
+                        sessionStorage.setItem('orderNumber', this.addOrderNumber)
+                        sessionStorage.setItem('orderName', this.material.name)
                         this.orderForm={
                             materialId: '',
                             count: '',
