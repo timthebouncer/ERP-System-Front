@@ -102,6 +102,7 @@ export default {
             if (res.status === 200) {
               console.log("登入成功");
               sessionStorage.setItem("token", res.data.code);
+              sessionStorage.setItem("userName", res.data.user)
               this.loading = false;
               this.$router.push("/");
             }

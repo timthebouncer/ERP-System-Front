@@ -37,6 +37,15 @@
                             class="mr-4"
                             large
                             depressed
+                            color="primary"
+                            @click="setIPDialog"
+                    >
+                        <h3>設定IP</h3>
+                    </v-btn>
+                    <v-btn
+                            class="mr-4"
+                            large
+                            depressed
                             :color="btColor"
                             @click="handleNotification"
                             v-if="!characteristic"
@@ -73,7 +82,7 @@
                     </v-btn>
                     <v-btn :disabled="rePrintStatus" class="mr-10" large depressed color="error" @click="updateStock()"><h3>取消入庫</h3></v-btn>
                     <div class="staffName">
-                        <span>Jennifer Lopez</span>
+                        <h3 style="display: inline-block">{{userName}}</h3>
                         <v-btn class="ml-2" icon @click="logout">
                             <v-icon large>mdi-exit-to-app</v-icon>
                         </v-btn>
@@ -161,7 +170,7 @@
                                 <v-text-field v-model="addOrderForm.livingWeight" type="number" label="毛雞重量(公斤) :" style="font-size: 22px;"/>
                             </v-col>
                             <v-col class="d-flex pb-0" cols="12" sm="6" md="6">
-                                <v-select v-model="productDepot" :items="productDepotList" item-value="id" item-text="name" :rules="warehouseValidat" label="儲存倉庫 :" style="font-size: 17px;" @change="stockInForm.depotId = productDepot"/>
+                                <v-select v-model="productDepot" :items="productDepotList" item-value="id" item-text="name" :rules="warehouseValidat" label="儲存倉庫 :" style="font-size: 17px;" @change="changeDepot"/>
                             </v-col>
                         <v-col class="d-flex pb-0 mt-4" cols="12" sm="6" md="6">
                             <PlusButton v-if="restPlusBtn" :name="'商品序號'" @changeNumber="changeNumber"/>
@@ -228,16 +237,20 @@
                 @close="closeAccumulateShowDialog"
                 @getZero="getZero"
         />
+        <IpDialog
+                :show="ipShow"
+                @close="closeIpDialog"
+        />
     </div>
 </template>
 
 <script>
     import { fabric } from "fabric";
-    import JsBarcode from "jsbarcode";
     import PlusButton from "../../components/plusButton";
     import AddNumberDialog from "../../components/addNumberDialog";
     import OrderNumberDialog from "../../components/orderNumberDialog";
     import AccumulateDialog from "../../components/accumulateDialog";
+    import IpDialog from "../../components/ipDialog";
     import LongPress from "vue-directive-long-press";
     import {UNIT} from "../../mixin/enums"
     import axios from "axios";
@@ -247,7 +260,8 @@
             PlusButton,
             AddNumberDialog,
             OrderNumberDialog,
-            AccumulateDialog
+            AccumulateDialog,
+            IpDialog
         },
         data() {
             return {
@@ -256,6 +270,7 @@
                 isActive: false,
                 orderNumberShow: false,
                 accumulateShow: false,
+                ipShow: false,
                 textDisabled: false,
                 btStatus: false,
                 btDisabled: false,
@@ -278,12 +293,14 @@
                 accumulateValue: 0,
                 stockInFormAmount: 0,
                 deductionValue: 0,
-                log: "",
-                today: "",
-                orderName: "",
-                position: "",
-                orderNumber: "",
-                addOrderNumber: "",
+                userName: '',
+                userIP: '',
+                log: '',
+                today: '',
+                orderName: '',
+                position: '',
+                orderNumber: '',
+                addOrderNumber: '',
                 inventoryId: '',
                 barcodeStorage: '',
                 inboundMsg: '',
@@ -327,6 +344,22 @@
             };
         },
         async mounted() {
+            this.userName = sessionStorage.getItem("userName")
+            //需要有IP才能入庫
+            if(this.userIP){
+                this.inboundPrintStatus = false
+            } else {
+                this.inboundPrintStatus = true
+                this.inboundPrintStatus = true
+            }
+            //代入上次操作結果
+            if(sessionStorage.getItem('orderNumber')){
+                this.addOrderForm = JSON.parse(sessionStorage.getItem('addOrderForm'))
+                this.orderNumber = sessionStorage.getItem('orderNumber')
+                this.orderName = sessionStorage.getItem('orderName')
+                this.stockInForm.depotId = sessionStorage.getItem('depot')
+                this.productDepot = sessionStorage.getItem('depot')
+            }
             this.canvas = new fabric.Canvas('canvasTest')
             await this.$scale.Product.getProduct().then(res => {
                 if (res.status === 200) {
@@ -351,11 +384,26 @@
             "long-press": LongPress
         },
         watch: {
+            userIP() {
+                //需要有IP才能入庫
+              if(this.userIP){
+                  this.inboundPrintStatus = false
+              } else {
+                  this.inboundPrintStatus = true
+              }
+            },
             position() {
-                this.barcodeStorage = ""
-                this.inventoryId = ""
-                this.rePrintStatus = false
-                this.inboundPrintStatus = false
+                //先設定IP
+                if(this.userIP){
+                    this.barcodeStorage = ""
+                    this.inventoryId = ""
+                    //切換標籤時重置取消入庫狀態
+                    this.rePrintStatus = false
+                    //切換標籤時重置入庫列印狀態
+                    this.inboundPrintStatus = false
+                    //切換標籤時重置重印標籤狀態
+                    this.rePrintTagStatus = true
+                }
             },
             //當磅秤機重量改變時
             displayValue() {
@@ -376,6 +424,10 @@
             },
         },
         methods: {
+            changeDepot() {
+                this.stockInForm.depotId = this.productDepot
+                window.sessionStorage.setItem('depot', this.productDepot)
+            },
             accumulate() {
                 //防止累加按鈕連續操作
                 if(this.displayValue === 0.000) return
@@ -412,6 +464,13 @@
                     );
                 }
             },
+            setIPDialog() {
+              this.ipShow = true
+            },
+            closeIpDialog(ip) {
+              this.ipShow = false
+              this.userIP = ip
+            },
             async showAddNumberDialog(show) {
                 this.addNumberShow = show;
                 //拿物料名稱
@@ -430,10 +489,11 @@
             closeAddNumberDialog() {
                 this.addNumberShow = false;
             },
-            getAddOrderForm(form, addOrderNumber, name) {
+            getAddOrderForm(form, addOrderNumber, name, id) {
                 this.addOrderForm = form
                 this.orderNumber = addOrderNumber
                 this.orderName = name
+                this.addOrderForm.id = id
             },
             showOrderNumberDialog(show) {
                 this.$scale.DepotOrder.getUnusedList().then(res => {
@@ -455,6 +515,10 @@
                 this.addOrderForm = value
                 this.orderNumber = value.number;
                 this.orderName = value.name
+                //紀錄最後一次操作的單號資料
+                sessionStorage.setItem('addOrderForm', JSON.stringify(value))
+                sessionStorage.setItem('orderNumber', value.number)
+                sessionStorage.setItem('orderName', value.name)
             },
             changeNumber(value, name) {
                 if (name === "商品序號") {
@@ -487,10 +551,7 @@
                 this.svgForm.weight = this.commodity[index].weight
                 this.svgForm.barcode = this.commodity[index].barcode
                 this.svgForm.price = this.commodity[index].price
-
                 this.position = index;
-                //切換標籤時重置重印標籤狀態
-                this.rePrintTagStatus = true
                 //切換標籤時reset組件
                 this.restPlusBtn = false
                 //切換標籤時reset組件
@@ -670,7 +731,7 @@
                                 let file = new File([canvasStr], 'text.txt', {type: 'text/plain'})
                                 let formData = new FormData()
                                 formData.append("file", file)
-                                await axios.post('http://127.0.0.1:8099/print/printTag', formData).then(res => {
+                                await axios.post(`http://${this.userIP}:8099/print/printTag`, formData).then(res => {
                                     if(res.data.status === 200) {
                                         status = true
                                         console.log(res.data.status);
@@ -688,7 +749,7 @@
                         let file = new File([canvasStr], 'text.txt', {type: 'text/plain'})
                         let formData = new FormData()
                         formData.append("file", file)
-                        await axios.post('http://127.0.0.1:8099/print/printTag', formData).then(res => {
+                        await axios.post(`http://${this.userIP}:8099/print/printTag`, formData).then(res => {
                             console.log(res.data.status)
                         }).catch((error) => {
                             console.error(error)
@@ -732,9 +793,7 @@
                             if(this.stockInForm.barcode === '') {
                                 this.barcodeStorage = res.data.barcode
                                 this.barcodeBase64 = res.data.barcodeBase64
-                                // setTimeout(() => {
-                                //     JsBarcode("#barcode").init()
-                                // }, 500)
+                                //動態條碼只能入庫一次
                                 this.inboundPrintStatus = true
                             }
                             //獲取當前庫存id
@@ -781,6 +840,7 @@
               this.$scale.Logout.logout().then(res => {
                   if(res.status === 200) {
                       sessionStorage.removeItem('token')
+                      sessionStorage.removeItem('userName')
                       this.$router.push('/login')
                   }
               })
