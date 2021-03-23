@@ -54,6 +54,7 @@
             getZero () {
                 this.snackbar = true
                 this.$emit('getZero')
+                this.$emit('close')
             },
             async submit () {
                 this.$emit('close')
