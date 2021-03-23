@@ -731,7 +731,7 @@
                                 let file = new File([canvasStr], 'text.txt', {type: 'text/plain'})
                                 let formData = new FormData()
                                 formData.append("file", file)
-                                await axios.post(`http://${this.userIP}:8099/print/printTag`, formData).then(res => {
+                                await axios.post(`https://${this.userIP}:8099/print/printTag`, formData).then(res => {
                                     if(res.data.status === 200) {
                                         status = true
                                         console.log(res.data.status);
@@ -749,7 +749,7 @@
                         let file = new File([canvasStr], 'text.txt', {type: 'text/plain'})
                         let formData = new FormData()
                         formData.append("file", file)
-                        await axios.post(`http://${this.userIP}:8099/print/printTag`, formData).then(res => {
+                        await axios.post(`https://${this.userIP}:8099/print/printTag`, formData).then(res => {
                             console.log(res.data.status)
                         }).catch((error) => {
                             console.error(error)
