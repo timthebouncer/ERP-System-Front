@@ -863,12 +863,12 @@ export default {
               });
               let formData = new FormData();
               formData.append("file", file);
-              const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+              const agent = new https.Agent({ rejectUnauthorized: false });
               await axios
                 .post(
                   `https://${this.userIP}:8099/print/printTag`,
                   formData,
-                  httpsAgent
+                        {agent}
                 )
                 .then(res => {
                   if (res.data.status === 200) {
@@ -891,12 +891,12 @@ export default {
           let file = new File([canvasStr], "text.txt", { type: "text/plain" });
           let formData = new FormData();
           formData.append("file", file);
-          const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+          const agent = new https.Agent({ rejectUnauthorized: false });
           await axios
             .post(
               `https://${this.userIP}:8099/print/printTag`,
               formData,
-              httpsAgent
+                    {agent}
             )
             .then(res => {
               console.log(res.data.status);
