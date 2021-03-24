@@ -865,11 +865,7 @@ export default {
               formData.append("file", file);
               const agent = new https.Agent({ rejectUnauthorized: false });
               await axios
-                .post(
-                  `https://${this.userIP}:8099/print/printTag`,
-                  formData,
-                        {agent}
-                )
+                .post(`https://${this.userIP}:8099/print/printTag`, formData,{httpsAgent: agent})
                 .then(res => {
                   if (res.data.status === 200) {
                     status = true;
@@ -893,11 +889,7 @@ export default {
           formData.append("file", file);
           const agent = new https.Agent({ rejectUnauthorized: false });
           await axios
-            .post(
-              `https://${this.userIP}:8099/print/printTag`,
-              formData,
-                    {agent}
-            )
+            .post(`https://${this.userIP}:8099/print/printTag`, formData, {httpsAgent: agent})
             .then(res => {
               console.log(res.data.status);
             })
