@@ -224,7 +224,14 @@
                 </template>
             </v-snackbar>
         </v-container>
-        <AddNumberDialog :show="addNumberShow" :kg="displayValue" :materialList="materialList" :addOrderNumber="addOrderNumber" @getAddOrderForm="getAddOrderForm" @close="closeAddNumberDialog"/>
+        <AddNumberDialog
+                :show="addNumberShow"
+                :kg="accumulateValue ? accumulateValue : displayValue"
+                :materialList="materialList"
+                :addOrderNumber="addOrderNumber"
+                @getAddOrderForm="getAddOrderForm"
+                @close="closeAddNumberDialog"
+        />
         <OrderNumberDialog
                 :show="orderNumberShow"
                 :getUnusedList="getUnusedList"
@@ -488,6 +495,7 @@
             },
             closeAddNumberDialog() {
                 this.addNumberShow = false;
+                this.accumulateValue = 0
             },
             getAddOrderForm(form, addOrderNumber, name, id) {
                 this.addOrderForm = form
