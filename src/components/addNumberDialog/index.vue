@@ -94,6 +94,17 @@
                         }
                         this.material = {id: '', name: ''}
                         this.loading = false
+                        //紀錄後一次操作的日期
+                        let today = new Date();
+                        let time =
+                            today.getFullYear() +
+                            "-" +
+                            (today.getMonth() + 1 < 10 ? "0" : "") +
+                            (today.getMonth() + 1) +
+                            "-" +
+                            (today.getDate() < 10 ? "0" : "") +
+                            today.getDate();
+                        sessionStorage.setItem("time", time);
                     }
                 })
             },

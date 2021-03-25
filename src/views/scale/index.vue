@@ -638,6 +638,18 @@ export default {
       sessionStorage.setItem("addOrderForm", JSON.stringify(value));
       sessionStorage.setItem("orderNumber", value.number);
       sessionStorage.setItem("orderName", value.name);
+      //紀錄後一次操作的日期
+      let today = new Date();
+      let time =
+              today.getFullYear() +
+              "-" +
+              (today.getMonth() + 1 < 10 ? "0" : "") +
+              (today.getMonth() + 1) +
+              "-" +
+              (today.getDate() < 10 ? "0" : "") +
+              today.getDate();
+      sessionStorage.setItem("time", time);
+
     },
     changeNumber(value, name) {
       if (name === "商品序號") {
