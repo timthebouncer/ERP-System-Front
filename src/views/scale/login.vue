@@ -112,7 +112,8 @@ export default {
         await this.$scale.Login.login(formData)
           .then(res => {
             if (res.status === 200) {
-              if(sessionStorage.getItem("time") !== "2021-03-26"){
+              //登入成功後如果今日日期與上次操作日期不同則清空sessionStorage
+              if(sessionStorage.getItem("time") !== this.today){
                 sessionStorage.removeItem("addOrderForm");
                 sessionStorage.removeItem("orderNumber");
                 sessionStorage.removeItem("orderName");
