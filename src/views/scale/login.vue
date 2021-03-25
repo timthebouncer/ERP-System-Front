@@ -85,10 +85,22 @@ export default {
       loading: false,
       snackbar: false,
       valid: true,
+      today: '',
       accountValid: [v => !!v || "請填寫帳號"],
       passwordValid: [v => !!v || "請填寫密碼"],
       errorText: "帳號密碼錯誤"
     };
+  },
+  mounted() {
+    let today = new Date();
+    this.today =
+            today.getFullYear() +
+            "-" +
+            (today.getMonth() + 1 < 10 ? "0" : "") +
+            (today.getMonth() + 1) +
+            "-" +
+            (today.getDate() < 10 ? "0" : "") +
+            today.getDate();
   },
   methods: {
     async login() {
@@ -100,7 +112,12 @@ export default {
         await this.$scale.Login.login(formData)
           .then(res => {
             if (res.status === 200) {
-              console.log("登入成功");
+              if(sessionStorage.getItem("time") !== "2021-03-26"){
+                sessionStorage.removeItem("addOrderForm");
+                sessionStorage.removeItem("orderNumber");
+                sessionStorage.removeItem("orderName");
+                sessionStorage.removeItem("depot");
+              }
               sessionStorage.setItem("token", res.data.code);
               sessionStorage.setItem("userName", res.data.user)
               this.loading = false;
