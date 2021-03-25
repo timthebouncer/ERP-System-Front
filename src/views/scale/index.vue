@@ -319,7 +319,7 @@
     </v-container>
     <AddNumberDialog
       :show="addNumberShow"
-      :kg="displayValue"
+      :kg="accumulateValue ? accumulateValue : displayValue"
       :materialList="materialList"
       :addOrderNumber="addOrderNumber"
       @getAddOrderForm="getAddOrderForm"
@@ -386,7 +386,7 @@ export default {
       defaultValue: 0,
       list: [],
       lastValue: "0",
-      displayValue: 0.0,
+      displayValue: 0.00,
       changeValue: 0,
       accumulateValue: 0,
       stockInFormAmount: 0,
@@ -512,6 +512,9 @@ export default {
       } else {
         this.changeUnit("g");
       }
+      //取得當前磅秤量的重量
+      this.stockInForm.weight = this.displayValue
+      this.svgForm.weight = this.displayValue
     }
   },
   computed: {
@@ -609,6 +612,7 @@ export default {
       this.orderNumber = addOrderNumber;
       this.orderName = name;
       this.addOrderForm.id = id;
+      this.accumulateValue = 0
     },
     showOrderNumberDialog(show) {
       this.$scale.DepotOrder.getUnusedList().then(res => {
@@ -655,15 +659,12 @@ export default {
       this.stockInFormAmount = this.commodity[index].stockAmount;
       //取得當前選擇的商品單位
       this.stockInForm.unit = this.commodity[index].unit;
-      //取得當前選擇的商品重量
-      this.stockInForm.weight = this.commodity[index].weight;
       //取得當前選擇的商品barcodeBase64
       this.barcodeBase64 = this.commodity[index].barcodeBase64;
       //SVG
       this.svgString = this.commodity[index].svgString;
       this.svgForm.name = this.commodity[index].name;
       this.svgForm.unit = this.getUnit(this.commodity[index].unit);
-      this.svgForm.weight = this.commodity[index].weight;
       this.svgForm.barcode = this.commodity[index].barcode;
       this.svgForm.price = this.commodity[index].price;
       this.position = index;
@@ -928,6 +929,11 @@ export default {
         //取得當前要操作入庫/取消的數量
         this.stockInForm.amount = this.count;
         this.stockInForm.orderId = this.addOrderForm.id;
+        //商品有固定條碼時不用傳重量
+        if(this.stockInForm.barcode !== ""){
+          this.stockInForm.weight = 0
+          this.svgForm.weight = 0
+        }
         await this.$scale.Inventory.stockIn(this.stockInForm).then(
           async res => {
             if (res.status === 200) {
