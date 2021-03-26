@@ -1033,14 +1033,14 @@ export default {
       if (item.quantity == "") {
         return;
       } else {
-        if (item.quantity == 0) {
+        if (parseInt(item.quantity) == 0) {
           item.quantity = 1;
           item.money =
             (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
             item.quantity;
           item.money = this.formatPrice(item.money)
           return item;
-        } else if (item.quantity > item.amount) {
+        } else if (parseInt(item.quantity) > item.amount) {
           item.quantity = item.amount;
           item.money =
             (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
@@ -1116,7 +1116,9 @@ export default {
       // this.clientData = this.$store.state.shipment.clientItem
       // this.receiveData = this.$store.state.shipment.receiveItem
       this.productItem = this.$store.state.shipment.orderItemRequestList;
-
+      this.productItem.forEach(item=>{
+        item.money = this.formatPrice(item.money)
+      })
       this.hasClass = true;
       this.hasClient = true;
       this.hasReceive = true;

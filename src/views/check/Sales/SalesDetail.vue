@@ -72,7 +72,7 @@
       </v-row>
       <v-row>
         <v-col class="col-3 pr-0">運費金額:</v-col>
-        <v-col>{{ shipmentData.shippingFee }}</v-col>
+        <v-col>{{ formatPrice(shipmentData.shippingFee) }}</v-col>
       </v-row>
       <v-row>
         <v-col class="col-2 pr-0">備註:</v-col>
@@ -108,10 +108,9 @@
                 </p>
                 <p>
                   <span>出貨售價:</span
-                  ><span>{{
-                    item.salesPrice === 0
+                  ><span>{{ formatPrice(item.salesPrice === 0
                       ? item.listPrice * item.quantity
-                      : item.salesPrice * item.quantity
+                      : item.salesPrice * item.quantity)
                   }}</span>
                 </p>
                 <p>
@@ -122,7 +121,7 @@
             <v-col class="col-5 align-self-center pl-0">
               <p>數量</p>
               <p>{{ item.quantity }}</p>
-              <p>${{ item.money }}</p>
+              <p>${{ formatPrice(item.money) }}</p>
             </v-col>
           </v-row>
         </template>
@@ -132,13 +131,13 @@
       <v-row>
         <v-col><span>折讓</span></v-col
         ><v-col class="text-end"
-          ><span>${{ discount }}</span></v-col
+          ><span>${{ formatPrice(discount) }}</span></v-col
         >
       </v-row>
       <v-row>
         <v-col><span>合計</span></v-col
         ><v-col class="text-end"
-          ><span style="color: red;">${{ total }}</span></v-col
+          ><span style="color: red;">${{ formatPrice(total) }}</span></v-col
         >
       </v-row>
     </div>
@@ -214,11 +213,16 @@ export default {
   },
   created() {
     this.shipmentData = this.$store.state.shipment;
+    console.log(this.shipmentData);
     this.workDate = this.$store.state.workDate;
     this.discount = this.$store.state.shipment.discount;
     this.total = this.$store.state.shipment.total + this.$store.state.shipment.shippingFee;
+    console.log(this.$store.state.shipment.shippingFee);
   },
   methods: {
+    formatPrice(value) {
+      return (value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+    },
     back() {
       this.$store.state.shipmentBacked = true;
       this.$router.push("/sales");
