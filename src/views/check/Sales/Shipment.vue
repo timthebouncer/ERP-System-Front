@@ -162,7 +162,7 @@
           ><v-text-field
             prefix="$"
             outlined
-            type="number"
+            type="text"
             v-model="shippingFee"
           ></v-text-field
         ></v-col>
@@ -252,8 +252,14 @@ export default {
     trackingNo() {
       this.checkNextDisable();
     },
-    shippingFee() {
+    shippingFee(value) {
+      if(value == ''){
+        value = '0'
+      }
+      value = value.toString().replace(/[^0-9]+/g, "")
+      console.log(value);
       this.checkNextDisable();
+      this.shippingFee = (parseInt(value)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
     }
   },
   methods: {
@@ -327,7 +333,9 @@ export default {
       this.$store.state.shipment.trackingNo = this.trackingNo;
       this.$store.state.shipment.temperatureCategory = this.temperatureCategory;
       this.$store.state.shipment.volume = this.volume;
-      this.$store.state.shipment.shippingFee = this.shippingFee;
+      let value
+      value = this.shippingFee.toString().replace(/[^0-9]+/g, "")
+      this.$store.state.shipment.shippingFee = parseInt(value);
       this.$store.state.shipment.remark = this.remark;
       this.$store.state.salesDetailed = true;
       this.$router.push("/salesDetail");

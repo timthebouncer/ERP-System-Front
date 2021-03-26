@@ -414,10 +414,9 @@
                 </p>
                 <p>
                   <span>出貨售價:</span
-                  ><span>{{
-                    item.salesPrice === 0
+                  ><span>{{ formatPrice(item.salesPrice === 0
                       ? item.listPrice * item.quantity
-                      : item.salesPrice * item.quantity
+                      : item.salesPrice * item.quantity)
                   }}</span>
                 </p>
                 <p>
@@ -450,8 +449,9 @@
               <div class="text-center pt-3">
                 <p>
                   $<input
-                    type="number"
+                    type="text"
                     v-model="item.money"
+                    @input="item.money = productMoneyInput(item.money)"
                     @change="item = productMoneyChange(item)"
                     style="text-align: center;border: #999 thin solid; width: 100px;margin-left: 5px; font-size: large;"
                   />
@@ -487,13 +487,13 @@
         <v-row>
           <v-col><span>折讓</span></v-col
           ><v-col class="text-end"
-            ><span>${{ discount }}</span></v-col
+            ><span>${{ formatPrice(discount) }}</span></v-col
           >
         </v-row>
         <v-row>
           <v-col><span>合計</span></v-col
           ><v-col class="text-end"
-            ><span style="color: red;">${{ total }}</span></v-col
+            ><span style="color: red;">${{ formatPrice(total) }}</span></v-col
           >
         </v-row>
       </div>
@@ -621,6 +621,9 @@ export default {
     }
   },
   methods: {
+    formatPrice(value) {
+      return (value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+    },
     onScroll(e) {
       if (typeof window === "undefined") return;
       const top = window.pageYOffset || e.target.scrollTop || 0;
@@ -843,9 +846,9 @@ export default {
         .amount;
       if (item.quantity < amount) {
         item.quantity++;
-        item.money =
+        item.money = this.formatPrice(
           (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
-          item.quantity;
+          item.quantity);
         this.onCalculation();
       } else {
         this.snackbar = true;
@@ -856,9 +859,9 @@ export default {
       let item = this.productItem[index];
       if (item.quantity > 1) {
         item.quantity--;
-        item.money =
+        item.money = this.formatPrice(
           (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
-          item.quantity;
+          item.quantity);
         this.onCalculation();
       }
     },
@@ -903,12 +906,15 @@ export default {
       this.total = 0;
       this.productItem.forEach(item => {
         let price = 0;
+        let money
+        money = item.money.toString().replace(/[^0-9]+/g, "")
+        money = parseInt(money)
         price =
           (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
           item.quantity;
-        _this.discount = _this.discount + (price - item.money);
+        _this.discount = _this.discount + (price - money);
 
-        _this.total = _this.total + parseInt(item.money, 10);
+        _this.total = _this.total + money;
       });
       this.checkNexted();
     },
@@ -921,6 +927,11 @@ export default {
       this.$store.state.shipment.classItem = this.classData;
       this.$store.state.shipment.clientItem = this.clientData;
       this.$store.state.shipment.receiveItem = this.receiveData;
+      this.productItem.forEach(item=>{
+        let money
+        money = item.money.toString().replace(/[^0-9]+/g, "")
+        item.money = parseInt(money)
+      })
       this.$store.state.shipment.orderItemRequestList = this.productItem;
       this.$store.state.shipment.discount = this.discount;
       this.$store.state.shipment.total = this.total;
@@ -1022,22 +1033,25 @@ export default {
       if (item.quantity == "") {
         return;
       } else {
-        if (item.quantity == 0) {
+        if (parseInt(item.quantity) == 0) {
           item.quantity = 1;
           item.money =
             (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
             item.quantity;
+          item.money = this.formatPrice(item.money)
           return item;
-        } else if (item.quantity > item.amount) {
+        } else if (parseInt(item.quantity) > item.amount) {
           item.quantity = item.amount;
           item.money =
             (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
             item.quantity;
+          item.money = this.formatPrice(item.money)
           return item;
         }
         item.money =
           (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
           item.quantity;
+        item.money = this.formatPrice(item.money)
         return item;
       }
     },
@@ -1053,15 +1067,30 @@ export default {
       this.onCalculation();
       return item;
     },
+    productMoneyInput(value){
+      console.log(value,'first value');
+      if(value == ''){
+        value = '0'
+      }
+      value = value.toString().replace(/[^0-9]+/g, "")
+      console.log(value);
+      return this.formatPrice(parseInt(value))
+
+      // return parseInt(value)
+    },
     productMoneyChange(item) {
       let price = (item.salesPrice === 0 ? item.listPrice : item.salesPrice) * item.quantity
-      if(item.money == undefined || item.money == ""){
-        item.money = 0
-      }
+      item.money = item.money.toString().replace(/[^0-9]+/g, "")
+      item.money = parseInt(item.money)
+      // if(item.money == undefined || item.money == ""){
+      //   item.money = 0
+      // }
       if(item.money > price){
         item.money = price
       }
+      console.log(item.money,'first money');
       this.onCalculation()
+      item.money = this.formatPrice(item.money)
       return item
     }
   },
@@ -1087,7 +1116,9 @@ export default {
       // this.clientData = this.$store.state.shipment.clientItem
       // this.receiveData = this.$store.state.shipment.receiveItem
       this.productItem = this.$store.state.shipment.orderItemRequestList;
-
+      this.productItem.forEach(item=>{
+        item.money = this.formatPrice(item.money)
+      })
       this.hasClass = true;
       this.hasClient = true;
       this.hasReceive = true;
