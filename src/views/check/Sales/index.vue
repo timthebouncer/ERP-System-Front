@@ -738,6 +738,11 @@ export default {
             quantity: 1,
             money: 0
           };
+          let amount = 0
+          if(this.$store.state.shipmentEdited && (this.$store.state.shipment.lastOrderItemList.findIndex(x=>x.barcode==data.barcode))!=-1){
+            amount = this.$store.state.shipment.lastOrderItemList.find(x=>x.barcode==data.barcode).amount
+            data.amount+=amount
+          }
           this.productItemData.push(data);
         });
       });
@@ -842,8 +847,14 @@ export default {
     },
     adder(index) {
       let item = this.productItem[index];
-      let amount = this.productItemData.find(x => x.barcode == item.barcode)
-        .amount;
+      let amount
+      if(this.productItemData.findIndex(x=>x.barcode == item.barcode)!=-1){
+        amount = this.productItemData.find(x => x.barcode == item.barcode)
+                .amount;
+      }
+      else{
+        amount = item.amount
+      }
       if (item.quantity < amount) {
         item.quantity++;
         item.money = this.formatPrice(
@@ -857,7 +868,10 @@ export default {
     },
     minuser(index) {
       let item = this.productItem[index];
-      if (item.quantity > 1) {
+      if ((item.quantity-1) == 0){
+        this.onDelProductDialog(item)
+      }
+      else if (item.quantity > 1) {
         item.quantity--;
         item.money = this.formatPrice(
           (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
@@ -1030,18 +1044,28 @@ export default {
       console.log("dialog input change");
     },
     productCountInput(item) {
+      let amount
+      if(this.productItemData.findIndex(x=>x.barcode == item.barcode)!=-1){
+        amount = this.productItemData.find(x => x.barcode == item.barcode)
+                .amount;
+      }
+      else{
+        amount = item.amount
+      }
       if (item.quantity == "") {
         return;
       } else {
         if (parseInt(item.quantity) == 0) {
-          item.quantity = 1;
+          item.quantity = 0;
           item.money =
             (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
             item.quantity;
           item.money = this.formatPrice(item.money)
           return item;
-        } else if (parseInt(item.quantity) > item.amount) {
-          item.quantity = item.amount;
+        } else if (parseInt(item.quantity) > amount) {
+          this.snackbar = true;
+          this.messageText = "數量不能超過現有庫存數!";
+          item.quantity = amount;
           item.money =
             (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
             item.quantity;
@@ -1056,6 +1080,9 @@ export default {
       }
     },
     productCountChange(item) {
+      if (item.quantity == "0"){
+        this.onDelProductDialog(item)
+      }
       if (item.quantity == "" || item.quantity == undefined) {
         item.quantity = 1;
         item.money =
@@ -1064,6 +1091,7 @@ export default {
         this.onCalculation();
         return item;
       }
+      item.quantity = parseInt(item.quantity)
       this.onCalculation();
       return item;
     },
