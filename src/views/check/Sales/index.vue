@@ -23,10 +23,16 @@
     <!--    新增客戶資料 新增收件資料 彈窗-->
     <v-dialog v-model="dialogVisible" hide-overlay fullscreen>
       <v-card style="background-color: #fff0e9;">
+        <v-system-bar color="#fff0e9"
+          ><v-spacer></v-spacer
+          ><v-btn icon @click="dialogVisible = false"
+            ><v-icon color="#000000" size="25">mdi-close</v-icon></v-btn
+          ></v-system-bar
+        >
         <v-card-title class="justify-center">
           <span class="text-h4">{{ dialogTitle }}</span>
         </v-card-title>
-        <v-card-text>
+        <v-card-text class="pa-2">
           <v-row
             class="align-content-center"
             v-for="item in dialogData"
@@ -292,12 +298,16 @@
             :value="classData.id"
           >
             <v-list-item v-for="child in item.items" :key="child.id">
-              <v-list-item-action class="mr-4">
-                <v-radio :value="child.id" :key="child.id"></v-radio>
-              </v-list-item-action>
-              <v-list-item-content>
-                <v-list-item-title v-text="child.className"></v-list-item-title>
-              </v-list-item-content>
+              <v-radio :value="child.id" :key="child.id">
+                <template v-slot:label>
+                  <v-list-item-action class="mr-1"> </v-list-item-action>
+                  <v-list-item-content>
+                    <v-list-item-title
+                      v-text="child.className" style="color: black;"
+                    ></v-list-item-title>
+                  </v-list-item-content>
+                </template>
+              </v-radio>
             </v-list-item>
           </v-radio-group>
         </template>
@@ -305,16 +315,17 @@
         <template v-else-if="item.key == 'client'">
           <v-radio-group @change="clientRadioChange" :value="clientData.id">
             <v-list-item v-for="child in item.items" :key="child.id">
-              <v-list-item-action class="mr-0">
-                <v-radio :value="child.id" :key="child.id"></v-radio>
-              </v-list-item-action>
-              <v-list-item-content>
-                <v-row class="justify-space-between ma-0 text-center"
-                  ><span class="col-7">{{ child.name }}</span
-                  ><span class="col-4">{{ child.phone }}</span
-                  ><span class=""></span
-                ></v-row>
-              </v-list-item-content>
+                <v-radio :value="child.id" :key="child.id" style="width: 100%;">
+                  <template v-slot:label>
+                    <v-list-item-content>
+                      <v-row class=" ma-0 text-center"
+                      ><span class="col-6 pl-0" style="color: black;">{{ child.name }}</span
+                      ><span class="col-4" style="color: black;">{{ child.phone }}</span
+                      ><span class=""></span
+                      ></v-row>
+                    </v-list-item-content>
+                  </template>
+                </v-radio>
             </v-list-item>
           </v-radio-group>
           <v-list-item class="pa-0 justify-center">
@@ -329,25 +340,27 @@
         </template>
         <!--        收件資料 List-->
         <template v-else-if="item.key == 'receive'">
-          <v-radio-group @change="receiveRadioChange" :value="receiveData.id">
+          <v-radio-group @change="receiveRadioChange" :value="receiveData.id" class="ma-0">
             <v-list-item v-for="child in item.items" :key="child.id">
-              <v-list-item-action class="mr-4">
-                <v-radio :value="child.id" :key="child.id"></v-radio>
-              </v-list-item-action>
-              <v-list-item-content>
-                <div>
-                  <v-row class="justify-space-between ma-0"
-                    ><span class="">{{ child.name }}</span
-                    ><span class="">{{ child.phone }}</span
-                    ><span></span
-                  ></v-row>
-                  <v-row class="justify-space-between ma-0"
-                    ><span class="col-1">{{ child.code }}</span
-                    ><span class="col-10">{{ child.address }}</span
-                    ><span></span
-                  ></v-row>
-                </div>
-              </v-list-item-content>
+                <v-radio :value="child.id" :key="child.id">
+                  <template v-slot:label>
+                    <v-list-item-content >
+                      <div style="color: black;">
+                        <v-row class="justify-space-between ma-0"
+                        ><span class="">{{ child.name }}</span
+                        ><span class="">{{ child.phone }}</span
+                        ><span></span
+                        ></v-row>
+                        <v-row class="justify-space-between ma-0"
+                        ><span class="col-1">{{ child.code }}</span
+                        ><span class="col-10">{{ child.address }}</span
+                        ><span></span
+                        ></v-row>
+                      </div>
+                    </v-list-item-content>
+                  </template>
+                </v-radio>
+
             </v-list-item>
           </v-radio-group>
           <v-list-item class="pa-0 justify-center">
@@ -381,7 +394,7 @@
           <!--          ></v-autocomplete>-->
           <v-text-field
             id="barcodeInput"
-            v-model="productId"
+            v-model="productBarcode"
             @input="setBarcode"
             solo
           ></v-text-field> </v-col
@@ -414,9 +427,12 @@
                 </p>
                 <p>
                   <span>出貨售價:</span
-                  ><span>{{ formatPrice(item.salesPrice === 0
-                      ? item.listPrice * item.quantity
-                      : item.salesPrice * item.quantity)
+                  ><span>{{
+                    formatPrice(
+                      item.salesPrice === 0
+                        ? item.listPrice * item.quantity
+                        : item.salesPrice * item.quantity
+                    )
                   }}</span>
                 </p>
                 <p>
@@ -549,7 +565,7 @@ export default {
       ],
       productItemData: [],
       productItem: [],
-      productId: "",
+      productBarcode: "",
       productData: {
         id: "",
         productId: "",
@@ -622,7 +638,7 @@ export default {
   },
   methods: {
     formatPrice(value) {
-      return (value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+      return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     },
     onScroll(e) {
       if (typeof window === "undefined") return;
@@ -738,10 +754,17 @@ export default {
             quantity: 1,
             money: 0
           };
-          let amount = 0
-          if(this.$store.state.shipmentEdited && (this.$store.state.shipment.lastOrderItemList.findIndex(x=>x.barcode==data.barcode))!=-1){
-            amount = this.$store.state.shipment.lastOrderItemList.find(x=>x.barcode==data.barcode).amount
-            data.amount+=amount
+          let amount = 0;
+          if (
+            this.$store.state.shipmentEdited &&
+            this.$store.state.shipment.lastOrderItemList.findIndex(
+              x => x.barcode == data.barcode
+            ) != -1
+          ) {
+            amount = this.$store.state.shipment.lastOrderItemList.find(
+              x => x.barcode == data.barcode
+            ).amount;
+            data.amount += amount;
           }
           this.productItemData.push(data);
         });
@@ -838,28 +861,32 @@ export default {
       }
 
       this.productItem.forEach(item => {
-        item.money =
+        item.money = this.formatPrice(
           (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
-          item.quantity;
+            item.quantity
+        );
       });
       this.onCalculation();
       this.salesDialogVisible = false;
+      this.productBarcode = "";
     },
     adder(index) {
       let item = this.productItem[index];
-      let amount
-      if(this.productItemData.findIndex(x=>x.barcode == item.barcode)!=-1){
+      let amount;
+      if (
+        this.productItemData.findIndex(x => x.barcode == item.barcode) != -1
+      ) {
         amount = this.productItemData.find(x => x.barcode == item.barcode)
-                .amount;
-      }
-      else{
-        amount = item.amount
+          .amount;
+      } else {
+        amount = item.amount;
       }
       if (item.quantity < amount) {
         item.quantity++;
         item.money = this.formatPrice(
           (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
-          item.quantity);
+            item.quantity
+        );
         this.onCalculation();
       } else {
         this.snackbar = true;
@@ -868,14 +895,14 @@ export default {
     },
     minuser(index) {
       let item = this.productItem[index];
-      if ((item.quantity-1) == 0){
-        this.onDelProductDialog(item)
-      }
-      else if (item.quantity > 1) {
+      if (item.quantity - 1 == 0) {
+        this.onDelProductDialog(item);
+      } else if (item.quantity > 1) {
         item.quantity--;
         item.money = this.formatPrice(
           (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
-          item.quantity);
+            item.quantity
+        );
         this.onCalculation();
       }
     },
@@ -920,9 +947,9 @@ export default {
       this.total = 0;
       this.productItem.forEach(item => {
         let price = 0;
-        let money
-        money = item.money.toString().replace(/[^0-9]+/g, "")
-        money = parseInt(money)
+        let money;
+        money = item.money.toString().replace(/[^0-9]+/g, "");
+        money = parseInt(money);
         price =
           (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
           item.quantity;
@@ -941,11 +968,11 @@ export default {
       this.$store.state.shipment.classItem = this.classData;
       this.$store.state.shipment.clientItem = this.clientData;
       this.$store.state.shipment.receiveItem = this.receiveData;
-      this.productItem.forEach(item=>{
-        let money
-        money = item.money.toString().replace(/[^0-9]+/g, "")
-        item.money = parseInt(money)
-      })
+      this.productItem.forEach(item => {
+        let money;
+        money = item.money.toString().replace(/[^0-9]+/g, "");
+        item.money = parseInt(money);
+      });
       this.$store.state.shipment.orderItemRequestList = this.productItem;
       this.$store.state.shipment.discount = this.discount;
       this.$store.state.shipment.total = this.total;
@@ -1044,13 +1071,14 @@ export default {
       console.log("dialog input change");
     },
     productCountInput(item) {
-      let amount
-      if(this.productItemData.findIndex(x=>x.barcode == item.barcode)!=-1){
+      let amount;
+      if (
+        this.productItemData.findIndex(x => x.barcode == item.barcode) != -1
+      ) {
         amount = this.productItemData.find(x => x.barcode == item.barcode)
-                .amount;
-      }
-      else{
-        amount = item.amount
+          .amount;
+      } else {
+        amount = item.amount;
       }
       if (item.quantity == "") {
         return;
@@ -1060,7 +1088,7 @@ export default {
           item.money =
             (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
             item.quantity;
-          item.money = this.formatPrice(item.money)
+          item.money = this.formatPrice(item.money);
           return item;
         } else if (parseInt(item.quantity) > amount) {
           this.snackbar = true;
@@ -1069,19 +1097,19 @@ export default {
           item.money =
             (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
             item.quantity;
-          item.money = this.formatPrice(item.money)
+          item.money = this.formatPrice(item.money);
           return item;
         }
         item.money =
           (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
           item.quantity;
-        item.money = this.formatPrice(item.money)
+        item.money = this.formatPrice(item.money);
         return item;
       }
     },
     productCountChange(item) {
-      if (item.quantity == "0"){
-        this.onDelProductDialog(item)
+      if (item.quantity == "0") {
+        this.onDelProductDialog(item);
       }
       if (item.quantity == "" || item.quantity == undefined) {
         item.quantity = 1;
@@ -1091,35 +1119,37 @@ export default {
         this.onCalculation();
         return item;
       }
-      item.quantity = parseInt(item.quantity)
+      item.quantity = parseInt(item.quantity);
       this.onCalculation();
       return item;
     },
-    productMoneyInput(value){
-      console.log(value,'first value');
-      if(value == ''){
-        value = '0'
+    productMoneyInput(value) {
+      console.log(value, "first value");
+      if (value == "") {
+        value = "0";
       }
-      value = value.toString().replace(/[^0-9]+/g, "")
+      value = value.toString().replace(/[^0-9]+/g, "");
       console.log(value);
-      return this.formatPrice(parseInt(value))
+      return this.formatPrice(parseInt(value));
 
       // return parseInt(value)
     },
     productMoneyChange(item) {
-      let price = (item.salesPrice === 0 ? item.listPrice : item.salesPrice) * item.quantity
-      item.money = item.money.toString().replace(/[^0-9]+/g, "")
-      item.money = parseInt(item.money)
+      let price =
+        (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
+        item.quantity;
+      item.money = item.money.toString().replace(/[^0-9]+/g, "");
+      item.money = parseInt(item.money);
       // if(item.money == undefined || item.money == ""){
       //   item.money = 0
       // }
-      if(item.money > price){
-        item.money = price
+      if (item.money > price) {
+        item.money = price;
       }
-      console.log(item.money,'first money');
-      this.onCalculation()
-      item.money = this.formatPrice(item.money)
-      return item
+      console.log(item.money, "first money");
+      this.onCalculation();
+      item.money = this.formatPrice(item.money);
+      return item;
     }
   },
   async mounted() {
@@ -1144,9 +1174,9 @@ export default {
       // this.clientData = this.$store.state.shipment.clientItem
       // this.receiveData = this.$store.state.shipment.receiveItem
       this.productItem = this.$store.state.shipment.orderItemRequestList;
-      this.productItem.forEach(item=>{
-        item.money = this.formatPrice(item.money)
-      })
+      this.productItem.forEach(item => {
+        item.money = this.formatPrice(item.money);
+      });
       this.hasClass = true;
       this.hasClient = true;
       this.hasReceive = true;
@@ -1162,9 +1192,6 @@ export default {
 .container {
   background-color: #fff0e9;
   padding: 12px 5px 12px 5px;
-}
-::v-deep .v-dialog {
-  margin: 10px;
 }
 .top-wrapper {
   background-color: #c2c2c2;

@@ -33,6 +33,7 @@ service.interceptors.response.use(
       window.sessionStorage.removeItem("token");
       router.replace("/login");
     }
+    return Promise.reject(error);
   }
 );
 
