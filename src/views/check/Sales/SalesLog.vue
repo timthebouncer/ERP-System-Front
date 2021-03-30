@@ -193,6 +193,7 @@ export default {
               barcode: item.barcode,
               name: item.productName,
               quantity: item.amount,
+              amount: parseInt(item.amount),
               salesPrice: item.clientPrice == 0 ? item.price : item.clientPrice,
               money:
                 (item.clientPrice == 0 ? item.price : item.clientPrice) *
@@ -203,6 +204,7 @@ export default {
             };
           }
         );
+        this.$store.state.shipment.lastOrderItemList = this.$store.state.shipment.orderItemRequestList
         this.$store.state.shipment.discount = discount;
         this.$store.state.shipment.total = total;
         this.$store.state.salesDetailed = true;

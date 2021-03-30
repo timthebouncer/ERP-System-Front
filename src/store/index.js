@@ -22,7 +22,8 @@ export default new Vuex.Store({
       shippingFee: 0,
       trackingNo:'',
       remark:'',
-      orderItemRequestList:[]
+      orderItemRequestList:[],
+      lastOrderItemList:[]
     },
     workDate: '',
     shipmentBacked: false,
