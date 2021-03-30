@@ -882,8 +882,9 @@ export default {
               });
               let formData = new FormData();
               formData.append("file", file);
-              formData.append("width", 180);
-              formData.append("height", 80);
+              formData.append("width", this.tagWidth);
+              formData.append("height", this.tagHeight);
+              formData.append("printerName", 'Sbarco T4ES 203 dpi');
               const agent = new https.Agent({ rejectUnauthorized: false });
               await axios
                 .post(`http://${this.userIP}:8099/print/printTag`, formData,{httpsAgent: agent})
@@ -910,6 +911,7 @@ export default {
           formData.append("file", file);
           formData.append("width", this.tagWidth);
           formData.append("height", this.tagHeight);
+          formData.append("printerName", 'Sbarco T4ES 203 dpi');
           const agent = new https.Agent({ rejectUnauthorized: false });
           await axios
             .post(`http://${this.userIP}:8099/print/printTag`, formData, {httpsAgent: agent})
