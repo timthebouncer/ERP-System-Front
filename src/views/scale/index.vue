@@ -391,6 +391,8 @@ export default {
       accumulateValue: 0,
       stockInFormAmount: 0,
       deductionValue: 0,
+      tagHeight: 0,
+      tagWidth: 0,
       userName: "",
       userIP: "",
       log: "",
@@ -673,6 +675,10 @@ export default {
       this.stockInForm.unit = this.commodity[index].unit;
       //取得當前選擇的商品barcodeBase64
       this.barcodeBase64 = this.commodity[index].barcodeBase64;
+      //取得標籤高
+      this.tagHeight = this.commodity[index].tagHeight;
+      //取得標籤寬
+      this.tagWidth = this.commodity[index].tagWidth;
       //SVG
       this.svgString = this.commodity[index].svgString;
       this.svgForm.name = this.commodity[index].name;
@@ -876,9 +882,11 @@ export default {
               });
               let formData = new FormData();
               formData.append("file", file);
+              formData.append("width", 180);
+              formData.append("height", 80);
               const agent = new https.Agent({ rejectUnauthorized: false });
               await axios
-                .post(`https://${this.userIP}:8099/print/printTag`, formData,{httpsAgent: agent})
+                .post(`http://${this.userIP}:8099/print/printTag`, formData,{httpsAgent: agent})
                 .then(res => {
                   if (res.data.status === 200) {
                     status = true;
@@ -900,9 +908,11 @@ export default {
           let file = new File([canvasStr], "text.txt", { type: "text/plain" });
           let formData = new FormData();
           formData.append("file", file);
+          formData.append("width", this.tagWidth);
+          formData.append("height", this.tagHeight);
           const agent = new https.Agent({ rejectUnauthorized: false });
           await axios
-            .post(`https://${this.userIP}:8099/print/printTag`, formData, {httpsAgent: agent})
+            .post(`http://${this.userIP}:8099/print/printTag`, formData, {httpsAgent: agent})
             .then(res => {
               console.log(res.data.status);
             })
@@ -913,8 +923,8 @@ export default {
         // this.imageDataUrl = this.canvas.toDataURL({
         //     left: 25,
         //     top: 25,
-        //     width: 500,
-        //     height: 500,
+        //     width: 500, 100mm -> 50mm
+        //     height: 500,  80mm -> 50mm
         //     format: 'png'
         // })
         // //base64 to image
