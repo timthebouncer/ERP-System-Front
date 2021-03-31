@@ -2,11 +2,11 @@
   <div>
     <div class="top-wrapper">
       <div class="btn-wrapper">
-        <v-btn color="normal" @click="showToday">今天</v-btn>
-        <v-btn color="normal" @click="showWeek">本周</v-btn>
-        <v-btn color="normal" @click="showMonth">本月</v-btn>
-        <v-btn color="normal" @click="showLastMonth">上個月</v-btn>
-        <v-btn color="normal" @click="showAll">全部</v-btn>
+        <v-btn id="today-btn-color" color="normal" @click="showToday">今天</v-btn>
+        <v-btn id="today-btn-color" color="normal" @click="showWeek">本周</v-btn>
+        <v-btn id="today-btn-color" color="normal" @click="showMonth">本月</v-btn>
+        <v-btn id="today-btn-color" color="normal" @click="showLastMonth">上個月</v-btn>
+        <v-btn id="today-btn-color" color="normal" @click="showAll">全部</v-btn>
       </div>
     </div>
     <div class="content-wrapper">
@@ -30,11 +30,14 @@
             <tr v-for="(item,index) in tableData" :key="index" class="text-center">
               <td>{{ item.updateDate }}</td>
               <td>{{ item.productName }}</td>
-              <td>{{ item.amount }}</td>
+              <td style="color: red">{{ item.amount }}</td>
             </tr>
           </tbody>
         </template>
       </v-simple-table>
+      <div class="nodata-message" v-show="message">
+        <h1>尚無資料</h1>
+      </div>
       <div class="loading">
         <div class="ball"></div>
         <div class="ball"></div>
@@ -50,9 +53,8 @@ export default {
   data() {
     let differentDate = [
       moment()
-              .date(1)
               .startOf('day'),
-      moment().endOf('month')
+      moment().endOf('day')
     ]
     return {
       tableData: [],
@@ -62,15 +64,17 @@ export default {
       startDate: differentDate[0].format('YYYY-MM-DD'),
       endDate: differentDate[1].format('YYYY-MM-DD'),
       mark:'-',
-      contentStatus:''
+      contentStatus:'',
+      message:true
     };
   },
   async created() {
-    // const res = await this.$api.Login.loginIdentify()
-    // console.log(res)
-    // if(res.data === false){
-    //   this.$router.push('/')
-    // }
+    const res = await this.$api.Login.loginIdentify()
+    console.log(res)
+    if(res.data === false){
+      this.$router.push('/')
+    }
+    this.getInventoryLog()
   },
   mounted() {
     window.addEventListener('scroll', () => {
@@ -151,7 +155,7 @@ export default {
     getInventoryLog(){
       this.$api.Inventory.getInventoryLogList({
         searchKey:"",
-        action:"",
+        action:"STOCK_EDIT",
         startDate:this.startDate == '' ? this.startDate : this.startDate + ' 00:00:00',
         endDate: this.endDate == '' ? this.endDate : this.endDate + ' 23:59:59',
         pageNumber:this.pageNumber,
@@ -161,6 +165,11 @@ export default {
         this.contentStatus = res.data.empty
         document.querySelector('.loading').classList.remove('show')
         this.tableData.push(...res.data.content)
+        if(this.tableData.length ===0){
+          this.message = true
+        }else {
+          this.message = false
+        }
       })
     }
   }
@@ -171,6 +180,12 @@ export default {
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
+}
+#today-btn-color:hover{
+  background-color: burlywood !important;
+}
+.nodata-message{
+  margin: 150px 121px 0 126px;
 }
 .loading{
   opacity: 0;
