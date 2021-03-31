@@ -278,7 +278,7 @@
           >
             <div>{{ item.name }}</div>
             <div>
-              {{ item.weight === 0 ? "" : item.weight }}{{ getUnit(item.unit) }}
+              {{ item.fixedWeight !== 0 ? item.fixedWeight : item.stockAmount === 0 ? "" : item.stockAmount }}{{ item.fixedWeight !== 0 ? `${getUnit(item.weightUnit)}/${getUnit(item.unit)}` : getUnit(item.unit) }}
             </div>
           </div>
           <i />
@@ -391,6 +391,8 @@ export default {
       accumulateValue: 0,
       stockInFormAmount: 0,
       deductionValue: 0,
+      tagHeight: 0,
+      tagWidth: 0,
       userName: "",
       userIP: "",
       log: "",
@@ -513,8 +515,13 @@ export default {
         this.changeUnit("g");
       }
       //取得當前磅秤量的重量
-      this.stockInForm.weight = this.displayValue
-      this.svgForm.weight = this.displayValue
+      if(this.deductionValue > 0) {
+        this.stockInForm.weight = this.displayValue - this.deductionValue
+        this.svgForm.weight = this.displayValue - this.deductionValue
+      }else{
+        this.stockInForm.weight = this.displayValue
+        this.svgForm.weight = this.displayValue
+      }
     }
   },
   computed: {
@@ -667,12 +674,24 @@ export default {
       this.stockInForm.productId = this.commodity[index].id;
       //當前選擇的商品barcode
       this.stockInForm.barcode = this.commodity[index].barcode;
+      //商品有固定條碼時不用傳重量
+      if(this.stockInForm.barcode !== ""){
+        this.stockInForm.weight = 0
+        this.svgForm.weight = 0
+      }else{
+        this.stockInForm.weight = ""
+        this.svgForm.weight = ""
+      }
       //當前選擇的商品的總數量
       this.stockInFormAmount = this.commodity[index].stockAmount;
       //取得當前選擇的商品單位
       this.stockInForm.unit = this.commodity[index].unit;
       //取得當前選擇的商品barcodeBase64
       this.barcodeBase64 = this.commodity[index].barcodeBase64;
+      //取得標籤高
+      this.tagHeight = this.commodity[index].tagHeight;
+      //取得標籤寬
+      this.tagWidth = this.commodity[index].tagWidth;
       //SVG
       this.svgString = this.commodity[index].svgString;
       this.svgForm.name = this.commodity[index].name;
@@ -876,9 +895,12 @@ export default {
               });
               let formData = new FormData();
               formData.append("file", file);
+              formData.append("width", this.tagWidth);
+              formData.append("height", this.tagHeight);
+              formData.append("printerName", 'Sbarco T4ES 203 dpi');
               const agent = new https.Agent({ rejectUnauthorized: false });
               await axios
-                .post(`https://${this.userIP}:8099/print/printTag`, formData,{httpsAgent: agent})
+                .post(`http://${this.userIP}:8099/print/printTag`, formData,{httpsAgent: agent})
                 .then(res => {
                   if (res.data.status === 200) {
                     status = true;
@@ -900,9 +922,12 @@ export default {
           let file = new File([canvasStr], "text.txt", { type: "text/plain" });
           let formData = new FormData();
           formData.append("file", file);
+          formData.append("width", this.tagWidth);
+          formData.append("height", this.tagHeight);
+          formData.append("printerName", 'Sbarco T4ES 203 dpi');
           const agent = new https.Agent({ rejectUnauthorized: false });
           await axios
-            .post(`https://${this.userIP}:8099/print/printTag`, formData, {httpsAgent: agent})
+            .post(`http://${this.userIP}:8099/print/printTag`, formData, {httpsAgent: agent})
             .then(res => {
               console.log(res.data.status);
             })
@@ -913,8 +938,8 @@ export default {
         // this.imageDataUrl = this.canvas.toDataURL({
         //     left: 25,
         //     top: 25,
-        //     width: 500,
-        //     height: 500,
+        //     width: 500, 100mm -> 50mm
+        //     height: 500,  80mm -> 50mm
         //     format: 'png'
         // })
         // //base64 to image
@@ -941,10 +966,8 @@ export default {
         //取得當前要操作入庫/取消的數量
         this.stockInForm.amount = this.count;
         this.stockInForm.orderId = this.addOrderForm.id;
-        //商品有固定條碼時不用傳重量
-        if(this.stockInForm.barcode !== ""){
-          this.stockInForm.weight = 0
-          this.svgForm.weight = 0
+        if (this.stockInForm.weight === "") {
+          return (this.inboundStatus = true), (this.inboundMsg = "入庫商品請秤重");
         }
         await this.$scale.Inventory.stockIn(this.stockInForm).then(
           async res => {
@@ -981,7 +1004,12 @@ export default {
                   } else if (items.name === "unit") {
                     items.text = `計價單位:${this.svgForm.unit}`;
                   } else if (items.name === "weight") {
-                    items.text = `重量:${this.svgForm.weight}`;
+                    if(this.stockInForm.barcode !== "") {
+                      items.text = `定重重量:${this.svgForm.weight}`;
+                    }else{
+                      console.log(this.svgForm.weight);
+                      items.text = `重量:${this.svgForm.weight}`;
+                    }
                   } else if (items.name === "price") {
                     items.text = `價格:${this.svgForm.price}元`;
                   } else if (items.name === "productNo") {
