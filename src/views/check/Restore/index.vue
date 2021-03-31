@@ -8,7 +8,7 @@
           <v-text-field
             solo
             v-model="searchBarcode"
-            @input="barcodeChange"
+            v-on:keyup="updateLen"
             placeholder="可掃條碼 或 手動輸入"
             class="barcode-input"
           ></v-text-field>
@@ -16,15 +16,27 @@
       </div>
     </div>
     <div class="content-wrapper">
-      <div class="enter-goods">商品資料</div>
-      <v-alert
-        :value="status"
-        type="info"
-        elevation="6"
-        style="width: 200px; margin: 0 auto"
+      <div class="enter-goods">入庫商品資料</div>
+      <v-snackbar
+              :timeout= 2500
+              v-model="notify"
+              :color="'success'"
+              absolute
+              centered
+              elevation="10"
       >
-        入庫成功
-      </v-alert>
+        <h3 class="notification">{{'取消入庫成功'}}</h3>
+      </v-snackbar>
+      <v-snackbar
+              :timeout= 2500
+              v-model="enterNotify"
+              :color="'error'"
+              absolute
+              centered
+              elevation="10"
+      >
+        <h3 class="notification">{{'請輸入商品條碼'}}</h3>
+      </v-snackbar>
       <template v-if="searchBarcode !== ''">
         <div class="goods-detail">
           <div>
@@ -37,19 +49,18 @@
             class="goods-display"
             v-if="productList.unit === '件' || productList.unit === '包'"
           >
-            <div style="margin-left: -32px;">數量</div>
-            <div>
-              <v-text-field
-                v-model="totalAmount"
-                @click:prepend="decrement()"
-                prepend-icon="mdi-minus"
-                @click:append-outer="increment()"
-                append-outer-icon="mdi-plus"
-                type="number"
-                class="input-number"
-              >
-              </v-text-field>
-            </div>
+            <div style="margin-left: -11px;width: 75px">數量</div>
+              <Index v-on:changeNumber="getChangeNumber" />
+<!--              <v-text-field-->
+<!--                v-model="totalAmount"-->
+<!--                @click:prepend="decrement()"-->
+<!--                prepend-icon="mdi-minus"-->
+<!--                @click:append-outer="increment()"-->
+<!--                append-outer-icon="mdi-plus"-->
+<!--                type="number"-->
+<!--                class="input-number"-->
+<!--              >-->
+<!--              </v-text-field>-->
           </div>
           <div v-else>
             數量
@@ -79,14 +90,19 @@
   </div>
 </template>
 <script>
+import _ from "lodash"
+import Index from '@/components/plusButton/index'
 export default {
   name: "Restore",
+  components:{Index},
   data() {
     return {
       searchBarcode: "",
       productList: {},
       totalAmount: 0,
-      status: false
+      status: false,
+      notify:false,
+      enterNotify:false
     };
   },
     // async created() {
@@ -102,37 +118,42 @@ export default {
     }
   },
   methods: {
-    barcodeChange() {
-      this.$api.Inventory.getStockDetail({
-        barcode: this.searchBarcode
-      })
-        .then(res => {
-          this.productList = res.data;
-        })
-        .catch(() => {
-          this.productList = {};
-          this.totalAmount = 0;
-        });
-    },
+    updateLen: _.debounce(
+            function() {
+              this.$api.Inventory.getStockDetail({
+                barcode: this.searchBarcode
+              }).then(res => {
+                this.productList = res.data;
+              }).catch(()=>{
+                this.productList = {}
+                this.totalAmount = 0
+              })
+            }, 500),
     addInventory() {
-      if(this.totalAmount === 0){
-        this.$api.Inventory.deleteInventory({
-          id: this.productList.inventoryId,
-          barcode: this.searchBarcode,
-          amount: this.productList.amount + 1
-        }).then(() => {
-          this.status = true;
-          this.clearData();
-        });
+      if(this.searchBarcode){
+        if(this.totalAmount === 0){
+          this.$api.Inventory.deleteInventory({
+            id: this.productList.inventoryId,
+            barcode: this.searchBarcode,
+            amount: this.productList.amount + 1
+          }).then(() => {
+            this.status = true;
+            this.notify = true
+            this.clearData();
+          });
+        }else {
+          this.$api.Inventory.deleteInventory({
+            id: this.productList.inventoryId,
+            barcode: this.searchBarcode,
+            amount: this.productList.amount + this.totalAmount
+          }).then(() => {
+            this.status = true;
+            this.notify = true
+            this.clearData();
+          });
+        }
       }else {
-        this.$api.Inventory.deleteInventory({
-          id: this.productList.inventoryId,
-          barcode: this.searchBarcode,
-          amount: this.productList.amount + this.totalAmount
-        }).then(() => {
-          this.status = true;
-          this.clearData();
-        });
+        this.enterNotify = true
       }
     },
     clearData() {
@@ -152,6 +173,10 @@ export default {
     },
     increment() {
       this.totalAmount += 1;
+    },
+    getChangeNumber(e){
+      console.log(e)
+      this.totalAmount = parseInt(e)
     }
   }
 };
@@ -175,7 +200,8 @@ export default {
   width: 100%;
   background-color: #ffffff;
 }
-.content-wrapper {
+.notification{
+  text-align: center;
 }
 .goods-display {
   display: flex;
