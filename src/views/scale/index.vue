@@ -993,7 +993,11 @@ export default {
                   } else if (items.name === "unit") {
                     items.text = `計價單位:${this.svgForm.unit}`;
                   } else if (items.name === "weight") {
-                    items.text = `重量:${this.svgForm.weight}`;
+                    if(this.stockInForm.barcode !== "") {
+                      items.text = `定重重量:${this.svgForm.weight}`;
+                    }else{
+                      items.text = `重量:${this.svgForm.weight}`;
+                    }
                   } else if (items.name === "price") {
                     items.text = `價格:${this.svgForm.price}元`;
                   } else if (items.name === "productNo") {
