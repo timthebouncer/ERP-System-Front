@@ -278,7 +278,7 @@
           >
             <div>{{ item.name }}</div>
             <div>
-              {{ item.weight === 0 ? "" : item.weight }}{{ getUnit(item.unit) }}
+              {{ item.fixedWeight !== 0 ? item.fixedWeight : item.stockAmount === 0 ? "" : item.stockAmount }}{{ item.fixedWeight !== 0 ? `${getUnit(item.weightUnit)}/${getUnit(item.unit)}` : getUnit(item.unit) }}
             </div>
           </div>
           <i />
