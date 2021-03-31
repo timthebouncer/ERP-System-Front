@@ -1,6 +1,41 @@
 <template>
   <div>
+    <v-dialog v-model="settingDialog">
+      <v-card style="background-color: #fff0e9;">
+        <v-system-bar color="#fff0e9"
+        ><v-spacer></v-spacer
+        ><v-btn icon @click="settingDialog = false"
+        ><v-icon color="#000000" size="25">mdi-close</v-icon></v-btn
+        ></v-system-bar
+        >
+        <v-card-text class="pl-1 pr-2 pt-4">
+          <v-row class="align-content-center"
+          ><v-col class="col-5"
+          ><span class="text-h6 font-weight-black">標籤機IP</span></v-col
+          ><v-col class="col-6 pa-0"
+          ><v-text-field solo></v-text-field></v-col
+          ></v-row
+          >
+          <v-row class="align-content-center"
+          ><v-col class="col-5"
+          ><span class="text-h6 font-weight-black">列印機名稱</span></v-col
+          ><v-col class="col-6 pa-0"
+          ><v-text-field solo></v-text-field></v-col
+          ></v-row
+          >
+        </v-card-text>
+        <v-card-actions class="justify-center">
+          <v-btn color="" text outlined @click="settingDialog = false">
+            取消
+          </v-btn>
+          <v-btn color="primary" @click="settingFun">
+            儲存
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-toolbar fixed dark color="#0c519c">
+      <v-btn icon @click="settingDialog=true"><v-icon color="#f7b573">mdi-cog</v-icon></v-btn>
       <v-spacer></v-spacer>
       <v-menu
         bottom
@@ -124,7 +159,8 @@ export default {
         restoreLogBtn: false,
         cancelRestoreBtn: false,
         cancelRestoreLogBtn: false
-      }
+      },
+      settingDialog: false
     };
   },
   watch: {
@@ -227,6 +263,9 @@ export default {
         this.$router.push('/login')
         this.menuName = ''
       })
+    },
+    settingFun(){
+
     }
   },
   mounted() {
