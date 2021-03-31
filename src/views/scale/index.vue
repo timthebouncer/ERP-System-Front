@@ -515,8 +515,13 @@ export default {
         this.changeUnit("g");
       }
       //取得當前磅秤量的重量
-      this.stockInForm.weight = this.displayValue
-      this.svgForm.weight = this.displayValue
+      if(this.deductionValue > 0) {
+        this.stockInForm.weight = this.displayValue - this.deductionValue
+        this.svgForm.weight = this.displayValue - this.deductionValue
+      }else{
+        this.stockInForm.weight = this.displayValue
+        this.svgForm.weight = this.displayValue
+      }
     }
   },
   computed: {
@@ -669,6 +674,14 @@ export default {
       this.stockInForm.productId = this.commodity[index].id;
       //當前選擇的商品barcode
       this.stockInForm.barcode = this.commodity[index].barcode;
+      //商品有固定條碼時不用傳重量
+      if(this.stockInForm.barcode !== ""){
+        this.stockInForm.weight = 0
+        this.svgForm.weight = 0
+      }else{
+        this.stockInForm.weight = ""
+        this.svgForm.weight = ""
+      }
       //當前選擇的商品的總數量
       this.stockInFormAmount = this.commodity[index].stockAmount;
       //取得當前選擇的商品單位
@@ -953,10 +966,8 @@ export default {
         //取得當前要操作入庫/取消的數量
         this.stockInForm.amount = this.count;
         this.stockInForm.orderId = this.addOrderForm.id;
-        //商品有固定條碼時不用傳重量
-        if(this.stockInForm.barcode !== ""){
-          this.stockInForm.weight = 0
-          this.svgForm.weight = 0
+        if (this.stockInForm.weight === "") {
+          return (this.inboundStatus = true), (this.inboundMsg = "入庫商品請秤重");
         }
         await this.$scale.Inventory.stockIn(this.stockInForm).then(
           async res => {
@@ -996,6 +1007,7 @@ export default {
                     if(this.stockInForm.barcode !== "") {
                       items.text = `定重重量:${this.svgForm.weight}`;
                     }else{
+                      console.log(this.svgForm.weight);
                       items.text = `重量:${this.svgForm.weight}`;
                     }
                   } else if (items.name === "price") {
