@@ -1051,7 +1051,6 @@ export default {
                 });
                 this.canvas.clear();
                 await this.loadFromJson(svgJSON);
-                console.log(svgJSON);
                 await this.changeBarcode();
                 this.stockInForm.weight = ""
                 this.svgForm.weight = ""
