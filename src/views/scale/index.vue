@@ -433,7 +433,8 @@ export default {
         price: 0,
         today: "",
         pSolarDay: 1,
-        rSolarDay: 1
+        rSolarDay: 1,
+        alias: ""
       },
       svgString: "",
       barcodeBase64: "",
@@ -707,6 +708,7 @@ export default {
       this.svgForm.unit = this.getUnit(this.commodity[index].unit);
       this.svgForm.barcode = this.commodity[index].barcode;
       this.svgForm.price = this.commodity[index].price;
+      this.svgForm.alias = this.commodity[index].alias;
       this.position = index;
       //切換標籤時reset組件
       this.restPlusBtn = false;
@@ -820,11 +822,19 @@ export default {
       if (svgJSON) {
         await svgJSON.objects.map(async items => {
           if (items.name === "productName") {
-            items.text = `商品名稱:${this.svgForm.name}`;
+            if(this.svgForm.alias) {
+              items.text = `商品名稱:${this.svgForm.alias}`;
+            }else{
+              items.text = `商品名稱:${this.svgForm.name}`;
+            }
           } else if (items.name === "unit") {
             items.text = `計價單位:${this.svgForm.unit}`;
           } else if (items.name === "weight") {
-            items.text = `重量:${this.svgForm.weight}`;
+            if(this.stockInForm.barcode !== "") {
+              items.text = `定重重量:${this.svgForm.weight}`;
+            }else{
+              items.text = `重量:${this.svgForm.weight}`;
+            }
           } else if (items.name === "price") {
             items.text = `價格:${this.svgForm.price}元`;
           } else if (items.name === "productNo") {
@@ -1014,7 +1024,11 @@ export default {
               if (svgJSON) {
                 await svgJSON.objects.map(async items => {
                   if (items.name === "productName") {
-                    items.text = `商品名稱:${this.svgForm.name}`;
+                    if(this.svgForm.alias) {
+                      items.text = `商品名稱:${this.svgForm.alias}`;
+                    }else{
+                      items.text = `商品名稱:${this.svgForm.name}`;
+                    }
                   } else if (items.name === "unit") {
                     items.text = `計價單位:${this.svgForm.unit}`;
                   } else if (items.name === "weight") {
@@ -1037,6 +1051,7 @@ export default {
                 });
                 this.canvas.clear();
                 await this.loadFromJson(svgJSON);
+                console.log(svgJSON);
                 await this.changeBarcode();
                 this.stockInForm.weight = ""
                 this.svgForm.weight = ""
