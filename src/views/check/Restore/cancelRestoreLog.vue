@@ -2,11 +2,11 @@
   <div>
     <div class="top-wrapper">
       <div class="btn-wrapper">
-        <v-btn id="today-btn-color" color="normal" @click="showToday">今天</v-btn>
-        <v-btn id="today-btn-color" color="normal" @click="showWeek">本周</v-btn>
-        <v-btn id="today-btn-color" color="normal" @click="showMonth">本月</v-btn>
-        <v-btn id="today-btn-color" color="normal" @click="showLastMonth">上個月</v-btn>
-        <v-btn id="today-btn-color" color="normal" @click="showAll">全部</v-btn>
+        <v-btn :style="{background: isActive === true? 'burlywood':'white'}"  @click="showToday">今天</v-btn>
+        <v-btn :style="{background: isActive2 === true? 'burlywood':'white'}" @click="showWeek">本周</v-btn>
+        <v-btn :style="{background: isActive3 === true? 'burlywood':'white'}" @click="showMonth">本月</v-btn>
+        <v-btn :style="{background: isActive4 === true? 'burlywood':'white'}" @click="showLastMonth">上個月</v-btn>
+        <v-btn :style="{background: isActive5 === true? 'burlywood':'white'}" @click="showAll">全部</v-btn>
       </div>
     </div>
     <div class="content-wrapper">
@@ -57,6 +57,11 @@ export default {
       moment().endOf('day')
     ]
     return {
+      isActive:false,
+      isActive2:false,
+      isActive3:false,
+      isActive4:false,
+      isActive5:false,
       tableData: [],
       pageNumber:1,
       pageSize:30,
@@ -75,6 +80,7 @@ export default {
       this.$router.push('/')
     }
     this.getInventoryLog()
+    this.isActive = true
   },
   mounted() {
     window.addEventListener('scroll', () => {
@@ -99,6 +105,11 @@ export default {
       this.tableData = []
       this.pageNumber = 1
       this.getInventoryLog()
+      this.isActive = true
+      this.isActive2 = false
+      this.isActive3=false
+      this.isActive4=false
+      this.isActive5=false
     },
     showWeek(){
       this.differentDate = [
@@ -114,6 +125,11 @@ export default {
       this.tableData = []
       this.pageNumber = 1
       this.getInventoryLog()
+      this.isActive2 = true
+      this.isActive = false
+      this.isActive3=false
+      this.isActive4=false
+      this.isActive5=false
     },
     showMonth(){
       this.differentDate = [
@@ -127,6 +143,11 @@ export default {
       this.tableData = []
       this.pageNumber = 1
       this.getInventoryLog()
+      this.isActive3 = true
+      this.isActive = false
+      this.isActive2=false
+      this.isActive4=false
+      this.isActive5=false
     },
     showLastMonth(){
       this.differentDate = [
@@ -143,6 +164,11 @@ export default {
       this.tableData = []
       this.pageNumber = 1
       this.getInventoryLog()
+      this.isActive4 = true
+      this.isActive = false
+      this.isActive2=false
+      this.isActive3=false
+      this.isActive5=false
     },
     showAll(){
       this.differentDate = ['']
@@ -151,6 +177,11 @@ export default {
       this.tableData = []
       this.pageNumber = 1
       this.getInventoryLog()
+      this.isActive = false
+      this.isActive2 = false
+      this.isActive3=false
+      this.isActive4=false
+      this.isActive5=true
     },
     getInventoryLog(){
       this.$api.Inventory.getInventoryLogList({
@@ -185,7 +216,9 @@ export default {
   background-color: burlywood !important;
 }
 .nodata-message{
-  margin: 150px 121px 0 126px;
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
 }
 .loading{
   opacity: 0;
