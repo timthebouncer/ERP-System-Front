@@ -515,8 +515,8 @@ export default {
       }
       //取得當前磅秤量的重量
       if(this.deductionValue > 0) {
-        this.stockInForm.weight = this.displayValue - this.deductionValue
-        this.svgForm.weight = this.displayValue - this.deductionValue
+        this.stockInForm.weight = (Number(this.displayValue) - this.deductionValue).toFixed(3)
+        this.svgForm.weight = (Number(this.displayValue) - this.deductionValue).toFixed(3)
       }else{
         this.stockInForm.weight = this.displayValue
         this.svgForm.weight = this.displayValue
