@@ -427,7 +427,6 @@ export default {
   },
   created() {
     this.shipmentData = this.$store.state.shipment;
-    console.log(this.shipmentData);
     this.workDate = this.$store.state.workDate;
     this.discount = this.$store.state.shipment.discount;
     this.total =

@@ -34,7 +34,7 @@
           <v-row
             class="pt-2 pb-2 pl-1 pr-1"
             v-if="item.action != 'CANCEL_ORDER'"
-            @click="onDetail(item.orderId, item.clientId)"
+            @click="onDetail(item.orderId)"
           >
             <v-col>{{ item.orderNo }}</v-col>
             <v-col class="text-center">{{ item.clientName }}</v-col>
@@ -86,7 +86,6 @@ export default {
       clientListRes: [],
       delSnackbar: false,
       messageText: "",
-      productItemData: []
     };
   },
   methods: {
@@ -119,33 +118,9 @@ export default {
         this.tableData = res.data.content;
       });
     },
-    async onDetail(id, clientId) {
+    async onDetail(id) {
       await this.$api.Customer.onlyCustomerList().then(res => {
         this.clientListRes = res.data;
-      });
-
-      await this.$api.Commodity.getSalesProduct({
-        searchKey: "",
-        barcode: "",
-        clientId: clientId
-      }).then(res => {
-        this.productItemData = [];
-        res.data.map((item, index) => {
-          let data = {
-            id: index,
-            productId: item.productId,
-            barcode: item.barcode,
-            name: item.productName,
-            unit: this.getUnit(item.unit),
-            amount: item.amount,
-            salesPrice: item.clientPrice,
-            listPrice: item.price,
-            description: "",
-            quantity: 1,
-            money: 0
-          };
-          this.productItemData.push(data);
-        });
       });
 
       this.$api.Distribute.getDistributeDetail(id).then(response => {
@@ -214,14 +189,13 @@ export default {
               (item.clientPrice == 0 ? item.price : item.clientPrice) *
                 item.amount -
               item.discount;
-            console.log(this.productItemData);
             return {
               productId: item.id,
               barcode: item.barcode,
               name: item.productName,
               quantity: item.amount,
               amount: parseInt(item.amount),
-              salesPrice: item.clientPrice == 0 ? item.price : item.clientPrice,
+              salesPrice: item.clientPrice,
               listPrice: item.price,
               money:
                 (item.clientPrice == 0 ? item.price : item.clientPrice) *
@@ -240,12 +214,6 @@ export default {
         console.log(this.$store.state.shipment);
         this.$router.push("/salesDetail");
       });
-    },
-    getUnit(unit) {
-      let unitName = UNIT.find(item => item.value === unit);
-      if (unitName) {
-        return unitName.name;
-      }
     },
   },
   mounted() {
