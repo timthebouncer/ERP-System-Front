@@ -1,12 +1,12 @@
 <template>
   <v-container class="container">
     <!--   貼箱標籤   -->
-    <div  style="position: absolute; top:-1000px;">
+    <div style="position: absolute; top:-1000px;">
       <div style="height: 173px; padding: 8px 0 0 0;">
         <canvas width="800" height="500" id="art"></canvas>
       </div>
       <div class="vanish">
-        <img class="brandLogo" src="@/assets/brand_logo.jpg"/>
+        <img class="brandLogo" src="@/assets/brand_logo.jpg" />
         <svg
           id="ean-13"
           :jsbarcode-format="skus.format"
@@ -22,7 +22,11 @@
       </div>
     </div>
     <!--    出貨單 html start   -->
-    <div :title="templateType" id="exampleWrapper" style="position: absolute; top:-1000px;">
+    <div
+      :title="templateType"
+      id="exampleWrapper"
+      style="position: absolute; top:2000px; opacity: 100%; width: 1200px; height: 560px;"
+    >
       <div class="table-content">
         <div class="top-wrapper">
           <div>
@@ -34,13 +38,13 @@
           <div v-show="templateType === '零售-有價格'" class="logo2">
             <h1 class="black-cat-logo">
               {{
-              shipmentData.shipment === 1
-              ? '親送'
-              : shipmentData.shipment === 2
-              ? '黑貓宅配'
-              : shipmentData.shipment === 3
-              ? '自取'
-              : ''
+                shipmentData.shipment === 1
+                  ? "親送"
+                  : shipmentData.shipment === 2
+                  ? "黑貓宅配"
+                  : shipmentData.shipment === 3
+                  ? "自取"
+                  : ""
               }}
             </h1>
           </div>
@@ -48,50 +52,50 @@
         <div class="detail-wrapper">
           <div class="detail-list">
             <span
-            >客戶名稱:<span style="border-bottom: 1px dotted">{{
+              >客戶名稱:<span style="border-bottom: 1px dotted">{{
                 shipmentData.clientItem.name
               }}</span></span
             >
             <span
-            >客戶類別:<span style="border-bottom: 1px dotted">{{
+              >客戶類別:<span style="border-bottom: 1px dotted">{{
                 shipmentData.classItem.className
               }}</span></span
             >
             <span
-            >收件地址:<span style="border-bottom: 1px dotted"
-            >{{ shipmentData.receiveItem.code
+              >收件地址:<span style="border-bottom: 1px dotted"
+                >{{ shipmentData.receiveItem.code
                 }}{{ shipmentData.receiveItem.address }}</span
-            ></span
+              ></span
             >
             <span
-            >客戶電話:<span style="border-bottom: 1px dotted">{{
+              >客戶電話:<span style="border-bottom: 1px dotted">{{
                 shipmentData.clientItem.phone
               }}</span></span
             >
             <span
-            >統一編號:<span style="border-bottom: 1px dotted">無</span></span
+              >統一編號:<span style="border-bottom: 1px dotted">無</span></span
             >
             <span v-show="templateType !== '零售-有價格'"
-            >出貨方式:<span style="border-bottom: 1px dotted">{{
+              >出貨方式:<span style="border-bottom: 1px dotted">{{
                 shipmentData.shipment === 1
-                  ? '親送'
+                  ? "親送"
                   : shipmentData.shipment === 2
-                  ? '黑貓宅配'
+                  ? "黑貓宅配"
                   : shipmentData.shipment === 3
-                  ? '自取'
-                  : ''
+                  ? "自取"
+                  : ""
               }}</span></span
             >
             <span v-show="templateType === '零售-有價格'">
               付款方式:
               <span style="border-bottom: 1px dotted">{{
                 shipmentData.payment === 1
-                  ? '貨到付款'
+                  ? "貨到付款"
                   : shipmentData.payment === 2
-                  ? '匯款'
+                  ? "匯款"
                   : shipmentData.payment === 3
-                  ? '現金'
-                  : ''
+                  ? "現金"
+                  : ""
               }}</span>
             </span>
             <span>備註:{{ shipmentData.remark }}</span>
@@ -102,26 +106,26 @@
               <span>出貨單號:</span>
               <div class="other3-order-barcode">
                 <svg
-                        id="ean-13"
-                        :jsbarcode-format="skus.format"
-                        :jsbarcode-value="shipmentData.orderNo"
-                        jsbarcode-textmargin="0"
-                        jsbarcode-fontoptions="bold"
+                  id="ean-13"
+                  :jsbarcode-format="skus.format"
+                  :jsbarcode-value="shipmentData.orderNo"
+                  jsbarcode-textmargin="0"
+                  jsbarcode-fontoptions="bold"
                 ></svg>
               </div>
             </div>
             <div
-                    class="paper-content-detail-order"
-                    v-show="shipmentData.trackingNo"
+              class="paper-content-detail-order"
+              v-show="shipmentData.trackingNo"
             >
               <span>物流編號:</span>
               <div class="other3-package-barcode">
                 <svg
-                        id="trackNo"
-                        :jsbarcode-format="skus2.format"
-                        :jsbarcode-value="shipmentData.trackingNo"
-                        jsbarcode-textmargin="0"
-                        jsbarcode-fontoptions="bold"
+                  id="trackNo"
+                  :jsbarcode-format="skus2.format"
+                  :jsbarcode-value="shipmentData.trackingNo"
+                  jsbarcode-textmargin="0"
+                  jsbarcode-fontoptions="bold"
                 ></svg>
               </div>
             </div>
@@ -129,14 +133,18 @@
         </div>
         <div class="content-wrapper">
           <v-data-table
-                  :headers="headers"
-                  :items="shipmentData.orderItemRequestList"
-                  :pagination="false"
-                  hide-default-footer
-                  style="text-align: center"
+            :headers="headers"
+            :items="shipmentData.orderItemRequestList"
+            :pagination="false"
+            hide-default-footer
+            disable-sort
+            disable-filtering
+            disable-pagination
+            mobile-breakpoint="100"
+            style="text-align: center"
           >
             <template v-slot:item.listPrice="{ item }">
-                ${{ item.listPrice * item.quantity }}
+              ${{ item.listPrice * item.quantity }}
             </template>
           </v-data-table>
         </div>
@@ -158,7 +166,9 @@
           </div>
           <div class="sign-wrapper">
             <div v-if="templateType === '商用-有價格'">
-              <span>合計 ${{ formatPrice(total-shipmentData.shippingFee) }}</span>
+              <span
+                >合計 ${{ formatPrice(total - shipmentData.shippingFee) }}</span
+              >
             </div>
             <div v-else></div>
             <div v-if="templateType !== '零售-有價格'" class="sign-block">
@@ -359,7 +369,12 @@
           >
             修改
           </v-btn>
-          <v-btn :disabled="btnDisable" style="width: 100%;" @click="back" v-else>
+          <v-btn
+            :disabled="btnDisable"
+            style="width: 100%;"
+            @click="back"
+            v-else
+          >
             返回修改
           </v-btn>
         </v-col>
@@ -379,6 +394,7 @@ import https from "https";
 import { fabric } from "fabric";
 import JsBarcode from "jsbarcode";
 import * as htmlToImage from "html-to-image";
+import { jsPDF } from 'jspdf'
 export default {
   name: "SalesDetail",
   data() {
@@ -394,16 +410,16 @@ export default {
       skus: { format: "auto", title: "" },
       skus2: { format: "auto", title: "" },
       btnDisable: false,
-      templateType: '',
-      headers:[
-        { text: '商品名稱',value: 'name', },
-        { text: '數量', value: 'quantity' },
-        { text: '單位', value: 'unit' },
-        { text: '建議售價', value: 'listPrice' },
-        { text: '出貨售價', value: 'salesPrice' },
-        { text: '折讓', value: 'discount' },
-        { text: '總計', value: 'total' },
-        { text: '備註', value: 'remark' },
+      templateType: "",
+      headers: [
+        { text: "商品名稱", value: "name" },
+        { text: "數量", value: "quantity" },
+        { text: "單位", value: "unit" },
+        { text: "建議售價", value: "listPrice" },
+        { text: "出貨售價", value: "salesPrice" },
+        { text: "折讓", value: "discount" },
+        { text: "總計", value: "total" },
+        { text: "備註", value: "remark" }
       ],
       tableData: [],
       columnList: []
@@ -426,14 +442,19 @@ export default {
       this.$store.state.shipmentBacked = true;
       this.$router.push("/sales");
     },
-    submit(value) {
-      this.btnDisable = true
+    async submit(value) {
+      // this.btnDisable = true;
       let recipientId = this.$store.state.shipment.receiveItem.id;
       if (recipientId == "1") {
         recipientId = "0";
       } else if (recipientId == "2") {
         recipientId = "1";
       }
+      this.templateType = "商用-有價格";
+      JsBarcode("#ean-13").init();
+      JsBarcode("#trackNo").init();
+      await this.printReport(value);
+      return
       if (this.$store.state.shipmentEdited) {
         this.$api.Distribute.editOrder({
           orderId: this.$store.state.shipment.orderId,
@@ -454,7 +475,10 @@ export default {
                 id: item.productId,
                 barcode: item.barcode,
                 amount: item.quantity,
-                discount: (item.salesPrice === 0 ? item.listPrice : item.salesPrice) * item.quantity - item.money,
+                discount:
+                  (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
+                    item.quantity -
+                  item.money,
                 price: item.money,
                 remark: item.remark
               };
@@ -462,8 +486,12 @@ export default {
           )
         })
           .then(async () => {
-              await this.drawLabel(value)
-              console.log('drawed')
+            this.templateType = "商用-有價格";
+            JsBarcode("#ean-13").init();
+            JsBarcode("#trackNo").init();
+            await this.printReport(value);
+            await this.drawLabel(value);
+            console.log("drawed");
             // this.$store.state.successSnackbar = true;
             // this.$store.state.salesDetailed = false;
             // this.$router.push("/salesLog");
@@ -527,6 +555,24 @@ export default {
       // this.$store.state.successSnackbar = true;
       // this.$router.push("/salesLog");
     },
+    async printReport(value) {
+      const dataUrl = await htmlToImage.toPng(
+              document.querySelector('.table-content')
+      )
+      let img = new Image()
+      img.src = dataUrl
+      var doc = new jsPDF('p', 'pt', 'a4')
+      let printPage = document.body.appendChild(img)
+      printPage.classList.add('printImage')
+      printPage.width = 595
+      doc.html(printPage, {
+        callback: function(doc) {
+          doc.save('test.pdf')
+        },
+        x: 10
+      })
+      printPage.remove()
+    },
     async drawLabel(value) {
       let canvas = new fabric.Canvas("art");
       let img = new Image();
@@ -540,8 +586,8 @@ export default {
         let image = new fabric.Image(img, {
           left: 100,
           top: 10,
-          width:200,
-          height:121,
+          width: 200,
+          height: 121,
           scaleX: 0.7,
           scaleY: 0.7
         });
@@ -613,8 +659,8 @@ export default {
         let _image = new fabric.Image(_img, {
           left: 415,
           top: 210,
-          width:288,
-          height:142,
+          width: 288,
+          height: 142,
           scaleX: 1,
           scaleY: 1
         });
@@ -651,8 +697,8 @@ export default {
           let images2 = new fabric.Image(__img, {
             left: 350,
             top: 350,
-            width:354,
-            height:140,
+            width: 354,
+            height: 140,
             scaleX: 1,
             scaleY: 1
           });
@@ -706,12 +752,11 @@ export default {
           httpsAgent: agent
         })
         .then(res => {
-          console.log(res)
+          console.log(res);
           if (value == 1) {
             this.$store.state.successMsg =
-                    "出貨確認成功，已列印出貨單/貼箱標籤";
-          }
-          else if(value == 2){
+              "出貨確認成功，已列印出貨單/貼箱標籤";
+          } else if (value == 2) {
             this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
           }
           this.$store.state.successSnackbar = true;
@@ -722,9 +767,8 @@ export default {
           console.error(error);
           if (value == 1) {
             this.$store.state.successMsg =
-                    "出貨確認成功，列印出貨單/貼箱標籤 失敗";
-          }
-          else if(value == 2){
+              "出貨確認成功，列印出貨單/貼箱標籤 失敗";
+          } else if (value == 2) {
             this.$store.state.successMsg = "出貨確認成功，列印貼箱標籤 失敗";
           }
           this.$store.state.successSnackbar = true;
@@ -754,4 +798,112 @@ canvas {
 .vanish {
   opacity: 0;
 }
+.top-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 120px;
+  .black-cat-logo {
+    border: 2px solid;
+  }
+  .title {
+    position: relative;
+    right: 45%;
+  }
+  img {
+    width: 150px;
+    position: relative;
+    left: 0;
+    top: 0;
+  }
+}
+
+#exampleWrapper {
+  opacity: 0;
+}
+.table-content {
+  padding: 0px 60px 0 10px;
+}
+.detail-wrapper {
+  display: flex;
+  justify-content: space-between;
+
+  .detail-list {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    line-height: 30px;
+    left: 0;
+    span {
+      font-size: 15px;
+    }
+  }
+  .barcode-wrapper {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    right: 20px;
+    span {
+      font-size: 20px;
+    }
+  }
+}
+.other3-order-barcode {
+  svg {
+    width: 200px;
+  }
+}
+.content-wrapper {
+  position: relative;
+  top: 20px;
+  margin-bottom: 20px;
+}
+.footer {
+  margin-top: 80px;
+  h2 {
+    margin-bottom: 50px;
+  }
+  display: flex;
+  justify-content: space-between;
+  .contact-wrapper {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    left: 0;
+    span {
+      font-size: 17px;
+    }
+  }
+  .sign-wrapper {
+    position: relative;
+    right: 30px;
+    span {
+      font-size: 17px;
+    }
+  }
+  .sign-block {
+    background-color: #f4f4f4;
+    width: 230px;
+    height: 50px;
+    line-height: 3;
+    margin-top: 77px;
+    padding: 0 0 0 12px;
+  }
+}
+.package-wrapper {
+  width: 520px;
+  height: 510px;
+  margin: 0 auto;
+  position: relative;
+  opacity: 0;
+}
+.other3-package-barcode {
+  svg {
+    width: 200px;
+  }
+}
+/*svg {*/
+/*  width: 255px;*/
+/*  align-self: flex-end;*/
+/*}*/
 </style>
