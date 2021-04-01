@@ -3,14 +3,15 @@
     <div class="top-wrapper">
       <div class="enter-goods">輸入商品</div>
       <div class="barcode-wrapper">
-        商品條碼
-        <div>
+        <div class="barcodeText">
+          商品條碼
+        </div>
+        <div class="barcode-input">
           <v-text-field
             solo
             v-model="searchBarcode"
             v-on:keyup="updateLen"
             placeholder="可掃條碼 或 手動輸入"
-            class="barcode-input"
           ></v-text-field>
         </div>
       </div>
@@ -177,14 +178,19 @@ export default {
   height: 100%;
 }
 .barcode-wrapper {
+  flex: 1;
   display: flex;
   align-items: center;
+  justify-content: space-around;
+}
+.barcodeText{
+  width: 64px;
 }
 .barcode-input {
-  display: flex;
-  text-align-all: center;
-  margin: 30px 0 0 30px;
-  width: 250px;
+  position: relative;
+  right: 3px;
+  top: 15px;
+  width: 230px;
 }
 .enter-goods {
   width: 100%;
@@ -205,10 +211,8 @@ export default {
   margin-top: 60px;
 }
 .barcode-message {
-  margin: 0 100px 0 110px;
-  line-height: 8;
-}
-.input-number {
-  width: 180px;
+  display: flex;
+  justify-content: center;
+  margin-top: 50px;
 }
 </style>
