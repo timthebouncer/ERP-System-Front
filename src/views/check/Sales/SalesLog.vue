@@ -34,7 +34,7 @@
           <v-row
             class="pt-2 pb-2 pl-1 pr-1"
             v-if="item.action != 'CANCEL_ORDER'"
-            @click="onDetail(item.orderId)"
+            @click="onDetail(item.orderId, item.clientId)"
           >
             <v-col>{{ item.orderNo }}</v-col>
             <v-col class="text-center">{{ item.clientName }}</v-col>
@@ -66,6 +66,7 @@
 <script>
 import { SwipeList } from "vue-swipe-actions";
 import "vue-swipe-actions/dist/vue-swipe-actions.css";
+import {UNIT} from "../../../mixin/enums";
 export default {
   name: "salesLog",
   components: {
@@ -84,7 +85,8 @@ export default {
       delOrderNo: "",
       clientListRes: [],
       delSnackbar: false,
-      messageText: ""
+      messageText: "",
+      productItemData: []
     };
   },
   methods: {
@@ -117,9 +119,33 @@ export default {
         this.tableData = res.data.content;
       });
     },
-    async onDetail(id) {
+    async onDetail(id, clientId) {
       await this.$api.Customer.onlyCustomerList().then(res => {
         this.clientListRes = res.data;
+      });
+
+      await this.$api.Commodity.getSalesProduct({
+        searchKey: "",
+        barcode: "",
+        clientId: clientId
+      }).then(res => {
+        this.productItemData = [];
+        res.data.map((item, index) => {
+          let data = {
+            id: index,
+            productId: item.productId,
+            barcode: item.barcode,
+            name: item.productName,
+            unit: this.getUnit(item.unit),
+            amount: item.amount,
+            salesPrice: item.clientPrice,
+            listPrice: item.price,
+            description: "",
+            quantity: 1,
+            money: 0
+          };
+          this.productItemData.push(data);
+        });
       });
 
       this.$api.Distribute.getDistributeDetail(id).then(response => {
@@ -188,6 +214,7 @@ export default {
               (item.clientPrice == 0 ? item.price : item.clientPrice) *
                 item.amount -
               item.discount;
+            console.log(this.productItemData);
             return {
               productId: item.id,
               barcode: item.barcode,
@@ -195,6 +222,7 @@ export default {
               quantity: item.amount,
               amount: parseInt(item.amount),
               salesPrice: item.clientPrice == 0 ? item.price : item.clientPrice,
+              listPrice: item.price,
               money:
                 (item.clientPrice == 0 ? item.price : item.clientPrice) *
                   item.amount -
@@ -212,7 +240,13 @@ export default {
         console.log(this.$store.state.shipment);
         this.$router.push("/salesDetail");
       });
-    }
+    },
+    getUnit(unit) {
+      let unitName = UNIT.find(item => item.value === unit);
+      if (unitName) {
+        return unitName.name;
+      }
+    },
   },
   mounted() {
     this.getDistributeList();

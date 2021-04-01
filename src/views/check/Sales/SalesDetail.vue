@@ -140,11 +140,11 @@
             disable-sort
             disable-filtering
             disable-pagination
-            mobile-breakpoint="100"
+            :mobile-breakpoint="0"
             style="text-align: center"
           >
             <template v-slot:item.listPrice="{ item }">
-              ${{ item.listPrice * item.quantity }}
+              <span>${{ item.salesPrice  }}</span>
             </template>
           </v-data-table>
         </div>
