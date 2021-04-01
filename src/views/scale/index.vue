@@ -278,7 +278,7 @@
           >
             <div>{{ item.name }}</div>
             <div>
-              {{ item.fixedWeight !== 0 ? item.fixedWeight : item.stockAmount === 0 ? "" : item.stockAmount }}{{ item.fixedWeight !== 0 ? `${getUnit(item.weightUnit)}/${getUnit(item.unit)}` : getUnit(item.unit) }}
+              {{formatUnit(item)}}{{formatWeightUnit(item)}}
             </div>
           </div>
           <i />
@@ -448,7 +448,6 @@ export default {
       this.inboundPrintStatus = false;
     } else {
       this.inboundPrintStatus = true;
-      this.inboundPrintStatus = true;
     }
     //代入上次操作結果
     if (sessionStorage.getItem("orderNumber")) {
@@ -535,6 +534,24 @@ export default {
     }
   },
   methods: {
+    formatUnit(item) {
+      if( item.barcode !== "" && item.fixedWeight === 0) {
+        return null
+      }else if (item.barcode === "") {
+        return null
+      }else{
+        return item.fixedWeight
+      }
+    },
+    formatWeightUnit(item) {
+      if(item.barcode !== "" && item.fixedWeight === 0) {
+        return this.getUnit(item.unit)
+      }else if (item.barcode === "") {
+        return this.getUnit(item.unit)
+      }else{
+        return `${this.getUnit(item.weightUnit)}/${this.getUnit(item.unit)}`
+      }
+    },
     changeDepot() {
       this.stockInForm.depotId = this.productDepot;
       window.sessionStorage.setItem("depot", this.productDepot);
@@ -674,14 +691,6 @@ export default {
       this.stockInForm.productId = this.commodity[index].id;
       //當前選擇的商品barcode
       this.stockInForm.barcode = this.commodity[index].barcode;
-      //商品有固定條碼時不用傳重量
-      if(this.stockInForm.barcode !== ""){
-        this.stockInForm.weight = 0
-        this.svgForm.weight = 0
-      }else{
-        this.stockInForm.weight = ""
-        this.svgForm.weight = ""
-      }
       //當前選擇的商品的總數量
       this.stockInFormAmount = this.commodity[index].stockAmount;
       //取得當前選擇的商品單位
@@ -966,6 +975,11 @@ export default {
         //取得當前要操作入庫/取消的數量
         this.stockInForm.amount = this.count;
         this.stockInForm.orderId = this.addOrderForm.id;
+        //商品有固定條碼時不用傳重量
+        if(this.stockInForm.barcode !== ""){
+          this.stockInForm.weight = 0
+          this.svgForm.weight = 0
+        }
         if (this.stockInForm.weight === "") {
           return (this.inboundStatus = true), (this.inboundMsg = "入庫商品請秤重");
         }
@@ -980,7 +994,7 @@ export default {
                 this.barcodeStorage = res.data.barcode;
                 this.barcodeBase64 = res.data.barcodeBase64;
                 //動態條碼只能入庫一次
-                this.inboundPrintStatus = true;
+                //this.inboundPrintStatus = true;
               }
               //獲取當前庫存id
               this.inventoryId = res.data.id;
@@ -1007,7 +1021,6 @@ export default {
                     if(this.stockInForm.barcode !== "") {
                       items.text = `定重重量:${this.svgForm.weight}`;
                     }else{
-                      console.log(this.svgForm.weight);
                       items.text = `重量:${this.svgForm.weight}`;
                     }
                   } else if (items.name === "price") {
@@ -1025,6 +1038,8 @@ export default {
                 this.canvas.clear();
                 await this.loadFromJson(svgJSON);
                 await this.changeBarcode();
+                this.stockInForm.weight = ""
+                this.svgForm.weight = ""
               }
             }
           }
