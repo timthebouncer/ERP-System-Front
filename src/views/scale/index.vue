@@ -909,7 +909,7 @@ export default {
               formData.append("printerName", 'Sbarco T4ES 203 dpi');
               const agent = new https.Agent({ rejectUnauthorized: false });
               await axios
-                .post(`http://${this.userIP}:8099/print/printTag`, formData,{httpsAgent: agent})
+                .post(`https://${this.userIP}:8099/print/printTag`, formData,{httpsAgent: agent})
                 .then(res => {
                   if (res.data.status === 200) {
                     status = true;
@@ -936,7 +936,7 @@ export default {
           formData.append("printerName", 'Sbarco T4ES 203 dpi');
           const agent = new https.Agent({ rejectUnauthorized: false });
           await axios
-            .post(`http://${this.userIP}:8099/print/printTag`, formData, {httpsAgent: agent})
+            .post(`https://${this.userIP}:8099/print/printTag`, formData, {httpsAgent: agent})
             .then(res => {
               console.log(res.data.status);
             })
