@@ -995,8 +995,6 @@ export default {
                 this.barcodeBase64 = res.data.barcodeBase64;
                 //動態條碼只能入庫一次
                 //this.inboundPrintStatus = true;
-                this.stockInForm.weight = ""
-                this.svgForm.weight = ""
               }
               //獲取當前庫存id
               this.inventoryId = res.data.id;
@@ -1023,7 +1021,6 @@ export default {
                     if(this.stockInForm.barcode !== "") {
                       items.text = `定重重量:${this.svgForm.weight}`;
                     }else{
-                      console.log(this.svgForm.weight);
                       items.text = `重量:${this.svgForm.weight}`;
                     }
                   } else if (items.name === "price") {
@@ -1041,6 +1038,8 @@ export default {
                 this.canvas.clear();
                 await this.loadFromJson(svgJSON);
                 await this.changeBarcode();
+                this.stockInForm.weight = ""
+                this.svgForm.weight = ""
               }
             }
           }
