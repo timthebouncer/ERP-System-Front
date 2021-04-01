@@ -103,7 +103,7 @@
           <div class="barcode-wrapper">
             <span>出貨日期:{{ shipmentData.shipmentDate }}</span>
             <div class="paper-content-detail-order">
-              <span>出貨單號:</span>
+              <span style="width: 40%;">出貨單號:</span>
               <div class="other3-order-barcode">
                 <svg
                   id="ean-13"
@@ -118,7 +118,7 @@
               class="paper-content-detail-order"
               v-show="shipmentData.trackingNo"
             >
-              <span>物流編號:</span>
+              <span style="width: 40%;">物流編號:</span>
               <div class="other3-package-barcode">
                 <svg
                   id="trackNo"
@@ -831,19 +831,27 @@ canvas {
     display: flex;
     flex-direction: column;
     position: relative;
+    width: 70%;
     line-height: 30px;
     left: 0;
     span {
-      font-size: 15px;
+      font-size: 20px;
     }
   }
   .barcode-wrapper {
     display: flex;
     flex-direction: column;
     position: relative;
+    width: 30%;
     right: 20px;
     span {
       font-size: 20px;
+    }
+    .paper-content-detail-order {
+      display: flex;
+      /*justify-content: space-between;*/
+      margin: -25px 0 -25px 0;
+      align-items: center;
     }
   }
 }
