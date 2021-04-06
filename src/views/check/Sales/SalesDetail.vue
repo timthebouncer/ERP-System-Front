@@ -25,7 +25,7 @@
     <div
       :title="templateType"
       id="exampleWrapper"
-      style="position: absolute; top:2000px; opacity: 100%; width: 1200px; height: 560px;"
+      style="position: absolute; top:-2000px; opacity: 0%; width: 1200px; height: 560px;"
     >
       <div class="table-content">
         <div class="top-wrapper">
@@ -534,9 +534,9 @@ export default {
             */
             await this.drawLabel(value);
 
-            this.$store.state.successSnackbar = true;
-            this.$store.state.salesDetailed = false;
-            this.$router.push("/salesLog");
+            // this.$store.state.successSnackbar = true;
+            // this.$store.state.salesDetailed = false;
+            // this.$router.push("/salesLog");
           })
           .catch(err => {
             this.messageText = err.response.data.message;
@@ -574,9 +574,9 @@ export default {
           .then(async () => {
             await this.drawLabel(value);
 
-            this.$store.state.successSnackbar = true;
-            this.$store.state.salesDetailed = false;
-            this.$router.push("/salesLog");
+            // this.$store.state.successSnackbar = true;
+            // this.$store.state.salesDetailed = false;
+            // this.$router.push("/salesLog");
           })
           .catch(err => {
             this.messageText = err.response.data.message;
@@ -613,7 +613,7 @@ export default {
 
       this.$nextTick(() => {
         let image = new fabric.Image(img, {
-          left: 100,
+          left: 80,
           top: 10,
           width: 200,
           height: 121,
@@ -686,11 +686,11 @@ export default {
 
       this.$nextTick(() => {
         let _image = new fabric.Image(_img, {
-          left: 415,
+          left: 200,
           top: 210,
           width: 288,
-          height: 142,
-          scaleX: 1,
+          height: 100,
+          scaleX: 0.8,
           scaleY: 1
         });
         canvas.add(_image);
@@ -724,10 +724,10 @@ export default {
 
         this.$nextTick(() => {
           let images2 = new fabric.Image(__img, {
-            left: 350,
-            top: 350,
-            width: 354,
-            height: 140,
+            left: 200,
+            top: 320,
+            width: 254,
+            height: 100,
             scaleX: 1,
             scaleY: 1
           });
@@ -774,10 +774,12 @@ export default {
       });
       const formData = await new FormData();
       formData.append("file", file);
-
+      formData.append("width", '100');
+      formData.append("height", '80');
+      formData.append("printerName", 'Sbarco T4ES 203 dpi');
       const agent = new https.Agent({ rejectUnauthorized: false });
       await axios
-        .post(`https://127.0.0.1:8099/print/printTag`, formData, {
+        .post(`https://${this.$store.state.ip}:8099/print/printTag`, formData, {
           httpsAgent: agent
         })
         .then(res => {
