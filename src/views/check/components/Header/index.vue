@@ -13,14 +13,14 @@
           ><v-col class="col-5"
           ><span class="text-h6 font-weight-black">標籤機IP</span></v-col
           ><v-col class="col-6 pa-0"
-          ><v-text-field solo></v-text-field></v-col
+          ><v-text-field v-model="ip" solo></v-text-field></v-col
           ></v-row
           >
           <v-row class="align-content-center"
           ><v-col class="col-5"
           ><span class="text-h6 font-weight-black">列印機名稱</span></v-col
           ><v-col class="col-6 pa-0"
-          ><v-text-field solo></v-text-field></v-col
+          ><v-text-field v-model="printName" solo></v-text-field></v-col
           ></v-row
           >
         </v-card-text>
@@ -160,7 +160,9 @@ export default {
         cancelRestoreBtn: false,
         cancelRestoreLogBtn: false
       },
-      settingDialog: false
+      settingDialog: false,
+      ip: "",
+      printName: ""
     };
   },
   watch: {
@@ -265,12 +267,20 @@ export default {
       })
     },
     settingFun(){
-
+      this.$store.state.ip = this.ip
+      this.$store.state.printName = this.printName
+      localStorage.setItem('ip', this.ip)
+      localStorage.setItem('printName', this.printName)
+      this.settingDialog = false
     }
   },
   mounted() {
     this.changeMenuName();
     this.menuPositionX = window.innerWidth / 2 - 150;
+    this.$store.state.ip = localStorage.getItem('ip')
+    this.$store.state.printName = localStorage.getItem('printName')
+    this.ip = this.$store.state.ip
+    this.printName = this.$store.state.printName
   }
 };
 </script>

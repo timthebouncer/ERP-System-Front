@@ -8,12 +8,12 @@
       <div class="vanish">
         <img class="brandLogo" src="@/assets/brand_logo.jpg" />
         <svg
-          id="ean-13"
+          id="tag-barcode"
           :jsbarcode-format="skus.format"
           :jsbarcode-value="shipmentData.orderNo"
         ></svg>
         <svg
-          id="trackNo"
+          id="tag-trackNo"
           :jsbarcode-format="skus2.format"
           :jsbarcode-value="shipmentData.trackingNo"
           jsbarcode-textmargin="0"
@@ -133,7 +133,7 @@
         </div>
         <div class="content-wrapper">
           <v-data-table
-            :headers="headers"
+            :headers="setHeader"
             :items="shipmentData.orderItemRequestList"
             :pagination="false"
             hide-default-footer
@@ -144,13 +144,22 @@
             style="text-align: center"
           >
             <template v-slot:item.listPrice="{ item }">
-              <span>${{ item.salesPrice  }}</span>
+              <span>${{ formatPrice(item.listPrice*item.quantity) }}</span>
+            </template>
+            <template v-slot:item.salesPrice="{ item }">
+              <span>${{ formatPrice(item.salesPrice*item.quantity) }}</span>
+            </template>
+            <template v-slot:item.discount="{ item }">
+              <span>${{ formatPrice((item.salesPrice == 0 ? item.listPrice : item.salesPrice)*item.quantity - item.money) }}</span>
+            </template>
+            <template v-slot:item.total="{ item }">
+              <span>${{ formatPrice(item.money) }}</span>
             </template>
           </v-data-table>
         </div>
         <div class="footer">
           <div class="contact-wrapper" v-if="templateType !== '零售-有價格'">
-            <span>總計 ${{ formatPrice(total) }}</span>
+            <span>總計 {{ shipmentData.orderItemRequestList.length }}</span>
             <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
             <span>業務聯絡人 : 0935-734982</span>
             <span>帳務聯絡人 : 0952-582050</span>
@@ -158,7 +167,7 @@
             <span>戶名: 張何男</span>
           </div>
           <div v-else class="contact-wrapper">
-            <span>總計 ${{ formatPrice(total) }}</span>
+            <span>總計 {{ shipmentData.orderItemRequestList.length }}</span>
             <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
             <span>聯絡電話: 03-4760311</span>
             <span>匯款帳號: 中國信託-新竹分行 822-554540329807</span>
@@ -172,7 +181,7 @@
             </div>
             <div v-else></div>
             <div v-if="templateType !== '零售-有價格'" class="sign-block">
-              <span>客戶簽收</span>
+              <span style="font-size: 17px;">客戶簽收</span>
             </div>
             <div v-else></div>
           </div>
@@ -412,17 +421,30 @@ export default {
       btnDisable: false,
       templateType: "",
       headers: [
-        { text: "商品名稱", value: "name" },
-        { text: "數量", value: "quantity" },
-        { text: "單位", value: "unit" },
-        { text: "建議售價", value: "listPrice" },
-        { text: "出貨售價", value: "salesPrice" },
-        { text: "折讓", value: "discount" },
-        { text: "總計", value: "total" },
-        { text: "備註", value: "remark" }
+        { text: "商品名稱", value: "name" ,class: "text-h5 font-weight-black grey lighten-2 pt-5 pb-5" },
+        { text: "數量", value: "quantity" ,class: "text-h5 font-weight-black grey lighten-2"},
+        { text: "單位", value: "unit" ,class: "text-h5 font-weight-black grey lighten-2"},
+        { text: "建議售價", value: "listPrice" ,class: "text-h5 font-weight-black grey lighten-2"},
+        { text: "出貨售價", value: "salesPrice" ,class: "text-h5 font-weight-black grey lighten-2"},
+        { text: "折讓", value: "discount" ,class: "text-h5 font-weight-black grey lighten-2"},
+        { text: "總計", value: "total" ,class: "text-h5 font-weight-black grey lighten-2"},
+        { text: "備註", value: "remark" ,class: "text-h5 font-weight-black grey lighten-2"}
       ],
+      headers2: [
+        { text: "商品名稱", value: "name" ,class: "text-h5 font-weight-black grey lighten-2 pt-5 pb-5" },
+        { text: "數量", value: "quantity" ,class: "text-h5 font-weight-black grey lighten-2"},
+        { text: "單位", value: "unit" ,class: "text-h5 font-weight-black grey lighten-2"},
+        { text: "", value: "" ,class: "text-h5 font-weight-black grey lighten-2"},
+        { text: "", value: "" ,class: "text-h5 font-weight-black grey lighten-2"},
+        { text: "", value: "" ,class: "text-h5 font-weight-black grey lighten-2"},
+        { text: "", value: "" ,class: "text-h5 font-weight-black grey lighten-2"},
+        { text: "備註", value: "remark" ,class: "text-h5 font-weight-black grey lighten-2"}
+      ],
+      setHeader:[],
       tableData: [],
-      columnList: []
+      columnList: [],
+      reportPDF:"",
+      printPage:null
     };
   },
   created() {
@@ -431,6 +453,9 @@ export default {
     this.discount = this.$store.state.shipment.discount;
     this.total =
       this.$store.state.shipment.total + this.$store.state.shipment.shippingFee;
+    this.setHeader = this.headers
+    this.printPage = document.createElement('div')
+    this.reportPDF = new jsPDF('p', 'pt', 'a4')
     console.log(this.$store.state.shipment.shippingFee);
   },
   methods: {
@@ -449,11 +474,7 @@ export default {
       } else if (recipientId == "2") {
         recipientId = "1";
       }
-      this.templateType = "商用-有價格";
-      JsBarcode("#ean-13").init();
-      JsBarcode("#trackNo").init();
-      await this.printReport(value);
-      return
+
       if (this.$store.state.shipmentEdited) {
         this.$api.Distribute.editOrder({
           orderId: this.$store.state.shipment.orderId,
@@ -485,22 +506,43 @@ export default {
           )
         })
           .then(async () => {
-            this.templateType = "商用-有價格";
+
+            /*  // 出貨單 fun
+            this.$nextTick(()=>{
+              this.templateType = "商用-有價格";
+            })
             JsBarcode("#ean-13").init();
             JsBarcode("#trackNo").init();
             await this.printReport(value);
+            // this.printPage.classList.add('printImage')
+            console.log('print report first');
+            this.$nextTick(()=>{
+              this.templateType = "商用-無價格";
+              this.setHeader = this.headers2
+            })
+            await this.printReport(value);
+            // this.printPage.classList.add('printImage2')
+            console.log(this.printPage);
+            let doc = this.reportPDF
+            this.reportPDF.html(this.printPage, {
+              callback: function(doc) {
+                doc.save('test.pdf')
+              },
+              x: 10
+            })
+            this.printPage.remove()
+            */
             await this.drawLabel(value);
-            console.log("drawed");
-            // this.$store.state.successSnackbar = true;
-            // this.$store.state.salesDetailed = false;
-            // this.$router.push("/salesLog");
+
+            this.$store.state.successSnackbar = true;
+            this.$store.state.salesDetailed = false;
+            this.$router.push("/salesLog");
           })
           .catch(err => {
             this.messageText = err.response.data.message;
             this.snackbar = true;
           });
       } else {
-        console.log(this.$store.state.shipment.orderItemRequestList);
         this.$api.Distribute.addOrder({
           recipientId: recipientId,
           clientId: this.$store.state.shipment.clientItem.id,
@@ -529,15 +571,12 @@ export default {
             }
           )
         })
-          .then(() => {
-            let _this = this;
+          .then(async () => {
+            await this.drawLabel(value);
 
-            setTimeout(() => {
-              _this.drawLabel(value);
-            }, 100);
-            // this.$store.state.successSnackbar = true;
-            // this.$store.state.salesDetailed = false;
-            // this.$router.push("/salesLog");
+            this.$store.state.successSnackbar = true;
+            this.$store.state.salesDetailed = false;
+            this.$router.push("/salesLog");
           })
           .catch(err => {
             this.messageText = err.response.data.message;
@@ -560,17 +599,8 @@ export default {
       )
       let img = new Image()
       img.src = dataUrl
-      var doc = new jsPDF('p', 'pt', 'a4')
-      let printPage = document.body.appendChild(img)
-      printPage.classList.add('printImage')
-      printPage.width = 595
-      doc.html(printPage, {
-        callback: function(doc) {
-          doc.save('test.pdf')
-        },
-        x: 10
-      })
-      printPage.remove()
+      img.width = 595
+      this.printPage.appendChild(img)
     },
     async drawLabel(value) {
       let canvas = new fabric.Canvas("art");
@@ -640,7 +670,7 @@ export default {
         fontFamily: "微軟正黑體"
       });
       canvas.add(text2);
-      await JsBarcode("#ean-13").init();
+      await JsBarcode("#tag-barcode").init();
 
       // let svg = document.querySelector('#ean-13')
       // let xml = new XMLSerializer().serializeToString(svg);
@@ -649,7 +679,7 @@ export default {
       // img.src = base64;
 
       const _dataUrl = await htmlToImage.toPng(
-        document.querySelector("#ean-13")
+        document.querySelector("#tag-barcode")
       );
       let _img = new Image();
       _img.src = _dataUrl;
@@ -675,10 +705,10 @@ export default {
           fontFamily: "微軟正黑體"
         });
         canvas.add(text3);
-        await JsBarcode("#trackNo").init();
+        await JsBarcode("#tag-trackNo").init();
 
         const _dataUrl = await htmlToImage.toPng(
-          document.querySelector("#trackNo")
+          document.querySelector("#tag-trackNo")
         );
         let __img = new Image();
         __img.src = _dataUrl;
@@ -835,7 +865,7 @@ canvas {
     line-height: 30px;
     left: 0;
     span {
-      font-size: 20px;
+      font-size: 25px;
     }
   }
   .barcode-wrapper {
@@ -845,7 +875,7 @@ canvas {
     width: 30%;
     right: 20px;
     span {
-      font-size: 20px;
+      font-size: 25px;
     }
     .paper-content-detail-order {
       display: flex;
@@ -876,16 +906,18 @@ canvas {
     display: flex;
     flex-direction: column;
     position: relative;
+    width: 70%;
     left: 0;
     span {
-      font-size: 17px;
+      font-size: 25px;
     }
   }
   .sign-wrapper {
     position: relative;
-    right: 30px;
+    width: 20%;
+    right: 0px;
     span {
-      font-size: 17px;
+      font-size: 25px;
     }
   }
   .sign-block {
@@ -909,8 +941,20 @@ canvas {
     width: 200px;
   }
 }
-/*svg {*/
-/*  width: 255px;*/
-/*  align-self: flex-end;*/
+/*::v-deep .v-data-table-header{*/
+/*  background-color: #d9001b;*/
+/*  tr > th{*/
+/*    font-size: 30px;*/
+/*  }*/
 /*}*/
+::v-deep .v-data-table > .v-data-table__wrapper > table > tbody > tr{
+
+  td{
+    padding-top: 20px;
+    padding-bottom: 20px;
+    font-size: 20px !important;
+  }
+
+}
+
 </style>
