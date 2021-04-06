@@ -906,6 +906,15 @@ export default {
               if (items.name === "productNo") {
                 items.text = `${i}`;
               }
+              if(items.name === "barcode") {
+                items.toObject = (function(toObject) {
+                  return function() {
+                    return fabric.util.object.extend(toObject.call(this), {
+                      name: items.name
+                    })
+                  }
+                })(items.toObject)
+              }
             });
             if (status) {
               let canvasStr = JSON.stringify(this.canvas);
@@ -937,6 +946,17 @@ export default {
             }
           }
         } else {
+          this.canvas.getObjects().map(items => {
+            if(items.name === "barcode") {
+              items.toObject = (function(toObject) {
+                return function() {
+                  return fabric.util.object.extend(toObject.call(this), {
+                    name: items.name
+                  })
+                }
+              })(items.toObject)
+            }
+          });
           let canvasStr = JSON.stringify(this.canvas);
           let file = new File([canvasStr], "text.txt", { type: "text/plain" });
           let formData = new FormData();
@@ -990,9 +1010,9 @@ export default {
           this.stockInForm.weight = 0
           this.svgForm.weight = 0
         }
-        if (this.stockInForm.weight === "") {
-          return (this.inboundStatus = true), (this.inboundMsg = "入庫商品請秤重");
-        }
+        // if (this.stockInForm.weight === "") {
+        //   return (this.inboundStatus = true), (this.inboundMsg = "入庫商品請秤重");
+        // }
         await this.$scale.Inventory.stockIn(this.stockInForm).then(
           async res => {
             if (res.status === 200) {
