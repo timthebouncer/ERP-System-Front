@@ -66,6 +66,7 @@
 <script>
 import { SwipeList } from "vue-swipe-actions";
 import "vue-swipe-actions/dist/vue-swipe-actions.css";
+import {UNIT} from "../../../mixin/enums";
 export default {
   name: "salesLog",
   components: {
@@ -84,7 +85,7 @@ export default {
       delOrderNo: "",
       clientListRes: [],
       delSnackbar: false,
-      messageText: ""
+      messageText: "",
     };
   },
   methods: {
@@ -194,7 +195,8 @@ export default {
               name: item.productName,
               quantity: item.amount,
               amount: parseInt(item.amount),
-              salesPrice: item.clientPrice == 0 ? item.price : item.clientPrice,
+              salesPrice: item.clientPrice,
+              listPrice: item.price,
               money:
                 (item.clientPrice == 0 ? item.price : item.clientPrice) *
                   item.amount -
@@ -212,7 +214,7 @@ export default {
         console.log(this.$store.state.shipment);
         this.$router.push("/salesDetail");
       });
-    }
+    },
   },
   mounted() {
     this.getDistributeList();
