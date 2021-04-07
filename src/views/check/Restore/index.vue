@@ -25,7 +25,7 @@
               centered
               elevation="10"
       >
-        <h3 class="notification">{{'取消入庫成功'}}</h3>
+        <h3 class="notification">{{'重新入庫成功'}}</h3>
       </v-snackbar>
       <v-snackbar
               :timeout= 2500
