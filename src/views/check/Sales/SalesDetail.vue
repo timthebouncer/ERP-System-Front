@@ -597,7 +597,7 @@ export default {
               console.log("printPage remove");
               this.printPage2.remove();
               console.log("printPage2 remove");
-              await this.drawLabel(value);
+              // await this.drawLabel(value);
             } else if (value == 2) {
               await this.drawLabel(value);
             }
@@ -642,7 +642,7 @@ export default {
               console.log("printPage remove");
               this.printPage2.remove();
               console.log("printPage2 remove");
-              await this.drawLabel(value);
+              // await this.drawLabel(value);
             } else if (value == 2) {
               await this.drawLabel(value);
             }
@@ -822,8 +822,9 @@ export default {
                   formData,
                   { httpsAgent: agent }
                 )
-                .then(res => {
+                .then(async res => {
                   console.log(res);
+                  await this.drawLabel();
                 })
                 .catch(error => {
                   console.error(error);
@@ -839,7 +840,7 @@ export default {
       }
       setTimeout(async () => {
         await postPdf.bind(this)();
-      }, 1500);
+      }, 3000);
     },
     async drawLabel(value) {
       let canvas = new fabric.Canvas("art");
@@ -1017,6 +1018,7 @@ export default {
       formData.append("height", "80");
       formData.append("printerName", "Sbarco T4ES 203 dpi");
       const agent = new https.Agent({ rejectUnauthorized: false });
+
       await axios
         .post(`https://${this.$store.state.ip}:8099/print/printTag`, formData, {
           httpsAgent: agent
@@ -1045,6 +1047,8 @@ export default {
           this.$store.state.salesDetailed = false;
           this.$router.push("/salesLog");
         });
+
+
       // axios.post('http://127.0.0.1:8099/print/printTag',formData)
       //         .then(res =>{
       //           console.log(res)
