@@ -412,7 +412,7 @@ import { fabric } from "fabric";
 import JsBarcode from "jsbarcode";
 import * as htmlToImage from "html-to-image";
 import { jsPDF } from "jspdf";
-import PDFMerger from "pdf-merger-js";
+// import PDFMerger from "pdf-merger-js";
 // import merge from 'easy-pdf-merge'
 export default {
   name: "SalesDetail",
