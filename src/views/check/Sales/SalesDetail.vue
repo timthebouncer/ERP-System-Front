@@ -412,7 +412,7 @@ import { fabric } from "fabric";
 import JsBarcode from "jsbarcode";
 import * as htmlToImage from "html-to-image";
 import { jsPDF } from "jspdf";
-import PDFMerger from "pdf-merger-js";
+// import PDFMerger from "pdf-merger-js";
 // import merge from 'easy-pdf-merge'
 export default {
   name: "SalesDetail",
@@ -554,12 +554,12 @@ export default {
       } else if (recipientId == "2") {
         recipientId = "1";
       }
-      // await this.printReport();
-      // this.printPage.remove();
-      // console.log("printPage remove");
-      // this.printPage2.remove();
-      // console.log("printPage2 remove");
-      // return
+      await this.printReport();
+      this.printPage.remove();
+      console.log("printPage remove");
+      this.printPage2.remove();
+      console.log("printPage2 remove");
+      return
       if (this.$store.state.shipmentEdited) {
         this.$api.Distribute.editOrder({
           orderId: this.$store.state.shipment.orderId,
@@ -765,8 +765,8 @@ export default {
               file1 = new File([blob], "test.pdf", { type: "application/pdf" });
               console.log("is file1 created");
 
-              // let fileURL = URL.createObjectURL(file1);
-              // window.open(fileURL);
+              let fileURL = URL.createObjectURL(file1);
+              window.open(fileURL);
             });
 
           // })
@@ -780,8 +780,8 @@ export default {
                 type: "application/pdf"
               });
               console.log("is file2 created");
-              // let fileURL = URL.createObjectURL(file2);
-              // window.open(fileURL);
+              let fileURL = URL.createObjectURL(file2);
+              window.open(fileURL);
             });
 
           // merger.add(pdfFile)
@@ -806,7 +806,7 @@ export default {
           formData.append("printerName", "EPSONDB5105 (L3150 Series)");
           console.log(this.$store.state.ip);
           const agent = new https.Agent({ rejectUnauthorized: false });
-
+/*
           await axios
             .post(
               `https://${this.$store.state.ip}:8099/print/printPdf`,
@@ -833,7 +833,7 @@ export default {
               console.error(error);
             });
 
-
+*/
           resolve(true);
         });
       }
@@ -1070,7 +1070,7 @@ canvas {
 }
 .top-wrapper {
   display: flex;
-  justify-content: space-between;
+  /*justify-content: space-between;*/
   align-items: center;
   height: 120px;
   .black-cat-logo {
@@ -1078,7 +1078,11 @@ canvas {
   }
   .title {
     position: relative;
-    right: 45%;
+    right: -30%;
+  }
+  .logo2 {
+    position: relative;
+    right: -55%;
   }
   img {
     width: 150px;
