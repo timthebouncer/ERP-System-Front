@@ -547,14 +547,19 @@ export default {
       this.$router.push("/sales");
     },
     async submit(value) {
-      // this.btnDisable = true;
+      this.btnDisable = true;
       let recipientId = this.$store.state.shipment.receiveItem.id;
       if (recipientId == "1") {
         recipientId = "0";
       } else if (recipientId == "2") {
         recipientId = "1";
       }
-
+      // await this.printReport();
+      // this.printPage.remove();
+      // console.log("printPage remove");
+      // this.printPage2.remove();
+      // console.log("printPage2 remove");
+      // return
       if (this.$store.state.shipmentEdited) {
         this.$api.Distribute.editOrder({
           orderId: this.$store.state.shipment.orderId,
@@ -592,7 +597,7 @@ export default {
               console.log("printPage remove");
               this.printPage2.remove();
               console.log("printPage2 remove");
-              // await this.drawLabel(value);
+              await this.drawLabel(value);
             } else if (value == 2) {
               await this.drawLabel(value);
             }
@@ -631,10 +636,16 @@ export default {
           )
         })
           .then(async () => {
-            // await this.drawLabel(value);
-            // this.$store.state.successSnackbar = true;
-            // this.$store.state.salesDetailed = false;
-            // this.$router.push("/salesLog");
+            if (value == 1) {
+              await this.printReport();
+              this.printPage.remove();
+              console.log("printPage remove");
+              this.printPage2.remove();
+              console.log("printPage2 remove");
+              await this.drawLabel(value);
+            } else if (value == 2) {
+              await this.drawLabel(value);
+            }
           })
           .catch(err => {
             this.messageText = err.response.data.message;
@@ -680,9 +691,33 @@ export default {
     async printReport() {
       let pdfFile, pdfFile2;
       let file1, file2;
-      // 出貨單 fun
+      // 出貨單 輸出格式
+      let printTypeStr = '', printTypeStr2 = ''
+      if(this.printType == 1){
+        if(this.printType2 == 1){
+          printTypeStr = '商用-有價格'
+          printTypeStr2 = '商用-無價格'
+        }
+        else if(this.printType2 == 2){
+          printTypeStr = '商用-無價格'
+          printTypeStr = '商用-無價格'
+        }
+      }
+      else if(this.printType == 2){
+        if(this.printType2 == 1){
+          printTypeStr = '零售-有價格'
+          printTypeStr2 = '零售-無價格'
+        }
+        else if(this.printType2 == 2){
+          printTypeStr = '零售-無價格'
+          printTypeStr2 = '零售-無價格'
+        }
+      }
       this.$nextTick(() => {
-        this.templateType = "商用-有價格";
+        this.templateType = printTypeStr;
+        if(this.printType2 == 2){
+          this.setHeader = this.headers2;
+        }
       });
       JsBarcode("#order-barcode").init();
       JsBarcode("#order-trackNo").init();
@@ -700,7 +735,7 @@ export default {
         x: 10
       });
       this.$nextTick(() => {
-        this.templateType = "商用-無價格";
+        this.templateType = printTypeStr2;
         this.setHeader = this.headers2;
         console.log("is set header2");
       });
@@ -730,8 +765,8 @@ export default {
               file1 = new File([blob], "test.pdf", { type: "application/pdf" });
               console.log("is file1 created");
 
-              let fileURL = URL.createObjectURL(file1);
-              window.open(fileURL);
+              // let fileURL = URL.createObjectURL(file1);
+              // window.open(fileURL);
             });
 
           // })
@@ -745,8 +780,8 @@ export default {
                 type: "application/pdf"
               });
               console.log("is file2 created");
-              let fileURL = URL.createObjectURL(file2);
-              window.open(fileURL);
+              // let fileURL = URL.createObjectURL(file2);
+              // window.open(fileURL);
             });
 
           // merger.add(pdfFile)
@@ -771,7 +806,7 @@ export default {
           formData.append("printerName", "EPSONDB5105 (L3150 Series)");
           console.log(this.$store.state.ip);
           const agent = new https.Agent({ rejectUnauthorized: false });
-          /*
+
           await axios
             .post(
               `https://${this.$store.state.ip}:8099/print/printPdf`,
@@ -798,7 +833,7 @@ export default {
               console.error(error);
             });
 
-           */
+
           resolve(true);
         });
       }
