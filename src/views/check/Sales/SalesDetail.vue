@@ -35,7 +35,7 @@
           <div class="title">
             <h1>出貨單</h1>
           </div>
-          <div v-show="templateType === '零售-有價格'" class="logo2">
+          <div v-show="templateType === '零售-有價格' || templateType === '零售-無價格'" class="logo2">
             <h1 class="black-cat-logo">
               {{
                 shipmentData.shipment === 1
@@ -73,9 +73,9 @@
               }}</span></span
             >
             <span
-              >統一編號:<span style="border-bottom: 1px dotted">無</span></span
+              >統一編號:<span style="border-bottom: 1px dotted">{{ vatNumber == null ? '無' : vatNumber }}</span></span
             >
-            <span v-show="templateType !== '零售-有價格'"
+            <span v-show="templateType !== '零售-有價格' && templateType !== '零售-無價格'"
               >出貨方式:<span style="border-bottom: 1px dotted">{{
                 shipmentData.shipment === 1
                   ? "親送"
@@ -86,7 +86,7 @@
                   : ""
               }}</span></span
             >
-            <span v-show="templateType === '零售-有價格'">
+            <span v-show="templateType === '零售-有價格' || templateType === '零售-無價格'">
               付款方式:
               <span style="border-bottom: 1px dotted">{{
                 shipmentData.payment === 1
@@ -166,7 +166,7 @@
           </v-data-table>
         </div>
         <div class="footer">
-          <div class="contact-wrapper" v-if="templateType !== '零售-有價格'">
+          <div class="contact-wrapper" v-if="templateType !== '零售-有價格' && templateType !== '零售-無價格'">
             <span style="font-size: 35px;">總計 {{ shipmentData.orderItemRequestList.length }}</span>
             <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
             <span>業務聯絡人 : 0935-734982</span>
@@ -175,20 +175,20 @@
             <span>戶名: 張何男</span>
           </div>
           <div v-else class="contact-wrapper">
-            <span>總計 {{ shipmentData.orderItemRequestList.length }}</span>
+            <span style="font-size: 35px;">總計 {{ shipmentData.orderItemRequestList.length }}</span>
             <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
             <span>聯絡電話: 03-4760311</span>
             <span>匯款帳號: 中國信託-新竹分行 822-554540329807</span>
             <span>戶名: 張何男</span>
           </div>
           <div class="sign-wrapper">
-            <div v-if="templateType === '商用-有價格'">
+            <div v-if="templateType === '商用-有價格' || templateType === '零售-有價格'">
               <span
                 >合計 ${{ formatPrice(total - shipmentData.shippingFee) }}</span
               >
             </div>
             <div v-else></div>
-            <div v-if="templateType !== '零售-有價格'" class="sign-block">
+            <div v-if="templateType !== '零售-有價格' && templateType !== '零售-無價格'" class="sign-block">
               <span style="font-size: 17px;">客戶簽收</span>
             </div>
             <div v-else></div>
@@ -419,6 +419,7 @@ export default {
   data() {
     return {
       shipmentData: {},
+      vatNumber: null,
       workDate: "",
       discount: 0,
       total: 0,
@@ -532,6 +533,10 @@ export default {
     this.total =
       this.$store.state.shipment.total + this.$store.state.shipment.shippingFee;
     this.setHeader = this.headers;
+    this.$api.Customer.getClient(this.shipmentData.clientItem.id).then(res=>{
+      console.log(res);
+      this.vatNumber = res.data.vatNumber
+    })
     this.printPage = document.createElement("div");
     this.printPage2 = document.createElement("div");
     this.reportPDF = new jsPDF("p", "pt", "a4");

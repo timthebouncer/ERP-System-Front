@@ -67,6 +67,9 @@ const api= {
     update(data) {
       return request.put('/client/updateClient', data)
     },
+    getClient(clientId) {
+      return request.get('/client/'+clientId)
+    }
   }
 }
 export default api;
