@@ -828,10 +828,18 @@ export default {
                 })
                 .catch(error => {
                   console.error(error);
+                  this.$store.state.successMsg = "出貨單產出失敗";
+                  this.$store.state.successSnackbar = true;
+                  this.$store.state.salesDetailed = false;
+                  this.$router.push("/salesLog");
                 });
             })
             .catch(error => {
               console.error(error);
+              this.$store.state.successMsg = "出貨單產出失敗";
+              this.$store.state.successSnackbar = true;
+              this.$store.state.salesDetailed = false;
+              this.$router.push("/salesLog");
             });
 
 
@@ -840,7 +848,7 @@ export default {
       }
       setTimeout(async () => {
         await postPdf.bind(this)();
-      }, 3000);
+      }, 10000);
     },
     async drawLabel(value) {
       let canvas = new fabric.Canvas("art");
