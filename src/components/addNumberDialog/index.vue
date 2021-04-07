@@ -64,7 +64,8 @@
                     materialId: '',
                     count: '',
                     carcassWeight: '',
-                    livingWeight: ''
+                    livingWeight: '',
+                    username:''
                 }
             }
         },
@@ -78,6 +79,7 @@
                 }
                 this.orderForm.materialId = this.material.id
                 this.orderForm.carcassWeight = this.kg
+                this.orderForm.username = sessionStorage.getItem("userName")
                 await this.$scale.DepotOrder.addOrder(this.orderForm).then(res => {
                     this.loading = true
                     if(res.status === 200){
