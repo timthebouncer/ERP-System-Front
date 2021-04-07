@@ -848,7 +848,7 @@ export default {
       }
       setTimeout(async () => {
         await postPdf.bind(this)();
-      }, 1500);
+      }, 5000);
     },
     async drawLabel(value) {
       let canvas = new fabric.Canvas("art");
