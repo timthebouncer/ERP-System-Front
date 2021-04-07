@@ -559,12 +559,12 @@ export default {
       } else if (recipientId == "2") {
         recipientId = "1";
       }
-      await this.printReport();
-      this.printPage.remove();
-      console.log("printPage remove");
-      this.printPage2.remove();
-      console.log("printPage2 remove");
-      return
+      // await this.printReport(value);
+      // this.printPage.remove();
+      // console.log("printPage remove");
+      // this.printPage2.remove();
+      // console.log("printPage2 remove");
+      // return
       if (this.$store.state.shipmentEdited) {
         this.$api.Distribute.editOrder({
           orderId: this.$store.state.shipment.orderId,
@@ -597,12 +597,12 @@ export default {
         })
           .then(async () => {
             if (value == 1) {
-              await this.printReport();
+              await this.printReport(value);
               this.printPage.remove();
               console.log("printPage remove");
               this.printPage2.remove();
               console.log("printPage2 remove");
-              await this.drawLabel(value);
+              // await this.drawLabel(value);
             } else if (value == 2) {
               await this.drawLabel(value);
             }
@@ -642,12 +642,12 @@ export default {
         })
           .then(async () => {
             if (value == 1) {
-              await this.printReport();
+              await this.printReport(value);
               this.printPage.remove();
               console.log("printPage remove");
               this.printPage2.remove();
               console.log("printPage2 remove");
-              await this.drawLabel(value);
+              // await this.drawLabel(value);
             } else if (value == 2) {
               await this.drawLabel(value);
             }
@@ -693,7 +693,7 @@ export default {
       // img.width = 595
       // this.printPage.appendChild(img)
     },
-    async printReport() {
+    async printReport(value) {
       let pdfFile, pdfFile2;
       let file1, file2;
       // 出貨單 輸出格式
@@ -770,8 +770,8 @@ export default {
               file1 = new File([blob], "test.pdf", { type: "application/pdf" });
               console.log("is file1 created");
 
-              let fileURL = URL.createObjectURL(file1);
-              window.open(fileURL);
+              // let fileURL = URL.createObjectURL(file1);
+              // window.open(fileURL);
             });
 
           // })
@@ -785,8 +785,8 @@ export default {
                 type: "application/pdf"
               });
               console.log("is file2 created");
-              let fileURL = URL.createObjectURL(file2);
-              window.open(fileURL);
+              // let fileURL = URL.createObjectURL(file2);
+              // window.open(fileURL);
             });
 
           // merger.add(pdfFile)
@@ -808,10 +808,11 @@ export default {
           console.log("is ready print pdf");
           let formData = new FormData();
           formData.append("pdf", file1);
+          // formData.append("printerName", "Sbarco T4ES 203 dpi");
           formData.append("printerName", "EPSONDB5105 (L3150 Series)");
           console.log(this.$store.state.ip);
           const agent = new https.Agent({ rejectUnauthorized: false });
-/*
+
           await axios
             .post(
               `https://${this.$store.state.ip}:8099/print/printPdf`,
@@ -827,24 +828,33 @@ export default {
                   formData,
                   { httpsAgent: agent }
                 )
-                .then(res => {
+                .then(async res=> {
                   console.log(res);
+                  await this.drawLabel(value);
                 })
                 .catch(error => {
                   console.error(error);
+                  this.$store.state.successMsg = "出貨單產出失敗";
+                  this.$store.state.successSnackbar = true;
+                  this.$store.state.salesDetailed = false;
+                  this.$router.push("/salesLog");
                 });
             })
             .catch(error => {
               console.error(error);
+              this.$store.state.successMsg = "出貨單產出失敗";
+              this.$store.state.successSnackbar = true;
+              this.$store.state.salesDetailed = false;
+              this.$router.push("/salesLog");
             });
 
-*/
+
           resolve(true);
         });
       }
       setTimeout(async () => {
         await postPdf.bind(this)();
-      }, 1500);
+      }, 5000);
     },
     async drawLabel(value) {
       let canvas = new fabric.Canvas("art");
@@ -1031,6 +1041,7 @@ export default {
           if (value == 1) {
             this.$store.state.successMsg =
               "出貨確認成功，已列印出貨單/貼箱標籤";
+            console.log(this.$store.state.successMsg,'exportSVG');
           } else if (value == 2) {
             this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
           }
