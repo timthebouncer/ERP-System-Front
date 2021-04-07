@@ -106,7 +106,7 @@
               <span style="width: 40%;">出貨單號:</span>
               <div class="other3-order-barcode">
                 <svg
-                  id="ean-13"
+                  id="order-barcode"
                   :jsbarcode-format="skus.format"
                   :jsbarcode-value="shipmentData.orderNo"
                   jsbarcode-textmargin="0"
@@ -121,7 +121,7 @@
               <span style="width: 40%;">物流編號:</span>
               <div class="other3-package-barcode">
                 <svg
-                  id="trackNo"
+                  id="order-trackNo"
                   :jsbarcode-format="skus2.format"
                   :jsbarcode-value="shipmentData.trackingNo"
                   jsbarcode-textmargin="0"
@@ -144,13 +144,21 @@
             style="text-align: center"
           >
             <template v-slot:item.listPrice="{ item }">
-              <span>${{ formatPrice(item.listPrice*item.quantity) }}</span>
+              <span>${{ formatPrice(item.listPrice * item.quantity) }}</span>
             </template>
             <template v-slot:item.salesPrice="{ item }">
-              <span>${{ formatPrice(item.salesPrice*item.quantity) }}</span>
+              <span>${{ formatPrice(item.salesPrice * item.quantity) }}</span>
             </template>
             <template v-slot:item.discount="{ item }">
-              <span>${{ formatPrice((item.salesPrice == 0 ? item.listPrice : item.salesPrice)*item.quantity - item.money) }}</span>
+              <span
+                >${{
+                  formatPrice(
+                    (item.salesPrice == 0 ? item.listPrice : item.salesPrice) *
+                      item.quantity -
+                      item.money
+                  )
+                }}</span
+              >
             </template>
             <template v-slot:item.total="{ item }">
               <span>${{ formatPrice(item.money) }}</span>
@@ -159,7 +167,7 @@
         </div>
         <div class="footer">
           <div class="contact-wrapper" v-if="templateType !== '零售-有價格'">
-            <span>總計 {{ shipmentData.orderItemRequestList.length }}</span>
+            <span style="font-size: 35px;">總計 {{ shipmentData.orderItemRequestList.length }}</span>
             <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
             <span>業務聯絡人 : 0935-734982</span>
             <span>帳務聯絡人 : 0952-582050</span>
@@ -337,14 +345,14 @@
       列印資料
     </div>
     <div>
-      <v-radio-group :value="1">
+      <v-radio-group v-model="printType">
         <v-row>
           <v-col class="col-1"> <span>1.</span></v-col
           ><v-col><v-radio label="商用格式" :value="1"></v-radio></v-col>
           <v-col> <v-radio label="零售格式" :value="2"></v-radio></v-col>
         </v-row>
       </v-radio-group>
-      <v-radio-group :value="1">
+      <v-radio-group v-model="printType2">
         <v-row>
           <v-col class="col-1"> <span>2.</span></v-col
           ><v-col
@@ -403,7 +411,9 @@ import https from "https";
 import { fabric } from "fabric";
 import JsBarcode from "jsbarcode";
 import * as htmlToImage from "html-to-image";
-import { jsPDF } from 'jspdf'
+import { jsPDF } from "jspdf";
+import PDFMerger from "pdf-merger-js";
+// import merge from 'easy-pdf-merge'
 export default {
   name: "SalesDetail",
   data() {
@@ -419,32 +429,100 @@ export default {
       skus: { format: "auto", title: "" },
       skus2: { format: "auto", title: "" },
       btnDisable: false,
+      printType:1,
+      printType2:1,
       templateType: "",
       headers: [
-        { text: "商品名稱", value: "name" ,class: "text-h5 font-weight-black grey lighten-2 pt-5 pb-5" },
-        { text: "數量", value: "quantity" ,class: "text-h5 font-weight-black grey lighten-2"},
-        { text: "單位", value: "unit" ,class: "text-h5 font-weight-black grey lighten-2"},
-        { text: "建議售價", value: "listPrice" ,class: "text-h5 font-weight-black grey lighten-2"},
-        { text: "出貨售價", value: "salesPrice" ,class: "text-h5 font-weight-black grey lighten-2"},
-        { text: "折讓", value: "discount" ,class: "text-h5 font-weight-black grey lighten-2"},
-        { text: "總計", value: "total" ,class: "text-h5 font-weight-black grey lighten-2"},
-        { text: "備註", value: "remark" ,class: "text-h5 font-weight-black grey lighten-2"}
+        {
+          text: "商品名稱",
+          value: "name",
+          class: "text-h5 font-weight-black grey lighten-2 pt-5 pb-5"
+        },
+        {
+          text: "數量",
+          value: "quantity",
+          class: "text-h5 font-weight-black grey lighten-2"
+        },
+        {
+          text: "單位",
+          value: "unit",
+          class: "text-h5 font-weight-black grey lighten-2"
+        },
+        {
+          text: "建議售價",
+          value: "listPrice",
+          class: "text-h5 font-weight-black grey lighten-2"
+        },
+        {
+          text: "出貨售價",
+          value: "salesPrice",
+          class: "text-h5 font-weight-black grey lighten-2"
+        },
+        {
+          text: "折讓",
+          value: "discount",
+          class: "text-h5 font-weight-black grey lighten-2"
+        },
+        {
+          text: "總計",
+          value: "total",
+          class: "text-h5 font-weight-black grey lighten-2"
+        },
+        {
+          text: "備註",
+          value: "remark",
+          class: "text-h5 font-weight-black grey lighten-2"
+        }
       ],
       headers2: [
-        { text: "商品名稱", value: "name" ,class: "text-h5 font-weight-black grey lighten-2 pt-5 pb-5" },
-        { text: "數量", value: "quantity" ,class: "text-h5 font-weight-black grey lighten-2"},
-        { text: "單位", value: "unit" ,class: "text-h5 font-weight-black grey lighten-2"},
-        { text: "", value: "" ,class: "text-h5 font-weight-black grey lighten-2"},
-        { text: "", value: "" ,class: "text-h5 font-weight-black grey lighten-2"},
-        { text: "", value: "" ,class: "text-h5 font-weight-black grey lighten-2"},
-        { text: "", value: "" ,class: "text-h5 font-weight-black grey lighten-2"},
-        { text: "備註", value: "remark" ,class: "text-h5 font-weight-black grey lighten-2"}
+        {
+          text: "商品名稱",
+          value: "name",
+          class: "text-h5 font-weight-black grey lighten-2 pt-5 pb-5"
+        },
+        {
+          text: "數量",
+          value: "quantity",
+          class: "text-h5 font-weight-black grey lighten-2"
+        },
+        {
+          text: "單位",
+          value: "unit",
+          class: "text-h5 font-weight-black grey lighten-2"
+        },
+        {
+          text: "",
+          value: "",
+          class: "text-h5 font-weight-black grey lighten-2"
+        },
+        {
+          text: "",
+          value: "",
+          class: "text-h5 font-weight-black grey lighten-2"
+        },
+        {
+          text: "",
+          value: "",
+          class: "text-h5 font-weight-black grey lighten-2"
+        },
+        {
+          text: "",
+          value: "",
+          class: "text-h5 font-weight-black grey lighten-2"
+        },
+        {
+          text: "備註",
+          value: "remark",
+          class: "text-h5 font-weight-black grey lighten-2"
+        }
       ],
-      setHeader:[],
+      setHeader: [],
       tableData: [],
       columnList: [],
-      reportPDF:"",
-      printPage:null
+      reportPDF: "",
+      reportPDF2: "",
+      printPage: null,
+      printPage2: null
     };
   },
   created() {
@@ -453,9 +531,11 @@ export default {
     this.discount = this.$store.state.shipment.discount;
     this.total =
       this.$store.state.shipment.total + this.$store.state.shipment.shippingFee;
-    this.setHeader = this.headers
-    this.printPage = document.createElement('div')
-    this.reportPDF = new jsPDF('p', 'pt', 'a4')
+    this.setHeader = this.headers;
+    this.printPage = document.createElement("div");
+    this.printPage2 = document.createElement("div");
+    this.reportPDF = new jsPDF("p", "pt", "a4");
+    this.reportPDF2 = new jsPDF("p", "pt", "a4");
     console.log(this.$store.state.shipment.shippingFee);
   },
   methods: {
@@ -467,14 +547,19 @@ export default {
       this.$router.push("/sales");
     },
     async submit(value) {
-      // this.btnDisable = true;
+      this.btnDisable = true;
       let recipientId = this.$store.state.shipment.receiveItem.id;
       if (recipientId == "1") {
         recipientId = "0";
       } else if (recipientId == "2") {
         recipientId = "1";
       }
-
+      // await this.printReport();
+      // this.printPage.remove();
+      // console.log("printPage remove");
+      // this.printPage2.remove();
+      // console.log("printPage2 remove");
+      // return
       if (this.$store.state.shipmentEdited) {
         this.$api.Distribute.editOrder({
           orderId: this.$store.state.shipment.orderId,
@@ -506,37 +591,16 @@ export default {
           )
         })
           .then(async () => {
-
-            /*  // 出貨單 fun
-            this.$nextTick(()=>{
-              this.templateType = "商用-有價格";
-            })
-            JsBarcode("#ean-13").init();
-            JsBarcode("#trackNo").init();
-            await this.printReport(value);
-            // this.printPage.classList.add('printImage')
-            console.log('print report first');
-            this.$nextTick(()=>{
-              this.templateType = "商用-無價格";
-              this.setHeader = this.headers2
-            })
-            await this.printReport(value);
-            // this.printPage.classList.add('printImage2')
-            console.log(this.printPage);
-            let doc = this.reportPDF
-            this.reportPDF.html(this.printPage, {
-              callback: function(doc) {
-                doc.save('test.pdf')
-              },
-              x: 10
-            })
-            this.printPage.remove()
-            */
-            await this.drawLabel(value);
-
-            // this.$store.state.successSnackbar = true;
-            // this.$store.state.salesDetailed = false;
-            // this.$router.push("/salesLog");
+            if (value == 1) {
+              await this.printReport();
+              this.printPage.remove();
+              console.log("printPage remove");
+              this.printPage2.remove();
+              console.log("printPage2 remove");
+              await this.drawLabel(value);
+            } else if (value == 2) {
+              await this.drawLabel(value);
+            }
           })
           .catch(err => {
             this.messageText = err.response.data.message;
@@ -572,11 +636,16 @@ export default {
           )
         })
           .then(async () => {
-            await this.drawLabel(value);
-
-            // this.$store.state.successSnackbar = true;
-            // this.$store.state.salesDetailed = false;
-            // this.$router.push("/salesLog");
+            if (value == 1) {
+              await this.printReport();
+              this.printPage.remove();
+              console.log("printPage remove");
+              this.printPage2.remove();
+              console.log("printPage2 remove");
+              await this.drawLabel(value);
+            } else if (value == 2) {
+              await this.drawLabel(value);
+            }
           })
           .catch(err => {
             this.messageText = err.response.data.message;
@@ -593,14 +662,184 @@ export default {
       // this.$store.state.successSnackbar = true;
       // this.$router.push("/salesLog");
     },
-    async printReport(value) {
+    async addReportImg(value) {
       const dataUrl = await htmlToImage.toPng(
-              document.querySelector('.table-content')
-      )
-      let img = new Image()
-      img.src = dataUrl
-      img.width = 595
-      this.printPage.appendChild(img)
+        document.querySelector(".table-content")
+      );
+
+      if (value == 1) {
+        let img = new Image();
+
+        img.src = dataUrl;
+        img.width = 595;
+        this.printPage.appendChild(img);
+        console.log("pirnt page add image");
+      } else if (value == 2) {
+        let img = new Image();
+
+        img.src = dataUrl;
+        img.width = 595;
+        this.printPage2.appendChild(img);
+        console.log("print page2 add image");
+      }
+      // let img = new Image()
+      //
+      // img.src = dataUrl
+      // img.width = 595
+      // this.printPage.appendChild(img)
+    },
+    async printReport() {
+      let pdfFile, pdfFile2;
+      let file1, file2;
+      // 出貨單 輸出格式
+      let printTypeStr = '', printTypeStr2 = ''
+      if(this.printType == 1){
+        if(this.printType2 == 1){
+          printTypeStr = '商用-有價格'
+          printTypeStr2 = '商用-無價格'
+        }
+        else if(this.printType2 == 2){
+          printTypeStr = '商用-無價格'
+          printTypeStr = '商用-無價格'
+        }
+      }
+      else if(this.printType == 2){
+        if(this.printType2 == 1){
+          printTypeStr = '零售-有價格'
+          printTypeStr2 = '零售-無價格'
+        }
+        else if(this.printType2 == 2){
+          printTypeStr = '零售-無價格'
+          printTypeStr2 = '零售-無價格'
+        }
+      }
+      this.$nextTick(() => {
+        this.templateType = printTypeStr;
+        if(this.printType2 == 2){
+          this.setHeader = this.headers2;
+        }
+      });
+      JsBarcode("#order-barcode").init();
+      JsBarcode("#order-trackNo").init();
+      await this.addReportImg(1);
+      // this.printPage.classList.add('printImage')
+      console.log("print report first");
+      // console.log(this.printPage);
+
+      let doc = this.reportPDF;
+      await this.reportPDF.html(this.printPage, {
+        callback: function(doc) {
+          // console.log(doc.output('datauristring'));
+          pdfFile = doc.output("datauristring");
+        },
+        x: 10
+      });
+      this.$nextTick(() => {
+        this.templateType = printTypeStr2;
+        this.setHeader = this.headers2;
+        console.log("is set header2");
+      });
+
+      await this.addReportImg(2);
+      // this.printPage.classList.add('printImage2')
+      console.log("print report second");
+      // console.log(this.printPage2);
+      // let doc = this.reportPDF
+      // doc.addHTML(this.printPage)
+      this.reportPDF = new jsPDF("p", "pt", "a4");
+      let doc2 = this.reportPDF;
+
+      await this.reportPDF.html(this.printPage2, {
+        callback: async function(doc2) {
+          // console.log(doc2.output('datauristring'));
+
+          pdfFile2 = doc2.output("datauristring");
+          // console.log(pdfFile);
+          console.log("pdfFile created");
+          // function loadFile(){
+          //   return new Promise(resolve => {
+          fetch(pdfFile)
+            .then(res => res.blob())
+            .then(blob => {
+              console.log("ready create file1");
+              file1 = new File([blob], "test.pdf", { type: "application/pdf" });
+              console.log("is file1 created");
+
+              // let fileURL = URL.createObjectURL(file1);
+              // window.open(fileURL);
+            });
+
+          // })
+          // }
+
+          fetch(pdfFile2)
+            .then(res => res.blob())
+            .then(blob => {
+              console.log("ready create file2");
+              file2 = new File([blob], "test2.pdf", {
+                type: "application/pdf"
+              });
+              console.log("is file2 created");
+              // let fileURL = URL.createObjectURL(file2);
+              // window.open(fileURL);
+            });
+
+          // merger.add(pdfFile)
+          // merger.add(pdfFile2)
+          // await merger.save('output.pdf')
+
+          // merge([file1, file2], 'File Ouput.pdf', function (err) {
+          //   if (err) {
+          //     return console.log(err)
+          //   }
+          //   console.log('Successfully merged!')
+          // });
+        },
+        x: 10
+      });
+
+      function postPdf() {
+        return new Promise(async resolve => {
+          console.log("is ready print pdf");
+          let formData = new FormData();
+          formData.append("pdf", file1);
+          formData.append("printerName", "EPSONDB5105 (L3150 Series)");
+          console.log(this.$store.state.ip);
+          const agent = new https.Agent({ rejectUnauthorized: false });
+
+          await axios
+            .post(
+              `https://${this.$store.state.ip}:8099/print/printPdf`,
+              formData,
+              { httpsAgent: agent }
+            )
+            .then(async res => {
+              console.log(res);
+              formData.set("pdf", file2);
+              await axios
+                .post(
+                  `https://${this.$store.state.ip}:8099/print/printPdf`,
+                  formData,
+                  { httpsAgent: agent }
+                )
+                .then(res => {
+                  console.log(res);
+                })
+                .catch(error => {
+                  console.error(error);
+                });
+            })
+            .catch(error => {
+              console.error(error);
+            });
+
+
+          resolve(true);
+        });
+      }
+      setTimeout(async () => {
+        await postPdf.bind(this)();
+      }, 1500);
     },
     async drawLabel(value) {
       let canvas = new fabric.Canvas("art");
@@ -774,9 +1013,9 @@ export default {
       });
       const formData = await new FormData();
       formData.append("file", file);
-      formData.append("width", '100');
-      formData.append("height", '80');
-      formData.append("printerName", 'Sbarco T4ES 203 dpi');
+      formData.append("width", "100");
+      formData.append("height", "80");
+      formData.append("printerName", "Sbarco T4ES 203 dpi");
       const agent = new https.Agent({ rejectUnauthorized: false });
       await axios
         .post(`https://${this.$store.state.ip}:8099/print/printTag`, formData, {
@@ -919,7 +1158,7 @@ canvas {
     width: 20%;
     right: 0px;
     span {
-      font-size: 25px;
+      font-size: 35px;
     }
   }
   .sign-block {
@@ -949,14 +1188,11 @@ canvas {
 /*    font-size: 30px;*/
 /*  }*/
 /*}*/
-::v-deep .v-data-table > .v-data-table__wrapper > table > tbody > tr{
-
-  td{
+::v-deep .v-data-table > .v-data-table__wrapper > table > tbody > tr {
+  td {
     padding-top: 20px;
     padding-bottom: 20px;
     font-size: 20px !important;
   }
-
 }
-
 </style>
