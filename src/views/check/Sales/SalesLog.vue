@@ -1,6 +1,6 @@
 <template>
   <v-container class="container">
-    <v-snackbar v-model="delSnackbar" centered color="primary" timeout="2000">
+    <v-snackbar v-model="delSnackbar" centered color="primary" timeout="3000">
       <p class="text-center ma-0">{{ messageText }}</p>
     </v-snackbar>
     <v-dialog v-model="delOrderDialogVisible">
