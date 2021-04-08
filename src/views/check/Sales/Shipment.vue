@@ -247,7 +247,6 @@ export default {
       this.checkNextDisable();
     },
     volume() {
-      console.log(this.volume);
     },
     trackingNo() {
       this.checkNextDisable();
@@ -257,7 +256,6 @@ export default {
         value = '0'
       }
       value = value.toString().replace(/[^0-9]+/g, "")
-      console.log(value);
       this.checkNextDisable();
       this.shippingFee = (parseInt(value)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
     }
@@ -311,7 +309,6 @@ export default {
       }
     },
     submit() {
-      // console.log(this.trackingNo.length,'trackNo len');
       if (this.shipmentEvent == 2) {
         if (this.trackingNo == null) {
           this.errSnackbar = true;
@@ -341,11 +338,17 @@ export default {
       this.$router.push("/salesDetail");
     },
     computedShippingFee() {
+      if(this.temperatureCategory != 1 && this.volume == 4){
+        this.volume = 1
+      }
       let value =
         shippingRule[
           "" + this.shipmentEvent + this.temperatureCategory + this.volume
         ];
       // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+      if(this.shipmentEvent == 3){
+        value = 0
+      }
       this.shippingFee = value;
     }
   },

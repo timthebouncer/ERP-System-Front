@@ -251,15 +251,17 @@
             <span v-if="shipmentData.shipment == 1">親送</span>
             <span v-if="shipmentData.shipment == 2">黑貓宅配</span>
             <span v-if="shipmentData.shipment == 3">自取</span>
-            <span>/</span>
-            <span v-if="shipmentData.temperatureCategory == 1">常溫</span>
-            <span v-if="shipmentData.temperatureCategory == 2">冷藏</span>
-            <span v-if="shipmentData.temperatureCategory == 3">冷凍</span>
-            <span>/</span>
-            <span v-if="shipmentData.volume == 1">60公分</span>
-            <span v-if="shipmentData.volume == 2">90公分</span>
-            <span v-if="shipmentData.volume == 3">120公分</span>
-            <span v-if="shipmentData.volume == 4">150公分</span>
+            <span v-if="shipmentData.shipment != 3">
+              <span>/</span>
+              <span v-if="shipmentData.temperatureCategory == 1">常溫</span>
+              <span v-if="shipmentData.temperatureCategory == 2">冷藏</span>
+              <span v-if="shipmentData.temperatureCategory == 3">冷凍</span>
+              <span>/</span>
+              <span v-if="shipmentData.volume == 1">60公分</span>
+              <span v-if="shipmentData.volume == 2">90公分</span>
+              <span v-if="shipmentData.volume == 3">120公分</span>
+              <span v-if="shipmentData.volume == 4">150公分</span>
+            </span>
           </p>
         </v-col>
       </v-row>
@@ -320,7 +322,8 @@
             </v-col>
             <v-col class="col-5 align-self-center pl-0">
               <p>數量</p>
-              <p>{{ item.quantity }}</p>
+              <p v-if="item.unit == '件' || item.unit == '包'">{{ item.quantity }}</p>
+              <p v-else>{{ item.weight }}</p>
               <p>${{ formatPrice(item.money) }}</p>
             </v-col>
           </v-row>
@@ -528,6 +531,10 @@ export default {
   },
   created() {
     this.shipmentData = this.$store.state.shipment;
+    if(this.shipmentData.clientItem.id == '' || this.shipmentData.clientItem.id == null){
+      this.$store.state.salesDetailed = false;
+      this.$router.push("/salesLog");
+    }
     this.workDate = this.$store.state.workDate;
     this.discount = this.$store.state.shipment.discount;
     this.total =
@@ -590,7 +597,8 @@ export default {
                     item.quantity -
                   item.money,
                 price: item.money,
-                remark: item.remark
+                remark: item.remark,
+                weight: item.weight
               };
             }
           )
@@ -808,8 +816,8 @@ export default {
           console.log("is ready print pdf");
           let formData = new FormData();
           formData.append("pdf", file1);
-          // formData.append("printerName", "Sbarco T4ES 203 dpi");
-          formData.append("printerName", "EPSONDB5105 (L3150 Series)");
+          formData.append("printerName", "Sbarco T4ES 203 dpi");
+          // formData.append("printerName", "EPSONDB5105 (L3150 Series)");
           console.log(this.$store.state.ip);
           const agent = new https.Agent({ rejectUnauthorized: false });
 
