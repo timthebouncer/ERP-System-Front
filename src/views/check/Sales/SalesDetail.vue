@@ -35,7 +35,7 @@
           <div class="title">
             <h1>出貨單</h1>
           </div>
-          <div v-show="templateType === '零售-有價格'" class="logo2">
+          <div v-show="templateType === '零售-有價格' || templateType === '零售-無價格'" class="logo2">
             <h1 class="black-cat-logo">
               {{
                 shipmentData.shipment === 1
@@ -73,9 +73,9 @@
               }}</span></span
             >
             <span
-              >統一編號:<span style="border-bottom: 1px dotted">無</span></span
+              >統一編號:<span style="border-bottom: 1px dotted">{{ vatNumber == null ? '無' : vatNumber }}</span></span
             >
-            <span v-show="templateType !== '零售-有價格'"
+            <span v-show="templateType !== '零售-有價格' && templateType !== '零售-無價格'"
               >出貨方式:<span style="border-bottom: 1px dotted">{{
                 shipmentData.shipment === 1
                   ? "親送"
@@ -86,7 +86,7 @@
                   : ""
               }}</span></span
             >
-            <span v-show="templateType === '零售-有價格'">
+            <span v-show="templateType === '零售-有價格' || templateType === '零售-無價格'">
               付款方式:
               <span style="border-bottom: 1px dotted">{{
                 shipmentData.payment === 1
@@ -166,7 +166,7 @@
           </v-data-table>
         </div>
         <div class="footer">
-          <div class="contact-wrapper" v-if="templateType !== '零售-有價格'">
+          <div class="contact-wrapper" v-if="templateType !== '零售-有價格' && templateType !== '零售-無價格'">
             <span style="font-size: 35px;">總計 {{ shipmentData.orderItemRequestList.length }}</span>
             <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
             <span>業務聯絡人 : 0935-734982</span>
@@ -175,20 +175,20 @@
             <span>戶名: 張何男</span>
           </div>
           <div v-else class="contact-wrapper">
-            <span>總計 {{ shipmentData.orderItemRequestList.length }}</span>
+            <span style="font-size: 35px;">總計 {{ shipmentData.orderItemRequestList.length }}</span>
             <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
             <span>聯絡電話: 03-4760311</span>
             <span>匯款帳號: 中國信託-新竹分行 822-554540329807</span>
             <span>戶名: 張何男</span>
           </div>
           <div class="sign-wrapper">
-            <div v-if="templateType === '商用-有價格'">
+            <div v-if="templateType === '商用-有價格' || templateType === '零售-有價格'">
               <span
                 >合計 ${{ formatPrice(total - shipmentData.shippingFee) }}</span
               >
             </div>
             <div v-else></div>
-            <div v-if="templateType !== '零售-有價格'" class="sign-block">
+            <div v-if="templateType !== '零售-有價格' && templateType !== '零售-無價格'" class="sign-block">
               <span style="font-size: 17px;">客戶簽收</span>
             </div>
             <div v-else></div>
@@ -251,15 +251,17 @@
             <span v-if="shipmentData.shipment == 1">親送</span>
             <span v-if="shipmentData.shipment == 2">黑貓宅配</span>
             <span v-if="shipmentData.shipment == 3">自取</span>
-            <span>/</span>
-            <span v-if="shipmentData.temperatureCategory == 1">常溫</span>
-            <span v-if="shipmentData.temperatureCategory == 2">冷藏</span>
-            <span v-if="shipmentData.temperatureCategory == 3">冷凍</span>
-            <span>/</span>
-            <span v-if="shipmentData.volume == 1">60公分</span>
-            <span v-if="shipmentData.volume == 2">90公分</span>
-            <span v-if="shipmentData.volume == 3">120公分</span>
-            <span v-if="shipmentData.volume == 4">150公分</span>
+            <span v-if="shipmentData.shipment != 3">
+              <span>/</span>
+              <span v-if="shipmentData.temperatureCategory == 1">常溫</span>
+              <span v-if="shipmentData.temperatureCategory == 2">冷藏</span>
+              <span v-if="shipmentData.temperatureCategory == 3">冷凍</span>
+              <span>/</span>
+              <span v-if="shipmentData.volume == 1">60公分</span>
+              <span v-if="shipmentData.volume == 2">90公分</span>
+              <span v-if="shipmentData.volume == 3">120公分</span>
+              <span v-if="shipmentData.volume == 4">150公分</span>
+            </span>
           </p>
         </v-col>
       </v-row>
@@ -320,7 +322,8 @@
             </v-col>
             <v-col class="col-5 align-self-center pl-0">
               <p>數量</p>
-              <p>{{ item.quantity }}</p>
+              <p v-if="item.unit == '件' || item.unit == '包'">{{ item.quantity }}</p>
+              <p v-else>{{ item.weight }}</p>
               <p>${{ formatPrice(item.money) }}</p>
             </v-col>
           </v-row>
@@ -419,6 +422,7 @@ export default {
   data() {
     return {
       shipmentData: {},
+      vatNumber: null,
       workDate: "",
       discount: 0,
       total: 0,
@@ -527,11 +531,19 @@ export default {
   },
   created() {
     this.shipmentData = this.$store.state.shipment;
+    if(this.shipmentData.clientItem.id == '' || this.shipmentData.clientItem.id == null){
+      this.$store.state.salesDetailed = false;
+      this.$router.push("/salesLog");
+    }
     this.workDate = this.$store.state.workDate;
     this.discount = this.$store.state.shipment.discount;
     this.total =
       this.$store.state.shipment.total + this.$store.state.shipment.shippingFee;
     this.setHeader = this.headers;
+    this.$api.Customer.getClient(this.shipmentData.clientItem.id).then(res=>{
+      console.log(res);
+      this.vatNumber = res.data.vatNumber
+    })
     this.printPage = document.createElement("div");
     this.printPage2 = document.createElement("div");
     this.reportPDF = new jsPDF("p", "pt", "a4");
@@ -554,7 +566,7 @@ export default {
       } else if (recipientId == "2") {
         recipientId = "1";
       }
-      // await this.printReport();
+      // await this.printReport(value);
       // this.printPage.remove();
       // console.log("printPage remove");
       // this.printPage2.remove();
@@ -585,19 +597,20 @@ export default {
                     item.quantity -
                   item.money,
                 price: item.money,
-                remark: item.remark
+                remark: item.remark,
+                weight: item.weight
               };
             }
           )
         })
           .then(async () => {
             if (value == 1) {
-              await this.printReport();
+              await this.printReport(value);
               this.printPage.remove();
               console.log("printPage remove");
               this.printPage2.remove();
               console.log("printPage2 remove");
-              await this.drawLabel(value);
+              // await this.drawLabel(value);
             } else if (value == 2) {
               await this.drawLabel(value);
             }
@@ -637,12 +650,12 @@ export default {
         })
           .then(async () => {
             if (value == 1) {
-              await this.printReport();
+              await this.printReport(value);
               this.printPage.remove();
               console.log("printPage remove");
               this.printPage2.remove();
               console.log("printPage2 remove");
-              await this.drawLabel(value);
+              // await this.drawLabel(value);
             } else if (value == 2) {
               await this.drawLabel(value);
             }
@@ -688,7 +701,7 @@ export default {
       // img.width = 595
       // this.printPage.appendChild(img)
     },
-    async printReport() {
+    async printReport(value) {
       let pdfFile, pdfFile2;
       let file1, file2;
       // 出貨單 輸出格式
@@ -803,6 +816,7 @@ export default {
           console.log("is ready print pdf");
           let formData = new FormData();
           formData.append("pdf", file1);
+          // formData.append("printerName", "Sbarco T4ES 203 dpi");
           formData.append("printerName", "EPSONDB5105 (L3150 Series)");
           console.log(this.$store.state.ip);
           const agent = new https.Agent({ rejectUnauthorized: false });
@@ -822,15 +836,24 @@ export default {
                   formData,
                   { httpsAgent: agent }
                 )
-                .then(res => {
+                .then(async res=> {
                   console.log(res);
+                  await this.drawLabel(value);
                 })
                 .catch(error => {
                   console.error(error);
+                  this.$store.state.successMsg = "出貨單產出失敗";
+                  this.$store.state.successSnackbar = true;
+                  this.$store.state.salesDetailed = false;
+                  this.$router.push("/salesLog");
                 });
             })
             .catch(error => {
               console.error(error);
+              this.$store.state.successMsg = "出貨單產出失敗";
+              this.$store.state.successSnackbar = true;
+              this.$store.state.salesDetailed = false;
+              this.$router.push("/salesLog");
             });
 
 
@@ -839,7 +862,7 @@ export default {
       }
       setTimeout(async () => {
         await postPdf.bind(this)();
-      }, 1500);
+      }, 5000);
     },
     async drawLabel(value) {
       let canvas = new fabric.Canvas("art");
@@ -1026,6 +1049,7 @@ export default {
           if (value == 1) {
             this.$store.state.successMsg =
               "出貨確認成功，已列印出貨單/貼箱標籤";
+            console.log(this.$store.state.successMsg,'exportSVG');
           } else if (value == 2) {
             this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
           }
@@ -1070,7 +1094,7 @@ canvas {
 }
 .top-wrapper {
   display: flex;
-  justify-content: space-between;
+  /*justify-content: space-between;*/
   align-items: center;
   height: 120px;
   .black-cat-logo {
@@ -1078,7 +1102,11 @@ canvas {
   }
   .title {
     position: relative;
-    right: 45%;
+    right: -30%;
+  }
+  .logo2 {
+    position: relative;
+    right: -55%;
   }
   img {
     width: 150px;

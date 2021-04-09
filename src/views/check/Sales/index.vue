@@ -93,7 +93,9 @@
           <v-row class="align-content-center"
             ><v-col class="col-4"
               ><span class="text-h6 font-weight-black">數量</span></v-col
-            ><v-col class="col-8"
+            ><v-col
+              class="col-8"
+              v-if="productData.unit == '件' || productData.unit == '包'"
               ><ul class="counter">
                 <li>
                   <input
@@ -129,7 +131,10 @@
                     "
                   />
                 </li></ul></v-col
-          ></v-row>
+            ><v-col class="col-8" v-else
+              ><span class="text-h6">{{ productData.weight }}</span></v-col
+            >
+          </v-row>
           <v-row class="align-content-center"
             ><v-col class="col-4"
               ><span class="text-h6 font-weight-black">備註</span></v-col
@@ -263,8 +268,8 @@
                 ><v-col class="">{{ receiveData.phone }}</v-col>
               </v-list-item>
               <v-list-item class="justify-space-between ma-0 pa-0">
-                <v-col class="col-2">{{ receiveData.code }}</v-col
-                ><v-col class="col-10 pl-0 pr-0">{{
+                <v-col class="col-3">{{ receiveData.code }}</v-col
+                ><v-col class="col-9 pl-0 pr-0">{{
                   receiveData.address
                 }}</v-col>
               </v-list-item>
@@ -303,7 +308,8 @@
                   <v-list-item-action class="mr-1"> </v-list-item-action>
                   <v-list-item-content>
                     <v-list-item-title
-                      v-text="child.className" style="color: black;"
+                      v-text="child.className"
+                      style="color: black;"
                     ></v-list-item-title>
                   </v-list-item-content>
                 </template>
@@ -315,17 +321,21 @@
         <template v-else-if="item.key == 'client'">
           <v-radio-group @change="clientRadioChange" :value="clientData.id">
             <v-list-item v-for="child in item.items" :key="child.id">
-                <v-radio :value="child.id" :key="child.id" style="width: 100%;">
-                  <template v-slot:label>
-                    <v-list-item-content>
-                      <v-row class=" ma-0 text-center"
-                      ><span class="col-6 pl-0" style="color: black;">{{ child.name }}</span
-                      ><span class="col-4" style="color: black;">{{ child.phone }}</span
+              <v-radio :value="child.id" :key="child.id" style="width: 100%;">
+                <template v-slot:label>
+                  <v-list-item-content>
+                    <v-row class=" ma-0 text-center"
+                      ><span class="col-6 pl-0" style="color: black;">{{
+                        child.name
+                      }}</span
+                      ><span class="col-4" style="color: black;">{{
+                        child.phone
+                      }}</span
                       ><span class=""></span
-                      ></v-row>
-                    </v-list-item-content>
-                  </template>
-                </v-radio>
+                    ></v-row>
+                  </v-list-item-content>
+                </template>
+              </v-radio>
             </v-list-item>
           </v-radio-group>
           <v-list-item class="pa-0 justify-center">
@@ -340,27 +350,30 @@
         </template>
         <!--        收件資料 List-->
         <template v-else-if="item.key == 'receive'">
-          <v-radio-group @change="receiveRadioChange" :value="receiveData.id" class="ma-0">
+          <v-radio-group
+            @change="receiveRadioChange"
+            :value="receiveData.id"
+            class="ma-0"
+          >
             <v-list-item v-for="child in item.items" :key="child.id">
-                <v-radio :value="child.id" :key="child.id">
-                  <template v-slot:label>
-                    <v-list-item-content >
-                      <div style="color: black;">
-                        <v-row class="justify-space-between ma-0"
+              <v-radio :value="child.id" :key="child.id">
+                <template v-slot:label>
+                  <v-list-item-content>
+                    <div style="color: black;">
+                      <v-row class="justify-space-between ma-0"
                         ><span class="">{{ child.name }}</span
                         ><span class="">{{ child.phone }}</span
                         ><span></span
-                        ></v-row>
-                        <v-row class="justify-space-between ma-0"
+                      ></v-row>
+                      <v-row class="justify-space-between ma-0"
                         ><span class="col-1">{{ child.code }}</span
                         ><span class="col-10">{{ child.address }}</span
                         ><span></span
-                        ></v-row>
-                      </div>
-                    </v-list-item-content>
-                  </template>
-                </v-radio>
-
+                      ></v-row>
+                    </div>
+                  </v-list-item-content>
+                </template>
+              </v-radio>
             </v-list-item>
           </v-radio-group>
           <v-list-item class="pa-0 justify-center">
@@ -442,7 +455,10 @@
             </v-col>
             <v-col class="col-6 align-self-center pl-0">
               <div class="mr-1">
-                <ul class="counter">
+                <ul
+                  class="counter"
+                  v-if="item.unit == '件' || item.unit == '包'"
+                >
                   <p class="mb-1 commodityNumber">數量</p>
                   <li>
                     <input type="button" @click="minuser(index)" value="-" />
@@ -460,6 +476,10 @@
                   <li>
                     <input type="button" @click="adder(index)" value="+" />
                   </li>
+                </ul>
+                <ul class="counter" v-else>
+                  <p class="mb-1 commodityNumber">數量</p>
+                  <span class="text-h6">{{ item.weight }}</span>
                 </ul>
               </div>
               <div class="text-center pt-3">
@@ -572,6 +592,7 @@ export default {
         barcode: "",
         name: "",
         unit: "",
+        weight: 0,
         amount: "",
         salesPrice: 0,
         listPrice: 0,
@@ -738,15 +759,17 @@ export default {
         searchKey: "",
         barcode: "",
         clientId: value
-      }).then(res => {
+      }).then(async res => {
         this.productItemData = [];
-        res.data.map((item, index) => {
+
+        await res.data.map(async (item, index) => {
           let data = {
             id: index,
             productId: item.productId,
             barcode: item.barcode,
             name: item.productName,
             unit: this.getUnit(item.unit),
+            weight: item.weight,
             amount: item.amount,
             salesPrice: item.clientPrice,
             listPrice: item.price,
@@ -766,11 +789,30 @@ export default {
             ).amount;
             data.amount += amount;
           }
+          let productItemIndex = 0;
+          productItemIndex = this.productItem.findIndex(
+            x => x.barcode == data.barcode
+          );
+          if (productItemIndex != -1) {
+            this.productItem[productItemIndex].salesPrice = data.salesPrice;
+            this.productItem[productItemIndex].listPrice = data.listPrice;
+            this.productItem[productItemIndex].money = this.formatPrice(
+              (data.salesPrice === 0 ? data.listPrice : data.salesPrice) *
+                this.productItem[productItemIndex].quantity
+            );
+          }
           this.productItemData.push(data);
         });
       });
-
-      this.checkNexted();
+      console.log('is pushed');
+      if (this.productItem.length > 0) {
+        setTimeout(()=>{
+          console.log('onCal');
+          this.onCalculation();
+        },1500)
+      } else {
+        this.checkNexted();
+      }
       document.getElementById("barcodeInput").focus();
     },
     receiveRadioChange(value) {
@@ -853,10 +895,12 @@ export default {
         this.productItem.push(this.productData);
       } else {
         let data = this.productItem.find(item => item.barcode == barcode);
-        if (data.quantity + this.quantityDialog > this.productData.amount) {
-          data.quantity = this.productData.amount;
-        } else {
-          data.quantity += this.quantityDialog;
+        if (data.unit == "件" || data.unit == "包") {
+          if (data.quantity + this.quantityDialog > this.productData.amount) {
+            data.quantity = this.productData.amount;
+          } else {
+            data.quantity += this.quantityDialog;
+          }
         }
       }
 
@@ -957,6 +1001,10 @@ export default {
 
         _this.total = _this.total + money;
       });
+      console.log(_this.total,'onCal  totallllll');
+      this.$nextTick(()=>{
+        this.total = _this.total
+      })
       this.checkNexted();
     },
     submit() {
