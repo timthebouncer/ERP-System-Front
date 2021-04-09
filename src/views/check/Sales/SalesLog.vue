@@ -269,8 +269,8 @@ export default {
 
       this.$nextTick(() => {
         let image = new fabric.Image(img, {
-          left: 80,
-          top: 10,
+          left: 70,
+          top: 30,
           width: 200,
           height: 121,
           scaleX: 0.7,
@@ -287,28 +287,28 @@ export default {
 
       let text = new fabric.Textbox("收件客戶", {
         left: 70,
-        top: 140,
+        top: 160,
         name: "species",
         fontSize: 25,
         fontFamily: "微軟正黑體"
       });
-      let text1 = new fabric.Textbox(`${item.clientName}`, {
+      let text1 = new fabric.Textbox(`${this.shipmentData.receiveItem.name}`, {
         left: 90,
-        top: 170,
+        top: 190,
         name: "species",
         fontSize: 25,
         fontFamily: "微軟正黑體"
       });
       let line = new fabric.Textbox("|", {
         left: 170,
-        top: 138,
+        top: 158,
         fontSize: 20,
         fontWeight: 5,
         fontFamily: "微軟正黑體"
       });
       let line1 = new fabric.Textbox("|", {
         left: 170,
-        top: 258,
+        top: 278,
         fontSize: 20,
         fontWeight: 5,
         fontFamily: "微軟正黑體"
@@ -320,7 +320,7 @@ export default {
 
       let text2 = new fabric.Textbox("出貨單號", {
         left: 70,
-        top: 260,
+        top: 280,
         name: "orderNo",
         fontSize: 25,
         fontFamily: "微軟正黑體"
@@ -343,7 +343,7 @@ export default {
       this.$nextTick(() => {
         let _image = new fabric.Image(_img, {
           left: 200,
-          top: 210,
+          top: 230,
           width: 288,
           height: 100,
           scaleX: 0.8,
@@ -352,10 +352,10 @@ export default {
         canvas.add(_image);
       });
 
-      if (item.trackingNo) {
+      if (this.shipmentData.trackingNo) {
         let text3 = new fabric.Textbox("物流編號", {
           left: 70,
-          top: 390,
+          top: 410,
           name: "orderNo",
           fontSize: 25,
           fontFamily: "微軟正黑體"
@@ -371,7 +371,7 @@ export default {
 
         let line2 = new fabric.Textbox("|", {
           left: 170,
-          top: 387,
+          top: 407,
           fontSize: 20,
           fontWeight: 5,
           fontFamily: "微軟正黑體"
@@ -381,7 +381,7 @@ export default {
         this.$nextTick(() => {
           let images2 = new fabric.Image(__img, {
             left: 200,
-            top: 320,
+            top: 340,
             width: 254,
             height: 100,
             scaleX: 1,
@@ -392,22 +392,22 @@ export default {
       }
 
       let text7 = new fabric.Textbox("出貨日期", {
-        left: 250,
-        top: 48,
+        left: 240,
+        top: 68,
         name: "workingDate",
         fontSize: 25,
         fontFamily: "微軟正黑體"
       });
       let line3 = new fabric.Textbox("|", {
-        left: 350,
-        top: 45,
+        left: 340,
+        top: 65,
         fontSize: 20,
         fontWeight: 5,
         fontFamily: "微軟正黑體"
       });
-      let text8 = new fabric.Textbox(`${item.date}`, {
-        left: 370,
-        top: 48,
+      let text8 = new fabric.Textbox(`${this.shipmentData.shipmentDate}`, {
+        left: 360,
+        top: 68,
         name: "species",
         fontSize: 25
       });
