@@ -816,8 +816,8 @@ export default {
           console.log("is ready print pdf");
           let formData = new FormData();
           formData.append("pdf", file1);
-          formData.append("printerName", "Sbarco T4ES 203 dpi");
-          // formData.append("printerName", "EPSONDB5105 (L3150 Series)");
+          // formData.append("printerName", "Sbarco T4ES 203 dpi");
+          formData.append("printerName", "EPSONDB5105 (L3150 Series)");
           console.log(this.$store.state.ip);
           const agent = new https.Agent({ rejectUnauthorized: false });
 

@@ -110,7 +110,7 @@ export default {
       endDate: "",
       tableData: [],
       pageNumber: 1,
-      pageSize: 11,
+      pageSize: 1000,
       total: 0,
       delOrderDialogVisible: false,
       delOrderId: "",
@@ -454,22 +454,22 @@ export default {
   },
   mounted() {
     this.getDistributeList();
-    window.addEventListener('scroll', () => {
-      console.log('scroll')
-      const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-      // console.log(clientHeight,'clientHeight');
-      // console.log(scrollTop,'scrollTop');
-      // console.log(scrollHeight,'scrollHeight');
-      if(clientHeight + scrollTop >= scrollHeight) {
-        console.log("loading new data")
-        this.pageNumber += 1;
-        if(this.contentStatus === false){
-          // show the loading animation
-          document.querySelector('.loading').classList.add('show')
-          setTimeout(this.getDistributeList,1000)
-        }
-      }
-    });
+    // window.addEventListener('scroll', () => {
+    //   console.log('scroll')
+    //   const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+    //   // console.log(clientHeight,'clientHeight');
+    //   // console.log(scrollTop,'scrollTop');
+    //   // console.log(scrollHeight,'scrollHeight');
+    //   if(clientHeight + scrollTop >= scrollHeight) {
+    //     console.log("loading new data")
+    //     this.pageNumber += 1;
+    //     if(this.contentStatus === false){
+    //       // show the loading animation
+    //       document.querySelector('.loading').classList.add('show')
+    //       setTimeout(this.getDistributeList,1000)
+    //     }
+    //   }
+    // });
   }
 };
 </script>
