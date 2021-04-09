@@ -28,9 +28,11 @@
           ><v-menu
             v-model="menuVisible"
             :close-on-content-click="false"
-            :nudge-left="20"
+            :nudge-left="300"
+            :nudge-top="40"
             transition="scale-transition"
             offset-y
+            offset-x
             min-width="auto"
           >
             <template v-slot:activator="{ on, attrs }">

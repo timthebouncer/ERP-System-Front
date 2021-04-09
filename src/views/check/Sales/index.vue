@@ -901,6 +901,10 @@ export default {
           } else {
             data.quantity += this.quantityDialog;
           }
+        }else{
+          this.productData.quantity = this.quantityDialog;
+          this.productData.description = this.remarkDialog;
+          this.productItem.push(this.productData);
         }
       }
 
