@@ -709,6 +709,8 @@ export default {
       this.svgForm.barcode = this.commodity[index].barcode;
       this.svgForm.price = this.commodity[index].price;
       this.svgForm.alias = this.commodity[index].alias;
+      //固定條碼列印時帶入定重重量
+      this.svgForm.fixedWeight = this.commodity[index].fixedWeight.toFixed(2);
       this.position = index;
       //切換標籤時reset組件
       this.restPlusBtn = false;
@@ -831,7 +833,7 @@ export default {
             items.text = `計價單位:${this.svgForm.unit}`;
           } else if (items.name === "weight") {
             if(this.stockInForm.barcode !== "") {
-              items.text = `定重重量:${this.svgForm.weight}`;
+              items.text = `定重重量:${this.svgForm.fixedWeight}`;
             }else{
               items.text = `重量:${this.svgForm.weight}`;
             }
@@ -1053,7 +1055,7 @@ export default {
                     items.text = `計價單位:${this.svgForm.unit}`;
                   } else if (items.name === "weight") {
                     if(this.stockInForm.barcode !== "") {
-                      items.text = `定重重量:${this.svgForm.weight}`;
+                      items.text = `定重重量:${this.svgForm.fixedWeight}`;
                     }else{
                       items.text = `重量:${this.svgForm.weight}`;
                     }
