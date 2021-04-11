@@ -292,7 +292,7 @@ export default {
         fontSize: 25,
         fontFamily: "微軟正黑體"
       });
-      let text1 = new fabric.Textbox(`${this.shipmentData.receiveItem.name}`, {
+      let text1 = new fabric.Textbox(`${item.clientName}`, {
         left: 90,
         top: 190,
         name: "species",
@@ -352,7 +352,7 @@ export default {
         canvas.add(_image);
       });
 
-      if (this.shipmentData.trackingNo) {
+      if (item.trackingNo) {
         let text3 = new fabric.Textbox("物流編號", {
           left: 70,
           top: 410,
@@ -405,7 +405,7 @@ export default {
         fontWeight: 5,
         fontFamily: "微軟正黑體"
       });
-      let text8 = new fabric.Textbox(`${this.shipmentData.shipmentDate}`, {
+      let text8 = new fabric.Textbox(`${item.date}`, {
         left: 360,
         top: 68,
         name: "species",

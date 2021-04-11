@@ -272,6 +272,7 @@ export default {
       localStorage.setItem('ip', this.ip)
       localStorage.setItem('printName', this.printName)
       this.settingDialog = false
+      window.open(`https://${this.ip}:8099/`)
     }
   },
   mounted() {
