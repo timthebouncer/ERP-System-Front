@@ -1,5 +1,23 @@
 <template>
   <v-container class="container">
+    <v-dialog v-model="progressDialog" persistent>
+      <v-card style="background-color: #fff0e9;">
+        <v-card-text class="text-center"
+        ><span class="text-h6 font-weight-black"
+        >出貨單產出中</span
+        >
+          <v-progress-linear
+                  color="cyan"
+                  :active="progressLoading"
+                  :indeterminate="progressLoading"
+                  rounded
+                  height="6"
+          ></v-progress-linear>
+        </v-card-text
+        >
+      </v-card>
+
+    </v-dialog>
     <!--   貼箱標籤   -->
     <div style="position: absolute; top:-1000px;">
       <div style="height: 173px; padding: 8px 0 0 0;">
@@ -520,13 +538,17 @@ export default {
           class: "text-h5 font-weight-black grey lighten-2"
         }
       ],
+      progressLoading: false,
+      progressDialog: false,
       setHeader: [],
       tableData: [],
       columnList: [],
       reportPDF: "",
       reportPDF2: "",
       printPage: null,
-      printPage2: null
+      printPage2: null,
+      reportImage: null,
+      reportImage2: null
     };
   },
   created() {
@@ -544,9 +566,9 @@ export default {
       console.log(res);
       this.vatNumber = res.data.vatNumber
     })
-    this.printPage = document.createElement("div");
-    this.printPage2 = document.createElement("div");
-    this.reportPDF = new jsPDF("p", "pt", "a4");
+    // this.printPage = document.createElement("div");
+    // this.printPage2 = document.createElement("div");
+    this.reportPDF = new jsPDF("p", "pt", "a4",true);
     this.reportPDF2 = new jsPDF("p", "pt", "a4");
     console.log(this.$store.state.shipment.shippingFee);
   },
@@ -606,10 +628,10 @@ export default {
           .then(async () => {
             if (value == 1) {
               await this.printReport(value);
-              this.printPage.remove();
-              console.log("printPage remove");
-              this.printPage2.remove();
-              console.log("printPage2 remove");
+              // this.printPage.remove();
+              // console.log("printPage remove");
+              // this.printPage2.remove();
+              // console.log("printPage2 remove");
               // await this.drawLabel(value);
             } else if (value == 2) {
               await this.drawLabel(value);
@@ -651,10 +673,10 @@ export default {
           .then(async () => {
             if (value == 1) {
               await this.printReport(value);
-              this.printPage.remove();
-              console.log("printPage remove");
-              this.printPage2.remove();
-              console.log("printPage2 remove");
+              // this.printPage.remove();
+              // console.log("printPage remove");
+              // this.printPage2.remove();
+              // console.log("printPage2 remove");
               // await this.drawLabel(value);
             } else if (value == 2) {
               await this.drawLabel(value);
@@ -685,23 +707,36 @@ export default {
 
         img.src = dataUrl;
         img.width = 595;
-        this.printPage.appendChild(img);
-        console.log("pirnt page add image");
+        // this.printPage.appendChild(img);
+        // console.log(dataUrl,"pirnt page add image");
+        // var w = window.open("");
+        // w.document.write(img.outerHTML);
+
+        this.reportImage = img
+        // this.reportImage = dataUrl
       } else if (value == 2) {
         let img = new Image();
 
         img.src = dataUrl;
         img.width = 595;
-        this.printPage2.appendChild(img);
-        console.log("print page2 add image");
+        // this.printPage2.appendChild(img);
+        // console.log("print page2 add image");
+        // var w = window.open("");
+        // w.document.write(img.outerHTML);
+
+        this.reportImage2 = img
+        // this.reportImage2 = dataUrl
       }
       // let img = new Image()
       //
       // img.src = dataUrl
       // img.width = 595
       // this.printPage.appendChild(img)
+
     },
     async printReport(value) {
+      this.progressDialog = true
+      this.progressLoading = true
       let pdfFile, pdfFile2;
       let file1, file2;
       // 出貨單 輸出格式
@@ -739,14 +774,28 @@ export default {
       console.log("print report first");
       // console.log(this.printPage);
 
-      let doc = this.reportPDF;
-      await this.reportPDF.html(this.printPage, {
-        callback: function(doc) {
-          // console.log(doc.output('datauristring'));
-          pdfFile = doc.output("datauristring");
-        },
-        x: 10
-      });
+      // let doc = this.reportPDF;
+      // await this.reportPDF.html(this.printPage, {
+      //   callback: function(doc) {
+      //     // console.log(doc.output('datauristring'));
+      //     pdfFile = doc.output("datauristring");
+      //   },
+      //   x: 10
+      // });
+      // let pdf = new jsPDF("p", "pt", "a4")
+      // await this.reportPDF.addImage(this.reportImage,'JPEG',15,0,595,0,'FAST')
+      // pdfFile = this.reportPDF.output("datauristring");
+      console.log('added image to pdf')
+      // fetch(pdfFile)
+      //         .then(res => res.blob())
+      //         .then(blob => {
+      //           console.log("ready create file1");
+      //           file1 = new File([blob], "test.pdf", { type: "application/pdf" });
+      //           console.log("is file1 created");
+      //
+      //           // let fileURL = URL.createObjectURL(file1);
+      //           // window.open(fileURL);
+      //         });
       this.$nextTick(() => {
         this.templateType = printTypeStr2;
         this.setHeader = this.headers2;
@@ -754,62 +803,75 @@ export default {
       });
 
       await this.addReportImg(2);
+
       // this.printPage.classList.add('printImage2')
       console.log("print report second");
       // console.log(this.printPage2);
       // let doc = this.reportPDF
       // doc.addHTML(this.printPage)
-      this.reportPDF = new jsPDF("p", "pt", "a4");
-      let doc2 = this.reportPDF;
-
-      await this.reportPDF.html(this.printPage2, {
-        callback: async function(doc2) {
-          // console.log(doc2.output('datauristring'));
-
-          pdfFile2 = doc2.output("datauristring");
-          // console.log(pdfFile);
-          console.log("pdfFile created");
-          // function loadFile(){
-          //   return new Promise(resolve => {
-          fetch(pdfFile)
-            .then(res => res.blob())
-            .then(blob => {
-              console.log("ready create file1");
-              file1 = new File([blob], "test.pdf", { type: "application/pdf" });
-              console.log("is file1 created");
-
-              // let fileURL = URL.createObjectURL(file1);
-              // window.open(fileURL);
-            });
-
-          // })
-          // }
-
-          fetch(pdfFile2)
-            .then(res => res.blob())
-            .then(blob => {
-              console.log("ready create file2");
-              file2 = new File([blob], "test2.pdf", {
-                type: "application/pdf"
-              });
-              console.log("is file2 created");
-              // let fileURL = URL.createObjectURL(file2);
-              // window.open(fileURL);
-            });
-
-          // merger.add(pdfFile)
-          // merger.add(pdfFile2)
-          // await merger.save('output.pdf')
-
-          // merge([file1, file2], 'File Ouput.pdf', function (err) {
-          //   if (err) {
-          //     return console.log(err)
-          //   }
-          //   console.log('Successfully merged!')
-          // });
-        },
-        x: 10
-      });
+      // this.reportPDF = new jsPDF("p", "pt", "a4",true);
+      // await this.reportPDF.addImage(this.reportImage2,'JPEG',15,0,595,0,'FAST')
+      // pdfFile2 = this.reportPDF.output("datauristring");
+      // fetch(pdfFile2)
+      //         .then(res => res.blob())
+      //         .then(blob => {
+      //           console.log("ready create file2");
+      //           file2 = new File([blob], "test2.pdf", {
+      //             type: "application/pdf"
+      //           });
+      //           console.log("is file2 created");
+      //           // let fileURL = URL.createObjectURL(file2);
+      //           // window.open(fileURL);
+      //         });
+      // let doc2 = this.reportPDF;
+      // await this.reportPDF.html(this.printPage2, {
+      //   callback: async function(doc2) {
+      //     // console.log(doc2.output('datauristring'));
+      //
+      //     pdfFile2 = doc2.output("datauristring");
+      //     // console.log(pdfFile);
+      //     console.log("pdfFile created");
+      //     // function loadFile(){
+      //     //   return new Promise(resolve => {
+      //     fetch(pdfFile)
+      //       .then(res => res.blob())
+      //       .then(blob => {
+      //         console.log("ready create file1");
+      //         file1 = new File([blob], "test.pdf", { type: "application/pdf" });
+      //         console.log("is file1 created");
+      //
+      //         let fileURL = URL.createObjectURL(file1);
+      //         window.open(fileURL);
+      //       });
+      //
+      //     // })
+      //     // }
+      //
+      //     fetch(pdfFile2)
+      //       .then(res => res.blob())
+      //       .then(blob => {
+      //         console.log("ready create file2");
+      //         file2 = new File([blob], "test2.pdf", {
+      //           type: "application/pdf"
+      //         });
+      //         console.log("is file2 created");
+      //         let fileURL = URL.createObjectURL(file2);
+      //         window.open(fileURL);
+      //       });
+      //
+      //     // merger.add(pdfFile)
+      //     // merger.add(pdfFile2)
+      //     // await merger.save('output.pdf')
+      //
+      //     // merge([file1, file2], 'File Ouput.pdf', function (err) {
+      //     //   if (err) {
+      //     //     return console.log(err)
+      //     //   }
+      //     //   console.log('Successfully merged!')
+      //     // });
+      //   },
+      //   x: 10
+      // });
 
       function postPdf() {
         return new Promise(async resolve => {
@@ -862,8 +924,18 @@ export default {
         });
       }
       setTimeout(async () => {
-        await postPdf.bind(this)();
-      }, 5000);
+        console.log('created pdf to server')
+        var w = window.open("");
+        w.document.write(this.reportImage.outerHTML);
+        w.document.write(this.reportImage2.outerHTML);
+        this.progressLoading = false
+        this.progressDialog = false
+        this.$store.state.successMsg = "PDF 已產出";
+        this.$store.state.successSnackbar = true;
+        this.$store.state.salesDetailed = false;
+        this.$router.push("/salesLog");
+        // await postPdf.bind(this)();
+      }, 1000);
     },
     async drawLabel(value) {
       let canvas = new fabric.Canvas("art");
