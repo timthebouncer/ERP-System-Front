@@ -43,8 +43,11 @@
                 }
             },
             cancel () {
-                this.$emit('close')
+                this.$emit('close', this.ip)
             }
+        },
+        mounted() {
+            this.ip = localStorage.getItem("userIP")
         }
     }
 </script>

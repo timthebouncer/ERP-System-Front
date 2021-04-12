@@ -408,6 +408,7 @@
           <v-text-field
             id="barcodeInput"
             v-model="productBarcode"
+            placeholder="可掃條碼 或 手動輸入"
             @input="setBarcode"
             solo
           ></v-text-field> </v-col

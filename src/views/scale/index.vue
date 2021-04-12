@@ -444,6 +444,7 @@ export default {
   },
   async mounted() {
     this.userName = sessionStorage.getItem("userName");
+    this.userIP = localStorage.getItem("userIP");
     //需要有IP才能入庫
     if (this.userIP) {
       this.inboundPrintStatus = false;
@@ -612,6 +613,7 @@ export default {
     },
     closeIpDialog(ip) {
       this.ipShow = false;
+      localStorage.setItem('userIP', ip)
       this.userIP = ip;
     },
     async showAddNumberDialog(show) {
