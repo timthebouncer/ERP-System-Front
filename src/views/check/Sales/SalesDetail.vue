@@ -45,8 +45,9 @@
       id="exampleWrapper"
       style="position: absolute; top:-2000px; opacity: 0%; width: 1200px; height: 560px;"
     >
+      <div :class="pageClassName[index]" v-for="(item,index) in tableList" :key="index">
       <div class="table-content">
-        <div class="top-wrapper">
+        <div class="top-wrapper" v-if="!disableTitle[index]">
           <div>
             <span class="Brand-logo"><img src="@/assets/brand_logo.jpg"/></span>
           </div>
@@ -67,7 +68,7 @@
             </h1>
           </div>
         </div>
-        <div class="detail-wrapper">
+        <div class="detail-wrapper" v-if="!disableTitle[index]">
           <div class="detail-list">
             <span
               >客戶名稱:<span style="border-bottom: 1px dotted">{{
@@ -91,7 +92,7 @@
               }}</span></span
             >
             <span
-              >統一編號:<span style="border-bottom: 1px dotted">{{ vatNumber == null ? '無' : vatNumber }}</span></span
+              >統一編號:<span style="border-bottom: 1px dotted">{{ (vatNumber == null || vatNumber == '') ? '無' : vatNumber }}</span></span
             >
             <span v-show="templateType !== '零售-有價格' && templateType !== '零售-無價格'"
               >出貨方式:<span style="border-bottom: 1px dotted">{{
@@ -152,7 +153,7 @@
         <div class="content-wrapper">
           <v-data-table
             :headers="setHeader"
-            :items="shipmentData.orderItemRequestList"
+            :items="item"
             :pagination="false"
             hide-default-footer
             disable-sort
@@ -183,7 +184,7 @@
             </template>
           </v-data-table>
         </div>
-        <div class="footer">
+        <div class="footer" v-if="!disableFooter[index]">
           <div class="contact-wrapper" v-if="templateType !== '零售-有價格' && templateType !== '零售-無價格'">
             <span style="font-size: 35px;">總計 {{ shipmentData.orderItemRequestList.length }}</span>
             <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
@@ -212,6 +213,7 @@
             <div v-else></div>
           </div>
         </div>
+      </div>
       </div>
     </div>
     <!--  出貨單 html end   -->
@@ -492,7 +494,7 @@ export default {
         },
         {
           text: "備註",
-          value: "remark",
+          value: "description",
           class: "text-h5 font-weight-black grey lighten-2"
         }
       ],
@@ -534,21 +536,25 @@ export default {
         },
         {
           text: "備註",
-          value: "remark",
+          value: "description",
           class: "text-h5 font-weight-black grey lighten-2"
         }
       ],
       progressLoading: false,
       progressDialog: false,
       setHeader: [],
+      tableList: [],
       tableData: [],
       columnList: [],
       reportPDF: "",
       reportPDF2: "",
       printPage: null,
       printPage2: null,
-      reportImage: null,
-      reportImage2: null
+      reportImage: [],
+      reportImage2: [],
+      disableTitle: [],
+      disableFooter: [],
+      pageClassName: [],
     };
   },
   created() {
@@ -563,14 +569,38 @@ export default {
       this.$store.state.shipment.total + this.$store.state.shipment.shippingFee;
     this.setHeader = this.headers;
     this.$api.Customer.getClient(this.shipmentData.clientItem.id).then(res=>{
-      console.log(res);
       this.vatNumber = res.data.vatNumber
     })
+    if(this.shipmentData.orderItemRequestList.length>15){
+      let pages = 0
+      if(this.shipmentData.orderItemRequestList.length / 15 > parseInt(this.shipmentData.orderItemRequestList.length / 15)){
+        pages = parseInt(this.shipmentData.orderItemRequestList.length / 15) + 1
+      }else{
+        pages = this.shipmentData.orderItemRequestList.length / 15
+      }
+
+      for (let i=0;i<pages;i++){
+        this.tableList.push(this.shipmentData.orderItemRequestList.slice(i*15,i*15+15))
+        this.pageClassName.push('page'+(i+1))
+        if(i == 0){
+          this.disableTitle.push(false)
+          this.disableFooter.push(true)
+        }
+        else if(i == pages-1){
+          this.disableTitle.push(true)
+          this.disableFooter.push(false)
+        }
+        else{
+          this.disableFooter.push(true)
+          this.disableTitle.push(true)
+        }
+      }
+      this.$forceUpdate();
+    }
     // this.printPage = document.createElement("div");
     // this.printPage2 = document.createElement("div");
     this.reportPDF = new jsPDF("p", "pt", "a4",true);
     this.reportPDF2 = new jsPDF("p", "pt", "a4");
-    console.log(this.$store.state.shipment.shippingFee);
   },
   methods: {
     formatPrice(value) {
@@ -588,12 +618,12 @@ export default {
       } else if (recipientId == "2") {
         recipientId = "1";
       }
-      // await this.printReport(value);
+      await this.printReport(value);
       // this.printPage.remove();
       // console.log("printPage remove");
       // this.printPage2.remove();
       // console.log("printPage2 remove");
-      // return
+      return
       if (this.$store.state.shipmentEdited) {
         this.$api.Distribute.editOrder({
           orderId: this.$store.state.shipment.orderId,
@@ -697,9 +727,11 @@ export default {
       // this.$store.state.successSnackbar = true;
       // this.$router.push("/salesLog");
     },
-    async addReportImg(value) {
+    async addReportImg(value, page) {
+      let pageClass = 'page'+page
+
       const dataUrl = await htmlToImage.toPng(
-        document.querySelector(".table-content")
+          document.getElementsByClassName(pageClass)[0]
       );
 
       if (value == 1) {
@@ -708,11 +740,10 @@ export default {
         img.src = dataUrl;
         img.width = 595;
         // this.printPage.appendChild(img);
-        // console.log(dataUrl,"pirnt page add image");
+
         // var w = window.open("");
         // w.document.write(img.outerHTML);
-
-        this.reportImage = img
+        this.reportImage.push(dataUrl)
         // this.reportImage = dataUrl
       } else if (value == 2) {
         let img = new Image();
@@ -724,7 +755,7 @@ export default {
         // var w = window.open("");
         // w.document.write(img.outerHTML);
 
-        this.reportImage2 = img
+        this.reportImage2.push(dataUrl)
         // this.reportImage2 = dataUrl
       }
       // let img = new Image()
@@ -769,49 +800,22 @@ export default {
       });
       JsBarcode("#order-barcode").init();
       JsBarcode("#order-trackNo").init();
-      await this.addReportImg(1);
-      // this.printPage.classList.add('printImage')
-      console.log("print report first");
-      // console.log(this.printPage);
 
-      // let doc = this.reportPDF;
-      // await this.reportPDF.html(this.printPage, {
-      //   callback: function(doc) {
-      //     // console.log(doc.output('datauristring'));
-      //     pdfFile = doc.output("datauristring");
-      //   },
-      //   x: 10
-      // });
-      // let pdf = new jsPDF("p", "pt", "a4")
-      // await this.reportPDF.addImage(this.reportImage,'JPEG',15,0,595,0,'FAST')
-      // pdfFile = this.reportPDF.output("datauristring");
-      console.log('added image to pdf')
-      // fetch(pdfFile)
-      //         .then(res => res.blob())
-      //         .then(blob => {
-      //           console.log("ready create file1");
-      //           file1 = new File([blob], "test.pdf", { type: "application/pdf" });
-      //           console.log("is file1 created");
-      //
-      //           // let fileURL = URL.createObjectURL(file1);
-      //           // window.open(fileURL);
-      //         });
+      for (let item of this.tableList){
+        let index = this.tableList.indexOf(item)
+        await this.addReportImg(1,index+1);
+      }
+
       this.$nextTick(() => {
         this.templateType = printTypeStr2;
         this.setHeader = this.headers2;
-        console.log("is set header2");
       });
 
-      await this.addReportImg(2);
+      for (let item of this.tableList){
+        let index = this.tableList.indexOf(item)
+        await this.addReportImg(2,index+1);
+      }
 
-      // this.printPage.classList.add('printImage2')
-      console.log("print report second");
-      // console.log(this.printPage2);
-      // let doc = this.reportPDF
-      // doc.addHTML(this.printPage)
-      // this.reportPDF = new jsPDF("p", "pt", "a4",true);
-      // await this.reportPDF.addImage(this.reportImage2,'JPEG',15,0,595,0,'FAST')
-      // pdfFile2 = this.reportPDF.output("datauristring");
       // fetch(pdfFile2)
       //         .then(res => res.blob())
       //         .then(blob => {
@@ -926,14 +930,29 @@ export default {
       setTimeout(async () => {
         console.log('created pdf to server')
         var w = window.open("");
-        w.document.write(this.reportImage.outerHTML);
-        w.document.write(this.reportImage2.outerHTML);
+        this.reportImage.forEach((value,index)=>{
+          let img = new Image();
+
+          img.src = value;
+          img.width = 595;
+          w.document.write(img.outerHTML);
+        })
+        this.reportImage2.forEach((value,index)=>{
+          let img = new Image();
+
+          img.src = value;
+          img.width = 595;
+          w.document.write(img.outerHTML);
+        })
+        // w.document.write(this.reportImage.outerHTML);
+        // w.document.write(this.reportImage2.outerHTML);
         this.progressLoading = false
         this.progressDialog = false
-        this.$store.state.successMsg = "PDF 已產出";
-        this.$store.state.successSnackbar = true;
-        this.$store.state.salesDetailed = false;
-        this.$router.push("/salesLog");
+        this.btnDisable = false;
+        // this.$store.state.successMsg = "PDF 已產出";
+        // this.$store.state.successSnackbar = true;
+        // this.$store.state.salesDetailed = false;
+        // this.$router.push("/salesLog");
         // await postPdf.bind(this)();
       }, 1000);
     },
