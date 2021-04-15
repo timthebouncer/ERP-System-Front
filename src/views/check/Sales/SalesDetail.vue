@@ -177,6 +177,7 @@
               disable-filtering
               disable-pagination
               :mobile-breakpoint="0"
+              no-data-text="無出貨商品項目"
               style="text-align: center"
             >
               <template v-slot:item.listPrice="{ item }">
@@ -591,6 +592,7 @@ export default {
       columnList: [],
       reportPDF: "",
       reportPDF2: "",
+      isManyData: false,
       printPage: null,
       printPage2: null,
       reportImage: [],
@@ -618,6 +620,7 @@ export default {
       this.vatNumber = res.data.vatNumber;
     });
     if (this.shipmentData.orderItemRequestList.length > 15) {
+      this.isManyData = true
       let pages = 0;
       if (
         this.shipmentData.orderItemRequestList.length / 15 >
@@ -646,6 +649,13 @@ export default {
         }
       }
       this.$forceUpdate();
+    }else{
+      this.tableList.push(
+              this.shipmentData.orderItemRequestList
+      );
+      this.pageClassName.push("page1");
+      this.disableTitle.push(false)
+      this.disableFooter.push(false)
     }
     // this.printPage = document.createElement("div");
     // this.printPage2 = document.createElement("div");
@@ -850,10 +860,13 @@ export default {
       JsBarcode("#order-barcode").init();
       JsBarcode("#order-trackNo").init();
 
+
       for (let item of this.tableList) {
         let index = this.tableList.indexOf(item);
         await this.addReportImg(1, index + 1);
       }
+
+
 
       this.$nextTick(() => {
         this.templateType = printTypeStr2;
@@ -998,9 +1011,9 @@ export default {
         this.progressDialog = false;
         this.btnDisable = false;
         // this.$store.state.successMsg = "PDF 已產出";
-        // this.$store.state.successSnackbar = true;
-        // this.$store.state.salesDetailed = false;
-        // this.$router.push("/salesLog");
+        this.$store.state.successSnackbar = true;
+        this.$store.state.salesDetailed = false;
+        this.$router.push("/salesLog");
         // await postPdf.bind(this)();
       }, 1000);
     },
