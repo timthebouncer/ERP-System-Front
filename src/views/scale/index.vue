@@ -796,7 +796,7 @@ export default {
       }).then(res => {
         if (res.status === 200) {
           if (this.stockInForm.barcode === "") {
-            this.rePrintStatus = true;
+            // this.rePrintStatus = true;
           }
           //取消入庫成功後獲得當前商品數量
           this.stockInFormAmount = res.data.amount;
