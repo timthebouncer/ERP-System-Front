@@ -3,20 +3,16 @@
     <v-dialog v-model="progressDialog" persistent>
       <v-card style="background-color: #fff0e9;">
         <v-card-text class="text-center"
-        ><span class="text-h6 font-weight-black"
-        >出貨單產出中</span
-        >
+          ><span class="text-h6 font-weight-black">出貨單產出中</span>
           <v-progress-linear
-                  color="cyan"
-                  :active="progressLoading"
-                  :indeterminate="progressLoading"
-                  rounded
-                  height="6"
+            color="cyan"
+            :active="progressLoading"
+            :indeterminate="progressLoading"
+            rounded
+            height="6"
           ></v-progress-linear>
-        </v-card-text
-        >
+        </v-card-text>
       </v-card>
-
     </v-dialog>
     <!--   貼箱標籤   -->
     <div style="position: absolute; top:-1000px;">
@@ -45,175 +41,220 @@
       id="exampleWrapper"
       style="position: absolute; top:-2000px; opacity: 0%; width: 1200px; height: 560px;"
     >
-      <div :class="pageClassName[index]" v-for="(item,index) in tableList" :key="index">
-      <div class="table-content">
-        <div class="top-wrapper" v-if="!disableTitle[index]">
-          <div>
-            <span class="Brand-logo"><img src="@/assets/brand_logo.jpg"/></span>
-          </div>
-          <div class="title">
-            <h1>出貨單</h1>
-          </div>
-          <div v-show="templateType === '零售-有價格' || templateType === '零售-無價格'" class="logo2">
-            <h1 class="black-cat-logo">
-              {{
-                shipmentData.shipment === 1
-                  ? "親送"
-                  : shipmentData.shipment === 2
-                  ? "黑貓宅配"
-                  : shipmentData.shipment === 3
-                  ? "自取"
-                  : ""
-              }}
-            </h1>
-          </div>
-        </div>
-        <div class="detail-wrapper" v-if="!disableTitle[index]">
-          <div class="detail-list">
-            <span
-              >客戶名稱:<span style="border-bottom: 1px dotted">{{
-                shipmentData.clientItem.name
-              }}</span></span
-            >
-            <span
-              >客戶類別:<span style="border-bottom: 1px dotted">{{
-                shipmentData.classItem.className
-              }}</span></span
-            >
-            <span
-              >收件地址:<span style="border-bottom: 1px dotted"
-                >{{ shipmentData.receiveItem.code
-                }}{{ shipmentData.receiveItem.address }}</span
-              ></span
-            >
-            <span
-              >客戶電話:<span style="border-bottom: 1px dotted">{{
-                shipmentData.clientItem.phone
-              }}</span></span
-            >
-            <span
-              >統一編號:<span style="border-bottom: 1px dotted">{{ (vatNumber == null || vatNumber == '') ? '無' : vatNumber }}</span></span
-            >
-            <span v-show="templateType !== '零售-有價格' && templateType !== '零售-無價格'"
-              >出貨方式:<span style="border-bottom: 1px dotted">{{
-                shipmentData.shipment === 1
-                  ? "親送"
-                  : shipmentData.shipment === 2
-                  ? "黑貓宅配"
-                  : shipmentData.shipment === 3
-                  ? "自取"
-                  : ""
-              }}</span></span
-            >
-            <span v-show="templateType === '零售-有價格' || templateType === '零售-無價格'">
-              付款方式:
-              <span style="border-bottom: 1px dotted">{{
-                shipmentData.payment === 1
-                  ? "貨到付款"
-                  : shipmentData.payment === 2
-                  ? "匯款"
-                  : shipmentData.payment === 3
-                  ? "現金"
-                  : ""
-              }}</span>
-            </span>
-            <span>備註:{{ shipmentData.remark }}</span>
-          </div>
-          <div class="barcode-wrapper">
-            <span>出貨日期:{{ shipmentData.shipmentDate }}</span>
-            <div class="paper-content-detail-order">
-              <span style="width: 40%;">出貨單號:</span>
-              <div class="other3-order-barcode">
-                <svg
-                  id="order-barcode"
-                  :jsbarcode-format="skus.format"
-                  :jsbarcode-value="shipmentData.orderNo"
-                  jsbarcode-textmargin="0"
-                  jsbarcode-fontoptions="bold"
-                ></svg>
-              </div>
+      <div
+        :class="pageClassName[index]"
+        v-for="(item, index) in tableList"
+        :key="index"
+      >
+        <div class="table-content">
+          <div class="top-wrapper" v-if="!disableTitle[index]">
+            <div>
+              <span class="Brand-logo"
+                ><img src="@/assets/brand_logo.jpg"
+              /></span>
+            </div>
+            <div class="title">
+              <h1>出貨單</h1>
             </div>
             <div
-              class="paper-content-detail-order"
-              v-show="shipmentData.trackingNo"
+              v-show="
+                templateType === '零售-有價格' || templateType === '零售-無價格'
+              "
+              class="logo2"
             >
-              <span style="width: 40%;">物流編號:</span>
-              <div class="other3-package-barcode">
-                <svg
-                  id="order-trackNo"
-                  :jsbarcode-format="skus2.format"
-                  :jsbarcode-value="shipmentData.trackingNo"
-                  jsbarcode-textmargin="0"
-                  jsbarcode-fontoptions="bold"
-                ></svg>
+              <h1 class="black-cat-logo">
+                {{
+                  shipmentData.shipment === 1
+                    ? "親送"
+                    : shipmentData.shipment === 2
+                    ? "黑貓宅配"
+                    : shipmentData.shipment === 3
+                    ? "自取"
+                    : ""
+                }}
+              </h1>
+            </div>
+          </div>
+          <div class="detail-wrapper" v-if="!disableTitle[index]">
+            <div class="detail-list">
+              <span
+                >客戶名稱:<span style="border-bottom: 1px dotted">{{
+                  shipmentData.clientItem.name
+                }}</span></span
+              >
+              <span
+                >客戶類別:<span style="border-bottom: 1px dotted">{{
+                  shipmentData.classItem.className
+                }}</span></span
+              >
+              <span
+                >收件地址:<span style="border-bottom: 1px dotted"
+                  >{{ shipmentData.receiveItem.code
+                  }}{{ shipmentData.receiveItem.address }}</span
+                ></span
+              >
+              <span
+                >客戶電話:<span style="border-bottom: 1px dotted">{{
+                  shipmentData.clientItem.phone
+                }}</span></span
+              >
+              <span
+                >統一編號:<span style="border-bottom: 1px dotted">{{
+                  vatNumber == null || vatNumber == "" ? "無" : vatNumber
+                }}</span></span
+              >
+              <span
+                v-show="
+                  templateType !== '零售-有價格' &&
+                    templateType !== '零售-無價格'
+                "
+                >出貨方式:<span style="border-bottom: 1px dotted">{{
+                  shipmentData.shipment === 1
+                    ? "親送"
+                    : shipmentData.shipment === 2
+                    ? "黑貓宅配"
+                    : shipmentData.shipment === 3
+                    ? "自取"
+                    : ""
+                }}</span></span
+              >
+              <span
+                v-show="
+                  templateType === '零售-有價格' ||
+                    templateType === '零售-無價格'
+                "
+              >
+                付款方式:
+                <span style="border-bottom: 1px dotted">{{
+                  shipmentData.payment === 1
+                    ? "貨到付款"
+                    : shipmentData.payment === 2
+                    ? "匯款"
+                    : shipmentData.payment === 3
+                    ? "現金"
+                    : ""
+                }}</span>
+              </span>
+              <span>備註:{{ shipmentData.remark }}</span>
+            </div>
+            <div class="barcode-wrapper">
+              <span>出貨日期:{{ shipmentData.shipmentDate }}</span>
+              <div class="paper-content-detail-order">
+                <span style="width: 40%;">出貨單號:</span>
+                <div class="other3-order-barcode">
+                  <svg
+                    id="order-barcode"
+                    :jsbarcode-format="skus.format"
+                    :jsbarcode-value="shipmentData.orderNo"
+                    jsbarcode-textmargin="0"
+                    jsbarcode-fontoptions="bold"
+                  ></svg>
+                </div>
+              </div>
+              <div
+                class="paper-content-detail-order"
+                v-show="shipmentData.trackingNo"
+              >
+                <span style="width: 40%;">物流編號:</span>
+                <div class="other3-package-barcode">
+                  <svg
+                    id="order-trackNo"
+                    :jsbarcode-format="skus2.format"
+                    :jsbarcode-value="shipmentData.trackingNo"
+                    jsbarcode-textmargin="0"
+                    jsbarcode-fontoptions="bold"
+                  ></svg>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div class="content-wrapper">
-          <v-data-table
-            :headers="setHeader"
-            :items="item"
-            :pagination="false"
-            hide-default-footer
-            disable-sort
-            disable-filtering
-            disable-pagination
-            :mobile-breakpoint="0"
-            style="text-align: center"
-          >
-            <template v-slot:item.listPrice="{ item }">
-              <span>${{ formatPrice(item.listPrice * item.quantity) }}</span>
-            </template>
-            <template v-slot:item.salesPrice="{ item }">
-              <span>${{ formatPrice(item.salesPrice * item.quantity) }}</span>
-            </template>
-            <template v-slot:item.discount="{ item }">
-              <span
-                >${{
-                  formatPrice(
-                    (item.salesPrice == 0 ? item.listPrice : item.salesPrice) *
-                      item.quantity -
-                      item.money
-                  )
-                }}</span
+          <div class="content-wrapper">
+            <v-data-table
+              :headers="setHeader"
+              :items="item"
+              hide-default-footer
+              disable-sort
+              disable-filtering
+              disable-pagination
+              :mobile-breakpoint="0"
+              style="text-align: center"
+            >
+              <template v-slot:item.listPrice="{ item }">
+                <span>${{ formatPrice(item.listPrice * item.quantity) }}</span>
+              </template>
+              <template v-slot:item.salesPrice="{ item }">
+                <span>${{ formatPrice(item.salesPrice * item.quantity) }}</span>
+              </template>
+              <template v-slot:item.discount="{ item }">
+                <span
+                  >${{
+                    formatPrice(
+                      (item.salesPrice == 0
+                        ? item.listPrice
+                        : item.salesPrice) *
+                        item.quantity -
+                        item.money
+                    )
+                  }}</span
+                >
+              </template>
+              <template v-slot:item.total="{ item }">
+                <span>${{ formatPrice(item.money) }}</span>
+              </template>
+            </v-data-table>
+          </div>
+          <div class="footer" v-if="!disableFooter[index]">
+            <div
+              class="contact-wrapper"
+              v-if="
+                templateType !== '零售-有價格' && templateType !== '零售-無價格'
+              "
+            >
+              <span style="font-size: 35px;"
+                >總計 {{ shipmentData.orderItemRequestList.length }}</span
               >
-            </template>
-            <template v-slot:item.total="{ item }">
-              <span>${{ formatPrice(item.money) }}</span>
-            </template>
-          </v-data-table>
-        </div>
-        <div class="footer" v-if="!disableFooter[index]">
-          <div class="contact-wrapper" v-if="templateType !== '零售-有價格' && templateType !== '零售-無價格'">
-            <span style="font-size: 35px;">總計 {{ shipmentData.orderItemRequestList.length }}</span>
-            <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
-            <span>業務聯絡人 : 0935-734982</span>
-            <span>帳務聯絡人 : 0952-582050</span>
-            <span>匯款帳號: 中國信託-新竹分行 822-554540329807</span>
-            <span>戶名: 張何男</span>
-          </div>
-          <div v-else class="contact-wrapper">
-            <span style="font-size: 35px;">總計 {{ shipmentData.orderItemRequestList.length }}</span>
-            <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
-            <span>聯絡電話: 03-4760311</span>
-            <span>匯款帳號: 中國信託-新竹分行 822-554540329807</span>
-            <span>戶名: 張何男</span>
-          </div>
-          <div class="sign-wrapper">
-            <div v-if="templateType === '商用-有價格' || templateType === '零售-有價格'">
-              <span
-                >合計 ${{ formatPrice(total - shipmentData.shippingFee) }}</span
+              <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
+              <span>業務聯絡人 : 0935-734982</span>
+              <span>帳務聯絡人 : 0952-582050</span>
+              <span>匯款帳號: 中國信託-新竹分行 822-554540329807</span>
+              <span>戶名: 張何男</span>
+            </div>
+            <div v-else class="contact-wrapper">
+              <span style="font-size: 35px;"
+                >總計 {{ shipmentData.orderItemRequestList.length }}</span
               >
+              <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
+              <span>聯絡電話: 03-4760311</span>
+              <span>匯款帳號: 中國信託-新竹分行 822-554540329807</span>
+              <span>戶名: 張何男</span>
             </div>
-            <div v-else></div>
-            <div v-if="templateType !== '零售-有價格' && templateType !== '零售-無價格'" class="sign-block">
-              <span style="font-size: 17px;">客戶簽收</span>
+            <div class="sign-wrapper">
+              <div
+                v-if="
+                  templateType === '商用-有價格' ||
+                    templateType === '零售-有價格'
+                "
+              >
+                <span
+                  >合計 ${{
+                    formatPrice(total - shipmentData.shippingFee)
+                  }}</span
+                >
+              </div>
+              <div v-else></div>
+              <div
+                v-if="
+                  templateType !== '零售-有價格' &&
+                    templateType !== '零售-無價格'
+                "
+                class="sign-block"
+              >
+                <span style="font-size: 17px;">客戶簽收</span>
+              </div>
+              <div v-else></div>
             </div>
-            <div v-else></div>
           </div>
         </div>
-      </div>
       </div>
     </div>
     <!--  出貨單 html end   -->
@@ -342,7 +383,9 @@
             </v-col>
             <v-col class="col-5 align-self-center pl-0">
               <p>數量</p>
-              <p v-if="item.unit == '件' || item.unit == '包'">{{ item.quantity }}</p>
+              <p v-if="item.unit == '件' || item.unit == '包'">
+                {{ item.quantity }}
+              </p>
               <p v-else>{{ item.weight }}</p>
               <p>${{ formatPrice(item.money) }}</p>
             </v-col>
@@ -453,8 +496,8 @@ export default {
       skus: { format: "auto", title: "" },
       skus2: { format: "auto", title: "" },
       btnDisable: false,
-      printType:1,
-      printType2:1,
+      printType: 1,
+      printType2: 1,
       templateType: "",
       headers: [
         {
@@ -554,12 +597,15 @@ export default {
       reportImage2: [],
       disableTitle: [],
       disableFooter: [],
-      pageClassName: [],
+      pageClassName: []
     };
   },
   created() {
     this.shipmentData = this.$store.state.shipment;
-    if(this.shipmentData.clientItem.id == '' || this.shipmentData.clientItem.id == null){
+    if (
+      this.shipmentData.clientItem.id == "" ||
+      this.shipmentData.clientItem.id == null
+    ) {
       this.$store.state.salesDetailed = false;
       this.$router.push("/salesLog");
     }
@@ -568,38 +614,42 @@ export default {
     this.total =
       this.$store.state.shipment.total + this.$store.state.shipment.shippingFee;
     this.setHeader = this.headers;
-    this.$api.Customer.getClient(this.shipmentData.clientItem.id).then(res=>{
-      this.vatNumber = res.data.vatNumber
-    })
-    if(this.shipmentData.orderItemRequestList.length>15){
-      let pages = 0
-      if(this.shipmentData.orderItemRequestList.length / 15 > parseInt(this.shipmentData.orderItemRequestList.length / 15)){
-        pages = parseInt(this.shipmentData.orderItemRequestList.length / 15) + 1
-      }else{
-        pages = this.shipmentData.orderItemRequestList.length / 15
+    this.$api.Customer.getClient(this.shipmentData.clientItem.id).then(res => {
+      this.vatNumber = res.data.vatNumber;
+    });
+    if (this.shipmentData.orderItemRequestList.length > 15) {
+      let pages = 0;
+      if (
+        this.shipmentData.orderItemRequestList.length / 15 >
+        parseInt(this.shipmentData.orderItemRequestList.length / 15)
+      ) {
+        pages =
+          parseInt(this.shipmentData.orderItemRequestList.length / 15) + 1;
+      } else {
+        pages = this.shipmentData.orderItemRequestList.length / 15;
       }
 
-      for (let i=0;i<pages;i++){
-        this.tableList.push(this.shipmentData.orderItemRequestList.slice(i*15,i*15+15))
-        this.pageClassName.push('page'+(i+1))
-        if(i == 0){
-          this.disableTitle.push(false)
-          this.disableFooter.push(true)
-        }
-        else if(i == pages-1){
-          this.disableTitle.push(true)
-          this.disableFooter.push(false)
-        }
-        else{
-          this.disableFooter.push(true)
-          this.disableTitle.push(true)
+      for (let i = 0; i < pages; i++) {
+        this.tableList.push(
+          this.shipmentData.orderItemRequestList.slice(i * 15, i * 15 + 15)
+        );
+        this.pageClassName.push("page" + (i + 1));
+        if (i == 0) {
+          this.disableTitle.push(false);
+          this.disableFooter.push(true);
+        } else if (i == pages - 1) {
+          this.disableTitle.push(true);
+          this.disableFooter.push(false);
+        } else {
+          this.disableFooter.push(true);
+          this.disableTitle.push(true);
         }
       }
       this.$forceUpdate();
     }
     // this.printPage = document.createElement("div");
     // this.printPage2 = document.createElement("div");
-    this.reportPDF = new jsPDF("p", "pt", "a4",true);
+    this.reportPDF = new jsPDF("p", "pt", "a4", true);
     this.reportPDF2 = new jsPDF("p", "pt", "a4");
   },
   methods: {
@@ -623,7 +673,7 @@ export default {
       // console.log("printPage remove");
       // this.printPage2.remove();
       // console.log("printPage2 remove");
-      return
+      return;
       if (this.$store.state.shipmentEdited) {
         this.$api.Distribute.editOrder({
           orderId: this.$store.state.shipment.orderId,
@@ -728,10 +778,10 @@ export default {
       // this.$router.push("/salesLog");
     },
     async addReportImg(value, page) {
-      let pageClass = 'page'+page
+      let pageClass = "page" + page;
 
       const dataUrl = await htmlToImage.toPng(
-          document.getElementsByClassName(pageClass)[0]
+        document.getElementsByClassName(pageClass)[0]
       );
 
       if (value == 1) {
@@ -743,7 +793,7 @@ export default {
 
         // var w = window.open("");
         // w.document.write(img.outerHTML);
-        this.reportImage.push(dataUrl)
+        this.reportImage.push(dataUrl);
         // this.reportImage = dataUrl
       } else if (value == 2) {
         let img = new Image();
@@ -755,7 +805,7 @@ export default {
         // var w = window.open("");
         // w.document.write(img.outerHTML);
 
-        this.reportImage2.push(dataUrl)
+        this.reportImage2.push(dataUrl);
         // this.reportImage2 = dataUrl
       }
       // let img = new Image()
@@ -763,47 +813,46 @@ export default {
       // img.src = dataUrl
       // img.width = 595
       // this.printPage.appendChild(img)
-
     },
     async printReport(value) {
-      this.progressDialog = true
-      this.progressLoading = true
+      this.reportImage = []
+      this.reportImage2 = []
+      this.progressDialog = true;
+      this.progressLoading = true;
       let pdfFile, pdfFile2;
       let file1, file2;
       // 出貨單 輸出格式
-      let printTypeStr = '', printTypeStr2 = ''
-      if(this.printType == 1){
-        if(this.printType2 == 1){
-          printTypeStr = '商用-有價格'
-          printTypeStr2 = '商用-無價格'
+      let printTypeStr = "",
+        printTypeStr2 = "";
+      if (this.printType == 1) {
+        if (this.printType2 == 1) {
+          printTypeStr = "商用-有價格";
+          printTypeStr2 = "商用-無價格";
+        } else if (this.printType2 == 2) {
+          printTypeStr = "商用-無價格";
+          printTypeStr = "商用-無價格";
         }
-        else if(this.printType2 == 2){
-          printTypeStr = '商用-無價格'
-          printTypeStr = '商用-無價格'
-        }
-      }
-      else if(this.printType == 2){
-        if(this.printType2 == 1){
-          printTypeStr = '零售-有價格'
-          printTypeStr2 = '零售-無價格'
-        }
-        else if(this.printType2 == 2){
-          printTypeStr = '零售-無價格'
-          printTypeStr2 = '零售-無價格'
+      } else if (this.printType == 2) {
+        if (this.printType2 == 1) {
+          printTypeStr = "零售-有價格";
+          printTypeStr2 = "零售-無價格";
+        } else if (this.printType2 == 2) {
+          printTypeStr = "零售-無價格";
+          printTypeStr2 = "零售-無價格";
         }
       }
       this.$nextTick(() => {
         this.templateType = printTypeStr;
-        if(this.printType2 == 2){
+        if (this.printType2 == 2) {
           this.setHeader = this.headers2;
         }
       });
       JsBarcode("#order-barcode").init();
       JsBarcode("#order-trackNo").init();
 
-      for (let item of this.tableList){
-        let index = this.tableList.indexOf(item)
-        await this.addReportImg(1,index+1);
+      for (let item of this.tableList) {
+        let index = this.tableList.indexOf(item);
+        await this.addReportImg(1, index + 1);
       }
 
       this.$nextTick(() => {
@@ -811,9 +860,9 @@ export default {
         this.setHeader = this.headers2;
       });
 
-      for (let item of this.tableList){
-        let index = this.tableList.indexOf(item)
-        await this.addReportImg(2,index+1);
+      for (let item of this.tableList) {
+        let index = this.tableList.indexOf(item);
+        await this.addReportImg(2, index + 1);
       }
 
       // fetch(pdfFile2)
@@ -903,7 +952,7 @@ export default {
                   formData,
                   { httpsAgent: agent }
                 )
-                .then(async res=> {
+                .then(async res => {
                   console.log(res);
                   await this.drawLabel(value);
                 })
@@ -923,31 +972,30 @@ export default {
               this.$router.push("/salesLog");
             });
 
-
           resolve(true);
         });
       }
       setTimeout(async () => {
-        console.log('created pdf to server')
+        console.log("created pdf to server");
         var w = window.open("");
-        this.reportImage.forEach((value,index)=>{
+        this.reportImage.forEach((value, index) => {
           let img = new Image();
 
           img.src = value;
           img.width = 595;
           w.document.write(img.outerHTML);
-        })
-        this.reportImage2.forEach((value,index)=>{
+        });
+        this.reportImage2.forEach((value, index) => {
           let img = new Image();
 
           img.src = value;
           img.width = 595;
           w.document.write(img.outerHTML);
-        })
+        });
         // w.document.write(this.reportImage.outerHTML);
         // w.document.write(this.reportImage2.outerHTML);
-        this.progressLoading = false
-        this.progressDialog = false
+        this.progressLoading = false;
+        this.progressDialog = false;
         this.btnDisable = false;
         // this.$store.state.successMsg = "PDF 已產出";
         // this.$store.state.successSnackbar = true;
@@ -1141,7 +1189,7 @@ export default {
           if (value == 1) {
             this.$store.state.successMsg =
               "出貨確認成功，已列印出貨單/貼箱標籤";
-            console.log(this.$store.state.successMsg,'exportSVG');
+            console.log(this.$store.state.successMsg, "exportSVG");
           } else if (value == 2) {
             this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
           }
