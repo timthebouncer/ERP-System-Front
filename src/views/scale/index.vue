@@ -110,7 +110,7 @@
             <div v-if="kgStatus">
               {{
                 deductionValue && displayValue !== 0
-                  ? (Number(displayValue) - deductionValue).toFixed(3)
+                  ? (Number(displayValue)).toFixed(3)
                   : Number(displayValue).toFixed(3)
               }}
             </div>
@@ -383,6 +383,7 @@ export default {
       rePrintTagStatus: true,
       valid: true,
       restPlusBtn: true,
+      deductionStatus: false,
       defaultValue: 0,
       list: [],
       lastValue: "0",
@@ -617,11 +618,14 @@ export default {
       this.userIP = ip;
     },
     async showAddNumberDialog(show) {
-      this.addNumberShow = show;
       //拿物料名稱
       await this.$scale.Material.getList().then(res => {
         if (res.status === 200) {
-          this.materialList = res.data;
+          this.$nextTick(()=>{
+            this.materialList = res.data;
+            this.addNumberShow = show;
+          })
+
         }
       });
       //拿入料單號
@@ -751,6 +755,7 @@ export default {
       this.changeValue = 0;
       this.deductionValue = 0;
       this.displayValue = 0;
+      this.deductionStatus = false
     },
     //平板扣重
     deduction() {
@@ -759,6 +764,7 @@ export default {
         this.deductionValue = this.displayValue;
         this.displayValue = 0;
         this.changeValue = 0;
+        this.deductionStatus = true
       }
     },
     //取消入庫
@@ -1161,6 +1167,13 @@ export default {
       if (!(this.lastValue == noti.toString("ascii"))) {
         this.lastValue = noti.toString("ascii");
         this.displayValue = Number(noti.toString("ascii"));
+        if(this.deductionStatus === true && this.displayValue ===0){
+          this.displayValue = 0 - this.deductionValue
+        }else if(this.displayValue === this.deductionValue){
+          this.displayValue = 0
+        }else if(this.deductionStatus === true && this.displayValue > this.deductionValue){
+          this.displayValue = this.displayValue - this.deductionValue
+        }
       }
     },
     handleRecordWeightInterval() {
