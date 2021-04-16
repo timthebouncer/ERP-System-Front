@@ -52,6 +52,9 @@ const api= {
     },
     deleteCommodityDiscount(id){
       return request.delete('/deliveryOrderDetail/deleteDetail/'+id)
+    },
+    printTag(data){
+      return request.post('/printTag',data)
     }
   },
   Customer:{

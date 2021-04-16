@@ -355,23 +355,23 @@
             :value="receiveData.id"
             class="ma-0"
           >
-            <v-list-item v-for="child in item.items" :key="child.id">
+            <v-list-item v-for="(child,index) in item.items" :key="child.id">
               <v-radio :value="child.id" :key="child.id">
                 <template v-slot:label>
                   <v-list-item-content>
                     <div style="color: black;">
-                      <v-row class="justify-space-between ma-0"
+                      <v-row class="ma-0"
                         ><span class="">{{ child.name }}</span
-                        ><span class="">{{ child.phone }}</span
-                        ><span></span
-                      ></v-row>
-                      <v-row class="justify-space-between ma-0"
-                        ><span class="col-1">{{ child.code }}</span
+                        ><span class="pl-2"></span><span class="">{{ child.phone }}</span
+                        ></v-row>
+                      <v-row v-if="index>1" class="justify-space-between ma-0"
+                        ><span class="col-1 pl-0">{{ child.code }}</span
                         ><span class="col-10">{{ child.address }}</span
                         ><span></span
                       ></v-row>
                     </div>
                   </v-list-item-content>
+                  <span v-if="item.defaultReceiveInfo == index" class="pl-2 red--text text-h5">預</span>
                 </template>
               </v-radio>
             </v-list-item>
@@ -435,6 +435,7 @@
           <v-row>
             <v-col class="col-6">
               <div class="productList-content">
+                <p>{{ item.barcode }}</p>
                 <p>{{ item.name }}</p>
                 <p>
                   <span>{{ item.unit }}</span>
@@ -861,10 +862,10 @@ export default {
       } else {
         this.dialogTitle = "新增收件資料";
         this.dialogData = [
-          { title: "收件人", value: "", required: false, key: "name" },
-          { title: "收件電話", value: "", required: false, key: "phone" },
-          { title: "郵遞區號", value: "", required: false, key: "code" },
-          { title: "*收件地址", value: "", required: false, key: "address" }
+          { title: "*收件人", value: "", required: true, key: "name" },
+          { title: "*收件電話", value: "", required: true, key: "phone" },
+          { title: "*郵遞區號", value: "", required: true, key: "code" },
+          { title: "*收件地址", value: "", required: true, key: "address" }
         ];
       }
       this.dialogVisible = true;
@@ -1054,7 +1055,7 @@ export default {
           postCode: this.dialogData.find(x => x.key == "code").value.trim(),
           address: this.dialogData.find(x => x.key == "address").value.trim()
         };
-        if (data.address == "") {
+        if (data.receiver == "" || data.tel == "" || data.postCode == "" || data.address == "") {
           this.errSnackbar = true;
           this.messageText = "請輸入必填項目!";
           return;

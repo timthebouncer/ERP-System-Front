@@ -180,6 +180,9 @@
               no-data-text="無出貨商品項目"
               style="text-align: center"
             >
+              <template v-slot:item.quantity="{ item }">
+                <span>{{ (item.unit == '件' || item.unit == '包') ? item.quantity : item.weight }}</span>
+              </template>
               <template v-slot:item.listPrice="{ item }">
                 <span>${{ formatPrice(item.listPrice * item.quantity) }}</span>
               </template>
@@ -212,7 +215,7 @@
               "
             >
               <span style="font-size: 35px;"
-                >總計 {{ shipmentData.orderItemRequestList.length }}</span
+                >總計 {{ count }}</span
               >
               <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
               <span>業務聯絡人 : 0935-734982</span>
@@ -222,7 +225,7 @@
             </div>
             <div v-else class="contact-wrapper">
               <span style="font-size: 35px;"
-                >總計 {{ shipmentData.orderItemRequestList.length }}</span
+                >總計 {{ count }}</span
               >
               <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
               <span>聯絡電話: 03-4760311</span>
@@ -363,6 +366,7 @@
           <v-row>
             <v-col class="col-7">
               <div class="productList-content">
+                <p>{{ item.barcode }}</p>
                 <p>{{ item.name }}</p>
                 <p>
                   <span>{{ item.unit }}</span>
@@ -489,6 +493,7 @@ export default {
       vatNumber: null,
       workDate: "",
       discount: 0,
+      count: 0,
       total: 0,
       messageText: "",
       snackbar: false,
@@ -619,6 +624,13 @@ export default {
     this.$api.Customer.getClient(this.shipmentData.clientItem.id).then(res => {
       this.vatNumber = res.data.vatNumber;
     });
+
+    this.shipmentData.orderItemRequestList.map(item=>{
+      let num
+      num = (item.unit == '件' || item.unit == '包') ? item.quantity : item.weight
+      this.count += num
+    })
+
     if (this.shipmentData.orderItemRequestList.length > 15) {
       this.isManyData = true
       let pages = 0;
@@ -678,7 +690,8 @@ export default {
       } else if (recipientId == "2") {
         recipientId = "1";
       }
-      await this.printReport(value);
+      await this.drawLabel(value);
+      // await this.printReport(value);
       // this.printPage.remove();
       // console.log("printPage remove");
       // this.printPage2.remove();
@@ -992,6 +1005,7 @@ export default {
         console.log("created pdf to server");
         var w = window.open("");
         this.reportImage.forEach((value, index) => {
+          console.log(value);
           let img = new Image();
 
           img.src = value;
@@ -999,6 +1013,7 @@ export default {
           w.document.write(img.outerHTML);
         });
         this.reportImage2.forEach((value, index) => {
+          console.log(value);
           let img = new Image();
 
           img.src = value;
@@ -1184,44 +1199,61 @@ export default {
     async exportSVG(value) {
       let canvasJson = this.canvas.toJSON();
       console.log(canvasJson);
-      let file = await new File([JSON.stringify(canvasJson)], "foo.txt", {
-        type: "text/plain"
-      });
-      const formData = await new FormData();
-      formData.append("file", file);
-      formData.append("width", "100");
-      formData.append("height", "80");
-      formData.append("printerName", "Sbarco T4ES 203 dpi");
-      const agent = new https.Agent({ rejectUnauthorized: false });
-      await axios
-        .post(`https://${this.$store.state.ip}:8099/print/printTag`, formData, {
-          httpsAgent: agent
-        })
-        .then(res => {
-          console.log(res);
-          if (value == 1) {
-            this.$store.state.successMsg =
-              "出貨確認成功，已列印出貨單/貼箱標籤";
-            console.log(this.$store.state.successMsg, "exportSVG");
-          } else if (value == 2) {
-            this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
-          }
-          this.$store.state.successSnackbar = true;
-          this.$store.state.salesDetailed = false;
-          this.$router.push("/salesLog");
-        })
-        .catch(error => {
-          console.error(error);
-          if (value == 1) {
-            this.$store.state.successMsg =
-              "出貨確認成功，列印出貨單/貼箱標籤 失敗";
-          } else if (value == 2) {
-            this.$store.state.successMsg = "出貨確認成功，列印貼箱標籤 失敗";
-          }
-          this.$store.state.successSnackbar = true;
-          this.$store.state.salesDetailed = false;
-          this.$router.push("/salesLog");
-        });
+      // let file = await new File([JSON.stringify(canvasJson)], "foo.txt", {
+      //   type: "text/plain"
+      // });
+      // const formData = await new FormData();
+      // formData.append("file", file);
+      // formData.append("width", "100");
+      // formData.append("height", "80");
+      // formData.append("printerName", "Sbarco T4ES 203 dpi");
+      // const agent = new https.Agent({ rejectUnauthorized: false });
+      let data = {
+        width: "100",
+        height: "80",
+        printerName: "Sbarco T4ES 203 dpi",
+        content: JSON.stringify(canvasJson)
+      }
+      this.$api.Distribute.printTag(data).then((res)=>{
+        console.log(res);
+        this.$store.state.successSnackbar = true;
+        this.$store.state.salesDetailed = false;
+        this.$router.push("/salesLog");
+      }).catch((err)=>{
+        console.log(err);
+        this.$store.state.successSnackbar = true;
+        this.$store.state.salesDetailed = false;
+        this.$router.push("/salesLog");
+      })
+      // await axios
+      //   .post(`https://${this.$store.state.ip}:8099/print/printTag`, formData, {
+      //     httpsAgent: agent
+      //   })
+      //   .then(res => {
+      //     console.log(res);
+      //     if (value == 1) {
+      //       this.$store.state.successMsg =
+      //         "出貨確認成功，已列印出貨單/貼箱標籤";
+      //       console.log(this.$store.state.successMsg, "exportSVG");
+      //     } else if (value == 2) {
+      //       this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
+      //     }
+      //     this.$store.state.successSnackbar = true;
+      //     this.$store.state.salesDetailed = false;
+      //     this.$router.push("/salesLog");
+      //   })
+      //   .catch(error => {
+      //     console.error(error);
+      //     if (value == 1) {
+      //       this.$store.state.successMsg =
+      //         "出貨確認成功，列印出貨單/貼箱標籤 失敗";
+      //     } else if (value == 2) {
+      //       this.$store.state.successMsg = "出貨確認成功，列印貼箱標籤 失敗";
+      //     }
+      //     this.$store.state.successSnackbar = true;
+      //     this.$store.state.salesDetailed = false;
+      //     this.$router.push("/salesLog");
+      //   });
       // axios.post('http://127.0.0.1:8099/print/printTag',formData)
       //         .then(res =>{
       //           console.log(res)
