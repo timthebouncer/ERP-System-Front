@@ -39,15 +39,15 @@
           <span class="work-date">工作日期 : {{ today }}</span>
         </div>
         <div class="btn d-flex align-center">
-          <v-btn
-            class="mr-4"
-            large
-            depressed
-            color="primary"
-            @click="setIPDialog"
-          >
-            <h3>設定IP</h3>
-          </v-btn>
+<!--          <v-btn-->
+<!--            class="mr-4"-->
+<!--            large-->
+<!--            depressed-->
+<!--            color="primary"-->
+<!--            @click="setIPDialog"-->
+<!--          >-->
+<!--            <h3>設定IP</h3>-->
+<!--          </v-btn>-->
           <v-btn
             class="mr-4"
             large
@@ -110,7 +110,7 @@
             <div v-if="kgStatus">
               {{
                 deductionValue && displayValue !== 0
-                  ? (Number(displayValue)).toFixed(3)
+                  ? Number(displayValue).toFixed(3)
                   : Number(displayValue).toFixed(3)
               }}
             </div>
@@ -277,9 +277,7 @@
             :class="{ active: position === index }"
           >
             <div>{{ item.name }}</div>
-            <div>
-              {{formatUnit(item)}}{{formatWeightUnit(item)}}
-            </div>
+            <div>{{ formatUnit(item) }}{{ formatWeightUnit(item) }}</div>
           </div>
           <i />
           <i />
@@ -350,8 +348,8 @@ import AccumulateDialog from "../../components/accumulateDialog";
 import IpDialog from "../../components/ipDialog";
 import LongPress from "vue-directive-long-press";
 import { UNIT } from "../../mixin/enums";
-import axios from "axios";
-import https from "https";
+// import axios from "axios";
+// import https from "https";
 const SERVICE_ID = "00004353-0000-1000-8000-00805f9b34fb";
 export default {
   components: {
@@ -517,12 +515,16 @@ export default {
         this.changeUnit("g");
       }
       //取得當前磅秤量的重量
-      if(this.deductionValue > 0) {
-        this.stockInForm.weight = (Number(this.displayValue) - this.deductionValue).toFixed(3)
-        this.svgForm.weight = (Number(this.displayValue) - this.deductionValue).toFixed(3)
-      }else{
-        this.stockInForm.weight = this.displayValue
-        this.svgForm.weight = this.displayValue
+      if (this.deductionValue > 0) {
+        this.stockInForm.weight = (
+          Number(this.displayValue) - this.deductionValue
+        ).toFixed(3);
+        this.svgForm.weight = (
+          Number(this.displayValue) - this.deductionValue
+        ).toFixed(3);
+      } else {
+        this.stockInForm.weight = this.displayValue;
+        this.svgForm.weight = this.displayValue;
       }
     }
   },
@@ -538,21 +540,21 @@ export default {
   },
   methods: {
     formatUnit(item) {
-      if( item.barcode !== "" && item.fixedWeight === 0) {
-        return null
-      }else if (item.barcode === "") {
-        return null
-      }else{
-        return item.fixedWeight
+      if (item.barcode !== "" && item.fixedWeight === 0) {
+        return null;
+      } else if (item.barcode === "") {
+        return null;
+      } else {
+        return item.fixedWeight;
       }
     },
     formatWeightUnit(item) {
-      if(item.barcode !== "" && item.fixedWeight === 0) {
-        return this.getUnit(item.unit)
-      }else if (item.barcode === "") {
-        return this.getUnit(item.unit)
-      }else{
-        return `${this.getUnit(item.weightUnit)}/${this.getUnit(item.unit)}`
+      if (item.barcode !== "" && item.fixedWeight === 0) {
+        return this.getUnit(item.unit);
+      } else if (item.barcode === "") {
+        return this.getUnit(item.unit);
+      } else {
+        return `${this.getUnit(item.weightUnit)}/${this.getUnit(item.unit)}`;
       }
     },
     changeDepot() {
@@ -614,18 +616,17 @@ export default {
     },
     closeIpDialog(ip) {
       this.ipShow = false;
-      localStorage.setItem('userIP', ip)
+      localStorage.setItem("userIP", ip);
       this.userIP = ip;
     },
     async showAddNumberDialog(show) {
       //拿物料名稱
       await this.$scale.Material.getList().then(res => {
         if (res.status === 200) {
-          this.$nextTick(()=>{
+          this.$nextTick(() => {
             this.materialList = res.data;
             this.addNumberShow = show;
-          })
-
+          });
         }
       });
       //拿入料單號
@@ -643,7 +644,7 @@ export default {
       this.orderNumber = addOrderNumber;
       this.orderName = name;
       this.addOrderForm.id = id;
-      this.accumulateValue = 0
+      this.accumulateValue = 0;
     },
     showOrderNumberDialog(show) {
       this.$scale.DepotOrder.getUnusedList().then(res => {
@@ -672,15 +673,14 @@ export default {
       //紀錄後一次操作的日期
       let today = new Date();
       let time =
-              today.getFullYear() +
-              "-" +
-              (today.getMonth() + 1 < 10 ? "0" : "") +
-              (today.getMonth() + 1) +
-              "-" +
-              (today.getDate() < 10 ? "0" : "") +
-              today.getDate();
+        today.getFullYear() +
+        "-" +
+        (today.getMonth() + 1 < 10 ? "0" : "") +
+        (today.getMonth() + 1) +
+        "-" +
+        (today.getDate() < 10 ? "0" : "") +
+        today.getDate();
       sessionStorage.setItem("time", time);
-
     },
     changeNumber(value, name) {
       if (name === "商品序號") {
@@ -755,7 +755,7 @@ export default {
       this.changeValue = 0;
       this.deductionValue = 0;
       this.displayValue = 0;
-      this.deductionStatus = false
+      this.deductionStatus = false;
     },
     //平板扣重
     deduction() {
@@ -764,7 +764,7 @@ export default {
         this.deductionValue = this.displayValue;
         this.displayValue = 0;
         this.changeValue = 0;
-        this.deductionStatus = true
+        this.deductionStatus = true;
       }
     },
     //取消入庫
@@ -832,17 +832,17 @@ export default {
       if (svgJSON) {
         await svgJSON.objects.map(async items => {
           if (items.name === "productName") {
-            if(this.svgForm.alias) {
+            if (this.svgForm.alias) {
               items.text = `商品名稱:${this.svgForm.alias}`;
-            }else{
+            } else {
               items.text = `商品名稱:${this.svgForm.name}`;
             }
           } else if (items.name === "unit") {
             items.text = `計價單位:${this.svgForm.unit}`;
           } else if (items.name === "weight") {
-            if(this.stockInForm.barcode !== "") {
+            if (this.stockInForm.barcode !== "") {
               items.text = `定重重量:${this.svgForm.fixedWeight}`;
-            }else{
+            } else {
               items.text = `重量:${this.svgForm.weight}`;
             }
           } else if (items.name === "price") {
@@ -916,29 +916,26 @@ export default {
               if (items.name === "productNo") {
                 items.text = `${i}`;
               }
-              if(items.name === "barcode") {
+              if (items.name === "barcode") {
                 items.toObject = (function(toObject) {
                   return function() {
                     return fabric.util.object.extend(toObject.call(this), {
                       name: items.name
-                    })
-                  }
-                })(items.toObject)
+                    });
+                  };
+                })(items.toObject);
               }
             });
             if (status) {
               let canvasStr = JSON.stringify(this.canvas);
-              let file = new File([canvasStr], "text.txt", {
-                type: "text/plain"
-              });
-              let formData = new FormData();
-              formData.append("file", file);
-              formData.append("width", this.tagWidth);
-              formData.append("height", this.tagHeight);
-              formData.append("printerName", 'Sbarco T4ES 203 dpi');
-              const agent = new https.Agent({ rejectUnauthorized: false });
-              await axios
-                .post(`https://${this.userIP}:8099/print/printTag`, formData,{httpsAgent: agent})
+              let data = {
+                action: "tag",
+                width: "100",
+                height: "80",
+                printerName: "Sbarco T4ES 203 dpi",
+                content: canvasStr
+              };
+              await this.$scale.Inventory.print(data)
                 .then(res => {
                   if (res.data.status === 200) {
                     status = true;
@@ -957,26 +954,25 @@ export default {
           }
         } else {
           this.canvas.getObjects().map(items => {
-            if(items.name === "barcode") {
+            if (items.name === "barcode") {
               items.toObject = (function(toObject) {
                 return function() {
                   return fabric.util.object.extend(toObject.call(this), {
                     name: items.name
-                  })
-                }
-              })(items.toObject)
+                  });
+                };
+              })(items.toObject);
             }
           });
           let canvasStr = JSON.stringify(this.canvas);
-          let file = new File([canvasStr], "text.txt", { type: "text/plain" });
-          let formData = new FormData();
-          formData.append("file", file);
-          formData.append("width", this.tagWidth);
-          formData.append("height", this.tagHeight);
-          formData.append("printerName", 'Sbarco T4ES 203 dpi');
-          const agent = new https.Agent({ rejectUnauthorized: false });
-          await axios
-            .post(`https://${this.userIP}:8099/print/printTag`, formData, {httpsAgent: agent})
+          let data = {
+            action: "tag",
+            width: "100",
+            height: "80",
+            printerName: "Sbarco T4ES 203 dpi",
+            content: canvasStr
+          };
+          await this.$scale.Inventory.print(data)
             .then(res => {
               console.log(res.data.status);
             })
@@ -1016,9 +1012,9 @@ export default {
         this.stockInForm.amount = this.count;
         this.stockInForm.orderId = this.addOrderForm.id;
         //商品有固定條碼時不用傳重量
-        if(this.stockInForm.barcode !== ""){
-          this.stockInForm.weight = 0
-          this.svgForm.weight = 0
+        if (this.stockInForm.barcode !== "") {
+          this.stockInForm.weight = 0;
+          this.svgForm.weight = 0;
         }
         // if (this.stockInForm.weight === "") {
         //   return (this.inboundStatus = true), (this.inboundMsg = "入庫商品請秤重");
@@ -1054,17 +1050,17 @@ export default {
               if (svgJSON) {
                 await svgJSON.objects.map(async items => {
                   if (items.name === "productName") {
-                    if(this.svgForm.alias) {
+                    if (this.svgForm.alias) {
                       items.text = `商品名稱:${this.svgForm.alias}`;
-                    }else{
+                    } else {
                       items.text = `商品名稱:${this.svgForm.name}`;
                     }
                   } else if (items.name === "unit") {
                     items.text = `計價單位:${this.svgForm.unit}`;
                   } else if (items.name === "weight") {
-                    if(this.stockInForm.barcode !== "") {
+                    if (this.stockInForm.barcode !== "") {
                       items.text = `定重重量:${this.svgForm.fixedWeight}`;
-                    }else{
+                    } else {
                       items.text = `重量:${this.svgForm.weight}`;
                     }
                   } else if (items.name === "price") {
@@ -1082,8 +1078,8 @@ export default {
                 this.canvas.clear();
                 await this.loadFromJson(svgJSON);
                 await this.changeBarcode();
-                this.stockInForm.weight = ""
-                this.svgForm.weight = ""
+                this.stockInForm.weight = "";
+                this.svgForm.weight = "";
               }
             }
           }
@@ -1167,12 +1163,15 @@ export default {
       if (!(this.lastValue == noti.toString("ascii"))) {
         this.lastValue = noti.toString("ascii");
         this.displayValue = Number(noti.toString("ascii"));
-        if(this.deductionStatus === true && this.displayValue ===0){
-          this.displayValue = 0 - this.deductionValue
-        }else if(this.displayValue === this.deductionValue){
-          this.displayValue = 0
-        }else if(this.deductionStatus === true && this.displayValue > this.deductionValue){
-          this.displayValue = this.displayValue - this.deductionValue
+        if (this.deductionStatus === true && this.displayValue === 0) {
+          this.displayValue = 0 - this.deductionValue;
+        } else if (this.displayValue === this.deductionValue) {
+          this.displayValue = 0;
+        } else if (
+          this.deductionStatus === true &&
+          this.displayValue > this.deductionValue
+        ) {
+          this.displayValue = this.displayValue - this.deductionValue;
         }
       }
     },

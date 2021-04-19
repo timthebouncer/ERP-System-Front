@@ -9,13 +9,13 @@
         ></v-system-bar
         >
         <v-card-text class="pl-1 pr-2 pt-4">
-          <v-row class="align-content-center"
-          ><v-col class="col-5"
-          ><span class="text-h6 font-weight-black">標籤機IP</span></v-col
-          ><v-col class="col-6 pa-0"
-          ><v-text-field v-model="ip" solo></v-text-field></v-col
-          ></v-row
-          >
+<!--          <v-row class="align-content-center"-->
+<!--          ><v-col class="col-5"-->
+<!--          ><span class="text-h6 font-weight-black">標籤機IP</span></v-col-->
+<!--          ><v-col class="col-6 pa-0"-->
+<!--          ><v-text-field v-model="ip" solo></v-text-field></v-col-->
+<!--          ></v-row-->
+<!--          >-->
           <v-row class="align-content-center"
           ><v-col class="col-5"
           ><span class="text-h6 font-weight-black">列印機名稱</span></v-col
@@ -272,7 +272,6 @@ export default {
       localStorage.setItem('ip', this.ip)
       localStorage.setItem('printName', this.printName)
       this.settingDialog = false
-      window.open(`https://${this.ip}:8099/`)
     }
   },
   mounted() {

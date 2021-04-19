@@ -1,5 +1,19 @@
 <template>
   <v-container class="container">
+    <v-dialog v-model="progressDialog" persistent>
+      <v-card style="background-color: #fff0e9;">
+        <v-card-text class="text-center"
+          ><span class="text-h6 font-weight-black">出貨單產出中</span>
+          <v-progress-linear
+            color="cyan"
+            :active="progressLoading"
+            :indeterminate="progressLoading"
+            rounded
+            height="6"
+          ></v-progress-linear>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
     <!--   貼箱標籤   -->
     <div style="position: absolute; top:-1000px;">
       <div style="height: 173px; padding: 8px 0 0 0;">
@@ -25,173 +39,224 @@
     <div
       :title="templateType"
       id="exampleWrapper"
-      style="position: absolute; top:-2000px; opacity: 0%; width: 1200px; height: 560px;"
+      style="position: absolute; top:-2000px; left: 1000px; opacity: 0%; width: 1200px; height: 2000px; background-color: white;"
     >
-      <div class="table-content">
-        <div class="top-wrapper">
-          <div>
-            <span class="Brand-logo"><img src="@/assets/brand_logo.jpg"/></span>
-          </div>
-          <div class="title">
-            <h1>出貨單</h1>
-          </div>
-          <div v-show="templateType === '零售-有價格' || templateType === '零售-無價格'" class="logo2">
-            <h1 class="black-cat-logo">
-              {{
-                shipmentData.shipment === 1
-                  ? "親送"
-                  : shipmentData.shipment === 2
-                  ? "黑貓宅配"
-                  : shipmentData.shipment === 3
-                  ? "自取"
-                  : ""
-              }}
-            </h1>
-          </div>
-        </div>
-        <div class="detail-wrapper">
-          <div class="detail-list">
-            <span
-              >客戶名稱:<span style="border-bottom: 1px dotted">{{
-                shipmentData.clientItem.name
-              }}</span></span
-            >
-            <span
-              >客戶類別:<span style="border-bottom: 1px dotted">{{
-                shipmentData.classItem.className
-              }}</span></span
-            >
-            <span
-              >收件地址:<span style="border-bottom: 1px dotted"
-                >{{ shipmentData.receiveItem.code
-                }}{{ shipmentData.receiveItem.address }}</span
-              ></span
-            >
-            <span
-              >客戶電話:<span style="border-bottom: 1px dotted">{{
-                shipmentData.clientItem.phone
-              }}</span></span
-            >
-            <span
-              >統一編號:<span style="border-bottom: 1px dotted">{{ vatNumber == null ? '無' : vatNumber }}</span></span
-            >
-            <span v-show="templateType !== '零售-有價格' && templateType !== '零售-無價格'"
-              >出貨方式:<span style="border-bottom: 1px dotted">{{
-                shipmentData.shipment === 1
-                  ? "親送"
-                  : shipmentData.shipment === 2
-                  ? "黑貓宅配"
-                  : shipmentData.shipment === 3
-                  ? "自取"
-                  : ""
-              }}</span></span
-            >
-            <span v-show="templateType === '零售-有價格' || templateType === '零售-無價格'">
-              付款方式:
-              <span style="border-bottom: 1px dotted">{{
-                shipmentData.payment === 1
-                  ? "貨到付款"
-                  : shipmentData.payment === 2
-                  ? "匯款"
-                  : shipmentData.payment === 3
-                  ? "現金"
-                  : ""
-              }}</span>
-            </span>
-            <span>備註:{{ shipmentData.remark }}</span>
-          </div>
-          <div class="barcode-wrapper">
-            <span>出貨日期:{{ shipmentData.shipmentDate }}</span>
-            <div class="paper-content-detail-order">
-              <span style="width: 40%;">出貨單號:</span>
-              <div class="other3-order-barcode">
-                <svg
-                  id="order-barcode"
-                  :jsbarcode-format="skus.format"
-                  :jsbarcode-value="shipmentData.orderNo"
-                  jsbarcode-textmargin="0"
-                  jsbarcode-fontoptions="bold"
-                ></svg>
-              </div>
+      <div
+        :class="pageClassName[index]"
+        v-for="(item, index) in tableList"
+        :key="index"
+      >
+        <div class="table-content" style="width: 100%; height: 1700px;">
+          <div class="top-wrapper" v-if="!disableTitle[index]">
+            <div>
+              <span class="Brand-logo"
+                ><img src="@/assets/brand_logo.jpg"
+              /></span>
+            </div>
+            <div class="title">
+              <h1>出貨單</h1>
             </div>
             <div
-              class="paper-content-detail-order"
-              v-show="shipmentData.trackingNo"
+              v-show="
+                templateType === '零售-有價格' || templateType === '零售-無價格'
+              "
+              class="logo2"
             >
-              <span style="width: 40%;">物流編號:</span>
-              <div class="other3-package-barcode">
-                <svg
-                  id="order-trackNo"
-                  :jsbarcode-format="skus2.format"
-                  :jsbarcode-value="shipmentData.trackingNo"
-                  jsbarcode-textmargin="0"
-                  jsbarcode-fontoptions="bold"
-                ></svg>
+              <h1 class="black-cat-logo">
+                {{
+                  shipmentData.shipment === 1
+                    ? "親送"
+                    : shipmentData.shipment === 2
+                    ? "黑貓宅配"
+                    : shipmentData.shipment === 3
+                    ? "自取"
+                    : ""
+                }}
+              </h1>
+            </div>
+          </div>
+          <div class="detail-wrapper" v-if="!disableTitle[index]">
+            <div class="detail-list">
+              <span
+                >客戶名稱:<span style="border-bottom: 1px dotted">{{
+                  shipmentData.clientItem.name
+                }}</span></span
+              >
+              <span
+                >客戶類別:<span style="border-bottom: 1px dotted">{{
+                  shipmentData.classItem.className
+                }}</span></span
+              >
+              <span
+                >收件地址:<span style="border-bottom: 1px dotted"
+                  >{{ shipmentData.receiveItem.code
+                  }}{{ shipmentData.receiveItem.address }}</span
+                ></span
+              >
+              <span
+                >客戶電話:<span style="border-bottom: 1px dotted">{{
+                  shipmentData.clientItem.phone
+                }}</span></span
+              >
+              <span
+                >統一編號:<span style="border-bottom: 1px dotted">{{
+                  vatNumber == null || vatNumber == "" ? "無" : vatNumber
+                }}</span></span
+              >
+              <span
+                v-show="
+                  templateType !== '零售-有價格' &&
+                    templateType !== '零售-無價格'
+                "
+                >出貨方式:<span style="border-bottom: 1px dotted">{{
+                  shipmentData.shipment === 1
+                    ? "親送"
+                    : shipmentData.shipment === 2
+                    ? "黑貓宅配"
+                    : shipmentData.shipment === 3
+                    ? "自取"
+                    : ""
+                }}</span></span
+              >
+              <span
+                v-show="
+                  templateType === '零售-有價格' ||
+                    templateType === '零售-無價格'
+                "
+              >
+                付款方式:
+                <span style="border-bottom: 1px dotted">{{
+                  shipmentData.payment === 1
+                    ? "貨到付款"
+                    : shipmentData.payment === 2
+                    ? "匯款"
+                    : shipmentData.payment === 3
+                    ? "現金"
+                    : ""
+                }}</span>
+              </span>
+              <span>備註:{{ shipmentData.remark }}</span>
+            </div>
+            <div class="barcode-wrapper">
+              <span>出貨日期:{{ shipmentData.shipmentDate }}</span>
+              <div class="paper-content-detail-order">
+                <span style="width: 40%;">出貨單號:</span>
+                <div class="other3-order-barcode">
+                  <svg
+                    id="order-barcode"
+                    :jsbarcode-format="skus.format"
+                    :jsbarcode-value="shipmentData.orderNo"
+                    jsbarcode-textmargin="0"
+                    jsbarcode-fontoptions="bold"
+                  ></svg>
+                </div>
+              </div>
+              <div
+                class="paper-content-detail-order"
+                v-show="shipmentData.trackingNo"
+              >
+                <span style="width: 40%;">物流編號:</span>
+                <div class="other3-package-barcode">
+                  <svg
+                    id="order-trackNo"
+                    :jsbarcode-format="skus2.format"
+                    :jsbarcode-value="shipmentData.trackingNo"
+                    jsbarcode-textmargin="0"
+                    jsbarcode-fontoptions="bold"
+                  ></svg>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div class="content-wrapper">
-          <v-data-table
-            :headers="setHeader"
-            :items="shipmentData.orderItemRequestList"
-            :pagination="false"
-            hide-default-footer
-            disable-sort
-            disable-filtering
-            disable-pagination
-            :mobile-breakpoint="0"
-            style="text-align: center"
-          >
-            <template v-slot:item.listPrice="{ item }">
-              <span>${{ formatPrice(item.listPrice * item.quantity) }}</span>
-            </template>
-            <template v-slot:item.salesPrice="{ item }">
-              <span>${{ formatPrice(item.salesPrice * item.quantity) }}</span>
-            </template>
-            <template v-slot:item.discount="{ item }">
-              <span
-                >${{
-                  formatPrice(
-                    (item.salesPrice == 0 ? item.listPrice : item.salesPrice) *
-                      item.quantity -
-                      item.money
-                  )
-                }}</span
-              >
-            </template>
-            <template v-slot:item.total="{ item }">
-              <span>${{ formatPrice(item.money) }}</span>
-            </template>
-          </v-data-table>
-        </div>
-        <div class="footer">
-          <div class="contact-wrapper" v-if="templateType !== '零售-有價格' && templateType !== '零售-無價格'">
-            <span style="font-size: 35px;">總計 {{ shipmentData.orderItemRequestList.length }}</span>
-            <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
-            <span>業務聯絡人 : 0935-734982</span>
-            <span>帳務聯絡人 : 0952-582050</span>
-            <span>匯款帳號: 中國信託-新竹分行 822-554540329807</span>
-            <span>戶名: 張何男</span>
+          <div class="content-wrapper">
+            <v-data-table
+              :headers="setHeader"
+              :items="item"
+              hide-default-footer
+              disable-sort
+              disable-filtering
+              disable-pagination
+              :mobile-breakpoint="0"
+              no-data-text="無出貨商品項目"
+              style="text-align: center"
+            >
+              <template v-slot:item.quantity="{ item }">
+                <span>{{
+                  item.unit == "件" || item.unit == "包"
+                    ? item.quantity
+                    : item.weight
+                }}</span>
+              </template>
+              <template v-slot:item.listPrice="{ item }">
+                <span>${{ formatPrice(item.listPrice * item.quantity) }}</span>
+              </template>
+              <template v-slot:item.salesPrice="{ item }">
+                <span>${{ formatPrice(item.salesPrice * item.quantity) }}</span>
+              </template>
+              <template v-slot:item.discount="{ item }">
+                <span
+                  >${{
+                    formatPrice(
+                      (item.salesPrice == 0
+                        ? item.listPrice
+                        : item.salesPrice) *
+                        item.quantity -
+                        item.money
+                    )
+                  }}</span
+                >
+              </template>
+              <template v-slot:item.total="{ item }">
+                <span>${{ formatPrice(item.money) }}</span>
+              </template>
+            </v-data-table>
           </div>
-          <div v-else class="contact-wrapper">
-            <span style="font-size: 35px;">總計 {{ shipmentData.orderItemRequestList.length }}</span>
-            <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
-            <span>聯絡電話: 03-4760311</span>
-            <span>匯款帳號: 中國信託-新竹分行 822-554540329807</span>
-            <span>戶名: 張何男</span>
-          </div>
-          <div class="sign-wrapper">
-            <div v-if="templateType === '商用-有價格' || templateType === '零售-有價格'">
-              <span
-                >合計 ${{ formatPrice(total - shipmentData.shippingFee) }}</span
+          <div class="footer" v-if="!disableFooter[index]">
+            <div
+              class="contact-wrapper"
+              v-if="
+                templateType !== '零售-有價格' && templateType !== '零售-無價格'
+              "
+            >
+              <span style="font-size: 35px;">總計 {{ count }}</span>
+              <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
+              <span>業務聯絡人 : 0935-734982</span>
+              <span>帳務聯絡人 : 0952-582050</span>
+              <span>匯款帳號: 中國信託-新竹分行 822-554540329807</span>
+              <span>戶名: 張何男</span>
+            </div>
+            <div v-else class="contact-wrapper">
+              <span style="font-size: 35px;">總計 {{ count }}</span>
+              <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
+              <span>聯絡電話: 03-4760311</span>
+              <span>匯款帳號: 中國信託-新竹分行 822-554540329807</span>
+              <span>戶名: 張何男</span>
+            </div>
+            <div class="sign-wrapper">
+              <div
+                v-if="
+                  templateType === '商用-有價格' ||
+                    templateType === '零售-有價格'
+                "
               >
+                <span
+                  >合計 ${{
+                    formatPrice(total - shipmentData.shippingFee)
+                  }}</span
+                >
+              </div>
+              <div v-else></div>
+              <div
+                v-if="
+                  templateType !== '零售-有價格' &&
+                    templateType !== '零售-無價格'
+                "
+                class="sign-block"
+              >
+                <span style="font-size: 17px;">客戶簽收</span>
+              </div>
+              <div v-else></div>
             </div>
-            <div v-else></div>
-            <div v-if="templateType !== '零售-有價格' && templateType !== '零售-無價格'" class="sign-block">
-              <span style="font-size: 17px;">客戶簽收</span>
-            </div>
-            <div v-else></div>
           </div>
         </div>
       </div>
@@ -301,6 +366,7 @@
           <v-row>
             <v-col class="col-7">
               <div class="productList-content">
+                <p>{{ item.barcode }}</p>
                 <p>{{ item.name }}</p>
                 <p>
                   <span>{{ item.unit }}</span>
@@ -322,7 +388,9 @@
             </v-col>
             <v-col class="col-5 align-self-center pl-0">
               <p>數量</p>
-              <p v-if="item.unit == '件' || item.unit == '包'">{{ item.quantity }}</p>
+              <p v-if="item.unit == '件' || item.unit == '包'">
+                {{ item.quantity }}
+              </p>
               <p v-else>{{ item.weight }}</p>
               <p>${{ formatPrice(item.money) }}</p>
             </v-col>
@@ -425,6 +493,7 @@ export default {
       vatNumber: null,
       workDate: "",
       discount: 0,
+      count: 0,
       total: 0,
       messageText: "",
       snackbar: false,
@@ -433,8 +502,8 @@ export default {
       skus: { format: "auto", title: "" },
       skus2: { format: "auto", title: "" },
       btnDisable: false,
-      printType:1,
-      printType2:1,
+      printType: 1,
+      printType2: 1,
       templateType: "",
       headers: [
         {
@@ -474,7 +543,7 @@ export default {
         },
         {
           text: "備註",
-          value: "remark",
+          value: "description",
           class: "text-h5 font-weight-black grey lighten-2"
         }
       ],
@@ -516,22 +585,44 @@ export default {
         },
         {
           text: "備註",
-          value: "remark",
+          value: "description",
           class: "text-h5 font-weight-black grey lighten-2"
         }
       ],
+      progressLoading: false,
+      progressDialog: false,
       setHeader: [],
+      tableList: [],
       tableData: [],
       columnList: [],
       reportPDF: "",
       reportPDF2: "",
+      isManyData: false,
       printPage: null,
-      printPage2: null
+      printPage2: null,
+      reportImage: [],
+      reportImage2: [],
+      disableTitle: [],
+      disableFooter: [],
+      pageClassName: [],
+      checkID: null,
+      printState: ""
     };
+  },
+  watch: {
+    printType() {
+      this.createReport();
+    },
+    printType2() {
+      this.createReport();
+    }
   },
   created() {
     this.shipmentData = this.$store.state.shipment;
-    if(this.shipmentData.clientItem.id == '' || this.shipmentData.clientItem.id == null){
+    if (
+      this.shipmentData.clientItem.id == "" ||
+      this.shipmentData.clientItem.id == null
+    ) {
       this.$store.state.salesDetailed = false;
       this.$router.push("/salesLog");
     }
@@ -540,15 +631,60 @@ export default {
     this.total =
       this.$store.state.shipment.total + this.$store.state.shipment.shippingFee;
     this.setHeader = this.headers;
-    this.$api.Customer.getClient(this.shipmentData.clientItem.id).then(res=>{
-      console.log(res);
-      this.vatNumber = res.data.vatNumber
-    })
-    this.printPage = document.createElement("div");
-    this.printPage2 = document.createElement("div");
-    this.reportPDF = new jsPDF("p", "pt", "a4");
+    this.$api.Customer.getClient(this.shipmentData.clientItem.id).then(res => {
+      this.vatNumber = res.data.vatNumber;
+    });
+
+    this.shipmentData.orderItemRequestList.map(item => {
+      let num;
+      num =
+        item.unit == "件" || item.unit == "包" ? item.quantity : item.weight;
+      this.count += num;
+    });
+    this.count = this.count.toFixed(3);
+
+    if (this.shipmentData.orderItemRequestList.length > 15) {
+      this.isManyData = true;
+      let pages = 0;
+      if (
+        this.shipmentData.orderItemRequestList.length / 15 >
+        parseInt(this.shipmentData.orderItemRequestList.length / 15)
+      ) {
+        pages =
+          parseInt(this.shipmentData.orderItemRequestList.length / 15) + 1;
+      } else {
+        pages = this.shipmentData.orderItemRequestList.length / 15;
+      }
+
+      for (let i = 0; i < pages; i++) {
+        this.tableList.push(
+          this.shipmentData.orderItemRequestList.slice(i * 15, i * 15 + 15)
+        );
+        this.pageClassName.push("page" + (i + 1));
+        if (i == 0) {
+          this.disableTitle.push(false);
+          this.disableFooter.push(true);
+        } else if (i == pages - 1) {
+          this.disableTitle.push(true);
+          this.disableFooter.push(false);
+        } else {
+          this.disableFooter.push(true);
+          this.disableTitle.push(true);
+        }
+      }
+      this.$forceUpdate();
+    } else {
+      this.tableList.push(this.shipmentData.orderItemRequestList);
+      this.pageClassName.push("page1");
+      this.disableTitle.push(false);
+      this.disableFooter.push(false);
+      this.$forceUpdate();
+    }
+    this.reportPDF = new jsPDF("p", "pt", "a4", true);
     this.reportPDF2 = new jsPDF("p", "pt", "a4");
-    console.log(this.$store.state.shipment.shippingFee);
+    this.$nextTick(() => {
+      this.createReport();
+    });
   },
   methods: {
     formatPrice(value) {
@@ -566,11 +702,9 @@ export default {
       } else if (recipientId == "2") {
         recipientId = "1";
       }
-      // await this.printReport(value);
-      // this.printPage.remove();
-      // console.log("printPage remove");
-      // this.printPage2.remove();
-      // console.log("printPage2 remove");
+      // this.checkID = setInterval(() => {
+      //   this.checkReportImg(value);
+      // }, 1000);
       // return
       if (this.$store.state.shipmentEdited) {
         this.$api.Distribute.editOrder({
@@ -604,13 +738,12 @@ export default {
           )
         })
           .then(async () => {
+            this.progressDialog = true;
+            this.progressLoading = true;
             if (value == 1) {
-              await this.printReport(value);
-              this.printPage.remove();
-              console.log("printPage remove");
-              this.printPage2.remove();
-              console.log("printPage2 remove");
-              // await this.drawLabel(value);
+              this.checkID = setInterval(() => {
+                this.checkReportImg(value);
+              }, 1000);
             } else if (value == 2) {
               await this.drawLabel(value);
             }
@@ -618,6 +751,7 @@ export default {
           .catch(err => {
             this.messageText = err.response.data.message;
             this.snackbar = true;
+            this.btnDisable = false;
           });
       } else {
         this.$api.Distribute.addOrder({
@@ -649,13 +783,12 @@ export default {
           )
         })
           .then(async () => {
+            this.progressDialog = true;
+            this.progressLoading = true;
             if (value == 1) {
-              await this.printReport(value);
-              this.printPage.remove();
-              console.log("printPage remove");
-              this.printPage2.remove();
-              console.log("printPage2 remove");
-              // await this.drawLabel(value);
+              this.checkID = setInterval(() => {
+                this.checkReportImg(value);
+              }, 1000);
             } else if (value == 2) {
               await this.drawLabel(value);
             }
@@ -663,207 +796,138 @@ export default {
           .catch(err => {
             this.messageText = err.response.data.message;
             this.snackbar = true;
+            this.btnDisable = false;
           });
       }
-
-      // if(value == 1){
-      //   this.$store.state.successMsg = "出貨確認成功，已列印出貨單/貼箱標籤";
-      // }
-      // else if(value == 2){
-      //   this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
-      // }
-      // this.$store.state.successSnackbar = true;
-      // this.$router.push("/salesLog");
     },
-    async addReportImg(value) {
+    checkReportImg(value) {
+      if (this.reportImage2.length == this.tableList.length) {
+        clearInterval(this.checkID);
+        this.printReport(value);
+      }
+    },
+    async addReportImg(value, page) {
+      let pageClass = "page" + page;
+
       const dataUrl = await htmlToImage.toPng(
-        document.querySelector(".table-content")
+        document.getElementsByClassName(pageClass)[0]
       );
 
       if (value == 1) {
-        let img = new Image();
-
-        img.src = dataUrl;
-        img.width = 595;
-        this.printPage.appendChild(img);
-        console.log("pirnt page add image");
+        this.reportImage.push(dataUrl);
       } else if (value == 2) {
-        let img = new Image();
-
-        img.src = dataUrl;
-        img.width = 595;
-        this.printPage2.appendChild(img);
-        console.log("print page2 add image");
+        this.reportImage2.push(dataUrl);
       }
-      // let img = new Image()
-      //
-      // img.src = dataUrl
-      // img.width = 595
-      // this.printPage.appendChild(img)
     },
-    async printReport(value) {
-      let pdfFile, pdfFile2;
-      let file1, file2;
+    async createReport() {
+      this.reportImage = [];
+      this.reportImage2 = [];
+      this.setHeader = this.headers;
       // 出貨單 輸出格式
-      let printTypeStr = '', printTypeStr2 = ''
-      if(this.printType == 1){
-        if(this.printType2 == 1){
-          printTypeStr = '商用-有價格'
-          printTypeStr2 = '商用-無價格'
+      let printTypeStr = "",
+        printTypeStr2 = "";
+      if (this.printType == 1) {
+        if (this.printType2 == 1) {
+          printTypeStr = "商用-有價格";
+          printTypeStr2 = "商用-無價格";
+        } else if (this.printType2 == 2) {
+          printTypeStr = "商用-無價格";
+          printTypeStr = "商用-無價格";
         }
-        else if(this.printType2 == 2){
-          printTypeStr = '商用-無價格'
-          printTypeStr = '商用-無價格'
-        }
-      }
-      else if(this.printType == 2){
-        if(this.printType2 == 1){
-          printTypeStr = '零售-有價格'
-          printTypeStr2 = '零售-無價格'
-        }
-        else if(this.printType2 == 2){
-          printTypeStr = '零售-無價格'
-          printTypeStr2 = '零售-無價格'
+      } else if (this.printType == 2) {
+        if (this.printType2 == 1) {
+          printTypeStr = "零售-有價格";
+          printTypeStr2 = "零售-無價格";
+        } else if (this.printType2 == 2) {
+          printTypeStr = "零售-無價格";
+          printTypeStr2 = "零售-無價格";
         }
       }
-      this.$nextTick(() => {
-        this.templateType = printTypeStr;
-        if(this.printType2 == 2){
-          this.setHeader = this.headers2;
-        }
-      });
+
+      this.templateType = printTypeStr;
+      if (this.printType2 == 2) {
+        this.setHeader = this.headers2;
+      }
+      console.log("set printtype");
+
       JsBarcode("#order-barcode").init();
       JsBarcode("#order-trackNo").init();
-      await this.addReportImg(1);
-      // this.printPage.classList.add('printImage')
-      console.log("print report first");
-      // console.log(this.printPage);
-
-      let doc = this.reportPDF;
-      await this.reportPDF.html(this.printPage, {
-        callback: function(doc) {
-          // console.log(doc.output('datauristring'));
-          pdfFile = doc.output("datauristring");
-        },
-        x: 10
-      });
-      this.$nextTick(() => {
+      this.$forceUpdate();
+      this.$nextTick(async () => {
+        for (let item of this.tableList) {
+          console.log("addReport IMG");
+          let index = this.tableList.indexOf(item);
+          await this.addReportImg(1, index + 1);
+        }
         this.templateType = printTypeStr2;
         this.setHeader = this.headers2;
-        console.log("is set header2");
+        console.log("set printtype 2");
+        this.$nextTick(async () => {
+          for (let item of this.tableList) {
+            console.log("addReport IMG 222");
+            let index = this.tableList.indexOf(item);
+            await this.addReportImg(2, index + 1);
+          }
+        });
       });
-
-      await this.addReportImg(2);
-      // this.printPage.classList.add('printImage2')
-      console.log("print report second");
-      // console.log(this.printPage2);
-      // let doc = this.reportPDF
-      // doc.addHTML(this.printPage)
-      this.reportPDF = new jsPDF("p", "pt", "a4");
-      let doc2 = this.reportPDF;
-
-      await this.reportPDF.html(this.printPage2, {
-        callback: async function(doc2) {
-          // console.log(doc2.output('datauristring'));
-
-          pdfFile2 = doc2.output("datauristring");
-          // console.log(pdfFile);
-          console.log("pdfFile created");
-          // function loadFile(){
-          //   return new Promise(resolve => {
-          fetch(pdfFile)
-            .then(res => res.blob())
-            .then(blob => {
-              console.log("ready create file1");
-              file1 = new File([blob], "test.pdf", { type: "application/pdf" });
-              console.log("is file1 created");
-
-              // let fileURL = URL.createObjectURL(file1);
-              // window.open(fileURL);
-            });
-
-          // })
-          // }
-
-          fetch(pdfFile2)
-            .then(res => res.blob())
-            .then(blob => {
-              console.log("ready create file2");
-              file2 = new File([blob], "test2.pdf", {
-                type: "application/pdf"
-              });
-              console.log("is file2 created");
-              // let fileURL = URL.createObjectURL(file2);
-              // window.open(fileURL);
-            });
-
-          // merger.add(pdfFile)
-          // merger.add(pdfFile2)
-          // await merger.save('output.pdf')
-
-          // merge([file1, file2], 'File Ouput.pdf', function (err) {
-          //   if (err) {
-          //     return console.log(err)
-          //   }
-          //   console.log('Successfully merged!')
-          // });
-        },
-        x: 10
-      });
-
-      function postPdf() {
+    },
+    async printReport(value) {
+      function postPdf(dataUrl) {
         return new Promise(async resolve => {
           console.log("is ready print pdf");
-          let formData = new FormData();
-          formData.append("pdf", file1);
-          // formData.append("printerName", "Sbarco T4ES 203 dpi");
-          // formData.append("printerName", "EPSONDB5105 (L3150 Series)");
-          formData.append("printerName", this.$store.state.printName);
-          console.log(this.$store.state.ip);
-          const agent = new https.Agent({ rejectUnauthorized: false });
-
-          await axios
-            .post(
-              `https://${this.$store.state.ip}:8099/print/printPdf`,
-              formData,
-              { httpsAgent: agent }
-            )
-            .then(async res => {
-              console.log(res);
-              formData.set("pdf", file2);
-              await axios
-                .post(
-                  `https://${this.$store.state.ip}:8099/print/printPdf`,
-                  formData,
-                  { httpsAgent: agent }
-                )
-                .then(async res=> {
-                  console.log(res);
-                  await this.drawLabel(value);
-                })
-                .catch(error => {
-                  console.error(error);
-                  this.$store.state.successMsg = "出貨單產出失敗";
-                  this.$store.state.successSnackbar = true;
-                  this.$store.state.salesDetailed = false;
-                  this.$router.push("/salesLog");
-                });
-            })
-            .catch(error => {
-              console.error(error);
-              this.$store.state.successMsg = "出貨單產出失敗";
-              this.$store.state.successSnackbar = true;
-              this.$store.state.salesDetailed = false;
-              this.$router.push("/salesLog");
-            });
-
-
+          let data = {
+            action: "pdf",
+            printerName: this.$store.state.printName,
+            content: dataUrl
+          };
+          if (this.printState != "error") {
+            await this.$api.Distribute.print(data)
+              .then(res => {
+                console.log(res);
+                this.printState = "ok";
+              })
+              .catch(err => {
+                console.log(err);
+                this.printState = "error";
+              });
+          }
           resolve(true);
         });
       }
       setTimeout(async () => {
-        await postPdf.bind(this)();
-      }, 5000);
+        console.log("created pdf to server");
+
+        for (let value of this.reportImage) {
+          console.log(value);
+          await postPdf.bind(this)(value);
+        }
+        for (let value of this.reportImage2) {
+          console.log(value);
+          await postPdf.bind(this)(value);
+        }
+        // var w = window.open("");
+        // this.reportImage.forEach((value, index) => {
+        //   console.log(value);
+        //   let img = new Image();
+        //
+        //   img.src = value;
+        //   img.width = 595;
+        //   w.document.write(img.outerHTML);
+        // });
+        // this.reportImage2.forEach((value, index) => {
+        //   console.log(value);
+        //   let img = new Image();
+        //
+        //   img.src = value;
+        //   img.width = 595;
+        //   w.document.write(img.outerHTML);
+        // });
+
+        this.progressLoading = false;
+        this.progressDialog = false;
+
+        await this.drawLabel(value);
+      }, 1000);
     },
     async drawLabel(value) {
       let canvas = new fabric.Canvas("art");
@@ -1031,25 +1095,24 @@ export default {
     },
     async exportSVG(value) {
       let canvasJson = this.canvas.toJSON();
-      console.log(canvasJson);
-      let file = await new File([JSON.stringify(canvasJson)], "foo.txt", {
-        type: "text/plain"
-      });
-      const formData = await new FormData();
-      formData.append("file", file);
-      formData.append("width", "100");
-      formData.append("height", "80");
-      formData.append("printerName", "Sbarco T4ES 203 dpi");
-      const agent = new https.Agent({ rejectUnauthorized: false });
-      await axios
-        .post(`https://${this.$store.state.ip}:8099/print/printTag`, formData, {
-          httpsAgent: agent
-        })
+      let data = {
+        action: "tag",
+        width: "100",
+        height: "80",
+        printerName: "Sbarco T4ES 203 dpi",
+        content: JSON.stringify(canvasJson)
+      };
+      this.$api.Distribute.print(data)
         .then(res => {
           console.log(res);
           if (value == 1) {
-            this.$store.state.successMsg =
-              "出貨確認成功，已列印出貨單/貼箱標籤";
+            if (this.printState == "error") {
+              this.$store.state.successMsg =
+                "出貨確認成功，出貨單 或 貼箱標籤 列印失敗";
+            } else {
+              this.$store.state.successMsg =
+                "出貨確認成功，已列印出貨單/貼箱標籤";
+            }
           } else if (value == 2) {
             this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
           }
@@ -1057,24 +1120,18 @@ export default {
           this.$store.state.salesDetailed = false;
           this.$router.push("/salesLog");
         })
-        .catch(error => {
-          console.error(error);
+        .catch(err => {
+          console.log(err);
           if (value == 1) {
             this.$store.state.successMsg =
-              "出貨確認成功，列印出貨單/貼箱標籤 失敗";
+              "出貨確認成功，出貨單 或 貼箱標籤 列印失敗";
           } else if (value == 2) {
-            this.$store.state.successMsg = "出貨確認成功，列印貼箱標籤 失敗";
+            this.$store.state.successMsg = "出貨確認成功，貼箱標籤 列印失敗";
           }
           this.$store.state.successSnackbar = true;
           this.$store.state.salesDetailed = false;
           this.$router.push("/salesLog");
         });
-
-
-      // axios.post('http://127.0.0.1:8099/print/printTag',formData)
-      //         .then(res =>{
-      //           console.log(res)
-      //         })
     }
   },
   mounted() {}
