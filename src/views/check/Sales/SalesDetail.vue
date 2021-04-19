@@ -14,6 +14,20 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="tagProgressDialog" persistent>
+      <v-card style="background-color: #fff0e9;">
+        <v-card-text class="text-center"
+        ><span class="text-h6 font-weight-black">標籤列印中</span>
+          <v-progress-linear
+                  color="cyan"
+                  :active="tagProgressLoading"
+                  :indeterminate="tagProgressLoading"
+                  rounded
+                  height="6"
+          ></v-progress-linear>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
     <!--   貼箱標籤   -->
     <div style="position: absolute; top:-1000px;">
       <div style="height: 173px; padding: 8px 0 0 0;">
@@ -591,6 +605,8 @@ export default {
       ],
       progressLoading: false,
       progressDialog: false,
+      tagProgressLoading: false,
+      tagProgressDialog: false,
       setHeader: [],
       tableList: [],
       tableData: [],
@@ -738,13 +754,15 @@ export default {
           )
         })
           .then(async () => {
-            this.progressDialog = true;
-            this.progressLoading = true;
             if (value == 1) {
+              this.progressDialog = true;
+              this.progressLoading = true;
               this.checkID = setInterval(() => {
                 this.checkReportImg(value);
               }, 1000);
             } else if (value == 2) {
+              this.tagProgressDialog = true;
+              this.tagProgressLoading = true;
               await this.drawLabel(value);
             }
           })
@@ -783,13 +801,15 @@ export default {
           )
         })
           .then(async () => {
-            this.progressDialog = true;
-            this.progressLoading = true;
             if (value == 1) {
+              this.progressDialog = true;
+              this.progressLoading = true;
               this.checkID = setInterval(() => {
                 this.checkReportImg(value);
               }, 1000);
             } else if (value == 2) {
+              this.tagProgressDialog = true;
+              this.tagProgressLoading = true;
               await this.drawLabel(value);
             }
           })
@@ -925,7 +945,8 @@ export default {
 
         this.progressLoading = false;
         this.progressDialog = false;
-
+        this.tagProgressDialog = true;
+        this.tagProgressLoading = true;
         await this.drawLabel(value);
       }, 1000);
     },
@@ -1105,6 +1126,8 @@ export default {
       this.$api.Distribute.print(data)
         .then(res => {
           console.log(res);
+          this.tagProgressDialog = false;
+          this.tagProgressLoading = false;
           if (value == 1) {
             if (this.printState == "error") {
               this.$store.state.successMsg =
