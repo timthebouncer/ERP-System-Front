@@ -680,8 +680,6 @@ export default {
       this.disableFooter.push(false);
       this.$forceUpdate();
     }
-    // this.printPage = document.createElement("div");
-    // this.printPage2 = document.createElement("div");
     this.reportPDF = new jsPDF("p", "pt", "a4", true);
     this.reportPDF2 = new jsPDF("p", "pt", "a4");
     this.$nextTick(() => {
@@ -704,18 +702,10 @@ export default {
       } else if (recipientId == "2") {
         recipientId = "1";
       }
-      this.progressDialog = true;
-      this.progressLoading = true;
-      this.checkID = setInterval(() => {
-        this.checkReportImg(value);
-      }, 1000);
-      // await this.drawLabel(value);
-      // await this.printReport(value);
-      // this.printPage.remove();
-      // console.log("printPage remove");
-      // this.printPage2.remove();
-      // console.log("printPage2 remove");
-      return;
+      // this.checkID = setInterval(() => {
+      //   this.checkReportImg(value);
+      // }, 1000);
+      // return
       if (this.$store.state.shipmentEdited) {
         this.$api.Distribute.editOrder({
           orderId: this.$store.state.shipment.orderId,
@@ -748,16 +738,12 @@ export default {
           )
         })
           .then(async () => {
+            this.progressDialog = true;
+            this.progressLoading = true;
             if (value == 1) {
               this.checkID = setInterval(() => {
                 this.checkReportImg(value);
               }, 1000);
-              // await this.printReport(value);
-              // this.printPage.remove();
-              // console.log("printPage remove");
-              // this.printPage2.remove();
-              // console.log("printPage2 remove");
-              // await this.drawLabel(value);
             } else if (value == 2) {
               await this.drawLabel(value);
             }
@@ -765,6 +751,7 @@ export default {
           .catch(err => {
             this.messageText = err.response.data.message;
             this.snackbar = true;
+            this.btnDisable = false;
           });
       } else {
         this.$api.Distribute.addOrder({
@@ -796,16 +783,12 @@ export default {
           )
         })
           .then(async () => {
+            this.progressDialog = true;
+            this.progressLoading = true;
             if (value == 1) {
               this.checkID = setInterval(() => {
                 this.checkReportImg(value);
               }, 1000);
-              // await this.printReport(value);
-              // this.printPage.remove();
-              // console.log("printPage remove");
-              // this.printPage2.remove();
-              // console.log("printPage2 remove");
-              // await this.drawLabel(value);
             } else if (value == 2) {
               await this.drawLabel(value);
             }
@@ -813,17 +796,9 @@ export default {
           .catch(err => {
             this.messageText = err.response.data.message;
             this.snackbar = true;
+            this.btnDisable = false;
           });
       }
-
-      // if(value == 1){
-      //   this.$store.state.successMsg = "出貨確認成功，已列印出貨單/貼箱標籤";
-      // }
-      // else if(value == 2){
-      //   this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
-      // }
-      // this.$store.state.successSnackbar = true;
-      // this.$router.push("/salesLog");
     },
     checkReportImg(value) {
       if (this.reportImage2.length == this.tableList.length) {
@@ -839,37 +814,12 @@ export default {
       );
 
       if (value == 1) {
-        let img = new Image();
-
-        img.src = dataUrl;
-        // img.width = 595;
-        // this.printPage.appendChild(img);
-
-        // var w = window.open("");
-        // w.document.write(img.outerHTML);
         this.reportImage.push(dataUrl);
-        // this.reportImage = dataUrl
       } else if (value == 2) {
-        let img = new Image();
-
-        img.src = dataUrl;
-        // img.width = 595;
-        // this.printPage2.appendChild(img);
-        // console.log("print page2 add image");
-        // var w = window.open("");
-        // w.document.write(img.outerHTML);
-
         this.reportImage2.push(dataUrl);
-        // this.reportImage2 = dataUrl
       }
-      // let img = new Image()
-      //
-      // img.src = dataUrl
-      // img.width = 595
-      // this.printPage.appendChild(img)
     },
     async createReport() {
-      console.log("createReport 1231231");
       this.reportImage = [];
       this.reportImage2 = [];
       this.setHeader = this.headers;
@@ -922,134 +872,25 @@ export default {
       });
     },
     async printReport(value) {
-      // fetch(pdfFile2)
-      //         .then(res => res.blob())
-      //         .then(blob => {
-      //           console.log("ready create file2");
-      //           file2 = new File([blob], "test2.pdf", {
-      //             type: "application/pdf"
-      //           });
-      //           console.log("is file2 created");
-      //           // let fileURL = URL.createObjectURL(file2);
-      //           // window.open(fileURL);
-      //         });
-      // let doc2 = this.reportPDF;
-      // await this.reportPDF.html(this.printPage2, {
-      //   callback: async function(doc2) {
-      //     // console.log(doc2.output('datauristring'));
-      //
-      //     pdfFile2 = doc2.output("datauristring");
-      //     // console.log(pdfFile);
-      //     console.log("pdfFile created");
-      //     // function loadFile(){
-      //     //   return new Promise(resolve => {
-      //     fetch(pdfFile)
-      //       .then(res => res.blob())
-      //       .then(blob => {
-      //         console.log("ready create file1");
-      //         file1 = new File([blob], "test.pdf", { type: "application/pdf" });
-      //         console.log("is file1 created");
-      //
-      //         let fileURL = URL.createObjectURL(file1);
-      //         window.open(fileURL);
-      //       });
-      //
-      //     // })
-      //     // }
-      //
-      //     fetch(pdfFile2)
-      //       .then(res => res.blob())
-      //       .then(blob => {
-      //         console.log("ready create file2");
-      //         file2 = new File([blob], "test2.pdf", {
-      //           type: "application/pdf"
-      //         });
-      //         console.log("is file2 created");
-      //         let fileURL = URL.createObjectURL(file2);
-      //         window.open(fileURL);
-      //       });
-      //
-      //     // merger.add(pdfFile)
-      //     // merger.add(pdfFile2)
-      //     // await merger.save('output.pdf')
-      //
-      //     // merge([file1, file2], 'File Ouput.pdf', function (err) {
-      //     //   if (err) {
-      //     //     return console.log(err)
-      //     //   }
-      //     //   console.log('Successfully merged!')
-      //     // });
-      //   },
-      //   x: 10
-      // });
       function postPdf(dataUrl) {
-        return new Promise(resolve => {
+        return new Promise(async resolve => {
           console.log("is ready print pdf");
-          // let formData = new FormData();
-          // formData.append("pdf", file1);
-          // formData.append("printerName", "Sbarco T4ES 203 dpi");
-          // formData.append("printerName", "EPSONDB5105 (L3150 Series)");
-          // formData.append("printerName", this.$store.state.printName);
-          // console.log(this.$store.state.ip);
-          // const agent = new https.Agent({ rejectUnauthorized: false });
           let data = {
             action: "pdf",
             printerName: this.$store.state.printName,
-            pdfImage: dataUrl
+            content: dataUrl
           };
           if (this.printState != "error") {
-            this.$api.Distribute.print(data)
+            await this.$api.Distribute.print(data)
               .then(res => {
                 console.log(res);
                 this.printState = "ok";
-                // await this.drawLabel(value);
               })
               .catch(err => {
                 console.log(err);
                 this.printState = "error";
-                // this.$store.state.successMsg = "出貨單產出失敗";
-                // this.$store.state.successSnackbar = true;
-                // this.$store.state.salesDetailed = false;
-                // this.$router.push("/salesLog");
               });
           }
-
-          /*
-          await axios
-            .post(
-              `https://${this.$store.state.ip}:8099/print/printPdf`,
-              formData,
-              { httpsAgent: agent }
-            )
-            .then(async res => {
-              console.log(res);
-              formData.set("pdf", file2);
-              await axios
-                .post(
-                  `https://${this.$store.state.ip}:8099/print/printPdf`,
-                  formData,
-                  { httpsAgent: agent }
-                )
-                .then(async res => {
-                  console.log(res);
-                  await this.drawLabel(value);
-                })
-                .catch(error => {
-                  console.error(error);
-                  this.$store.state.successMsg = "出貨單產出失敗";
-                  this.$store.state.successSnackbar = true;
-                  this.$store.state.salesDetailed = false;
-                  this.$router.push("/salesLog");
-                });
-            })
-            .catch(error => {
-              console.error(error);
-              this.$store.state.successMsg = "出貨單產出失敗";
-              this.$store.state.successSnackbar = true;
-              this.$store.state.salesDetailed = false;
-              this.$router.push("/salesLog");
-            });
-*/
           resolve(true);
         });
       }
@@ -1081,18 +922,11 @@ export default {
         //   img.width = 595;
         //   w.document.write(img.outerHTML);
         // });
-        // w.document.write(this.reportImage.outerHTML);
-        // w.document.write(this.reportImage2.outerHTML);
+
         this.progressLoading = false;
         this.progressDialog = false;
-        this.btnDisable = false;
-        // this.$store.state.successMsg = "PDF 已產出";
-        this.$store.state.successSnackbar = true;
-        this.$store.state.salesDetailed = false;
-        this.$router.push("/salesLog");
 
         await this.drawLabel(value);
-        // await postPdf.bind(this)();
       }, 1000);
     },
     async drawLabel(value) {
@@ -1261,15 +1095,6 @@ export default {
     },
     async exportSVG(value) {
       let canvasJson = this.canvas.toJSON();
-      // let file = await new File([JSON.stringify(canvasJson)], "foo.txt", {
-      //   type: "text/plain"
-      // });
-      // const formData = await new FormData();
-      // formData.append("file", file);
-      // formData.append("width", "100");
-      // formData.append("height", "80");
-      // formData.append("printerName", "Sbarco T4ES 203 dpi");
-      // const agent = new https.Agent({ rejectUnauthorized: false });
       let data = {
         action: "tag",
         width: "100",
@@ -1307,39 +1132,6 @@ export default {
           this.$store.state.salesDetailed = false;
           this.$router.push("/salesLog");
         });
-      // await axios
-      //   .post(`https://${this.$store.state.ip}:8099/print/printTag`, formData, {
-      //     httpsAgent: agent
-      //   })
-      //   .then(res => {
-      //     console.log(res);
-      //     if (value == 1) {
-      //       this.$store.state.successMsg =
-      //         "出貨確認成功，已列印出貨單/貼箱標籤";
-      //       console.log(this.$store.state.successMsg, "exportSVG");
-      //     } else if (value == 2) {
-      //       this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
-      //     }
-      //     this.$store.state.successSnackbar = true;
-      //     this.$store.state.salesDetailed = false;
-      //     this.$router.push("/salesLog");
-      //   })
-      //   .catch(error => {
-      //     console.error(error);
-      //     if (value == 1) {
-      //       this.$store.state.successMsg =
-      //         "出貨確認成功，列印出貨單/貼箱標籤 失敗";
-      //     } else if (value == 2) {
-      //       this.$store.state.successMsg = "出貨確認成功，列印貼箱標籤 失敗";
-      //     }
-      //     this.$store.state.successSnackbar = true;
-      //     this.$store.state.salesDetailed = false;
-      //     this.$router.push("/salesLog");
-      //   });
-      // axios.post('http://127.0.0.1:8099/print/printTag',formData)
-      //         .then(res =>{
-      //           console.log(res)
-      //         })
     }
   },
   mounted() {}
