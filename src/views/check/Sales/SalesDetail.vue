@@ -39,14 +39,14 @@
     <div
       :title="templateType"
       id="exampleWrapper"
-      style="position: absolute; top:-2000px; opacity: 0%; width: 1200px; height: 560px;"
+      style="position: absolute; top:-2000px; left: 1000px; opacity: 0%; width: 1200px; height: 2000px; background-color: white;"
     >
       <div
         :class="pageClassName[index]"
         v-for="(item, index) in tableList"
         :key="index"
       >
-        <div class="table-content">
+        <div class="table-content" style="width: 100%; height: 1700px;">
           <div class="top-wrapper" v-if="!disableTitle[index]">
             <div>
               <span class="Brand-logo"
@@ -181,7 +181,11 @@
               style="text-align: center"
             >
               <template v-slot:item.quantity="{ item }">
-                <span>{{ (item.unit == '件' || item.unit == '包') ? item.quantity : item.weight }}</span>
+                <span>{{
+                  item.unit == "件" || item.unit == "包"
+                    ? item.quantity
+                    : item.weight
+                }}</span>
               </template>
               <template v-slot:item.listPrice="{ item }">
                 <span>${{ formatPrice(item.listPrice * item.quantity) }}</span>
@@ -214,9 +218,7 @@
                 templateType !== '零售-有價格' && templateType !== '零售-無價格'
               "
             >
-              <span style="font-size: 35px;"
-                >總計 {{ count }}</span
-              >
+              <span style="font-size: 35px;">總計 {{ count }}</span>
               <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
               <span>業務聯絡人 : 0935-734982</span>
               <span>帳務聯絡人 : 0952-582050</span>
@@ -224,9 +226,7 @@
               <span>戶名: 張何男</span>
             </div>
             <div v-else class="contact-wrapper">
-              <span style="font-size: 35px;"
-                >總計 {{ count }}</span
-              >
+              <span style="font-size: 35px;">總計 {{ count }}</span>
               <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
               <span>聯絡電話: 03-4760311</span>
               <span>匯款帳號: 中國信託-新竹分行 822-554540329807</span>
@@ -604,8 +604,18 @@ export default {
       reportImage2: [],
       disableTitle: [],
       disableFooter: [],
-      pageClassName: []
+      pageClassName: [],
+      checkID: null,
+      printState: ""
     };
+  },
+  watch: {
+    printType() {
+      this.createReport();
+    },
+    printType2() {
+      this.createReport();
+    }
   },
   created() {
     this.shipmentData = this.$store.state.shipment;
@@ -625,14 +635,16 @@ export default {
       this.vatNumber = res.data.vatNumber;
     });
 
-    this.shipmentData.orderItemRequestList.map(item=>{
-      let num
-      num = (item.unit == '件' || item.unit == '包') ? item.quantity : item.weight
-      this.count += num
-    })
+    this.shipmentData.orderItemRequestList.map(item => {
+      let num;
+      num =
+        item.unit == "件" || item.unit == "包" ? item.quantity : item.weight;
+      this.count += num;
+    });
+    this.count = this.count.toFixed(3);
 
     if (this.shipmentData.orderItemRequestList.length > 15) {
-      this.isManyData = true
+      this.isManyData = true;
       let pages = 0;
       if (
         this.shipmentData.orderItemRequestList.length / 15 >
@@ -661,18 +673,20 @@ export default {
         }
       }
       this.$forceUpdate();
-    }else{
-      this.tableList.push(
-              this.shipmentData.orderItemRequestList
-      );
+    } else {
+      this.tableList.push(this.shipmentData.orderItemRequestList);
       this.pageClassName.push("page1");
-      this.disableTitle.push(false)
-      this.disableFooter.push(false)
+      this.disableTitle.push(false);
+      this.disableFooter.push(false);
+      this.$forceUpdate();
     }
     // this.printPage = document.createElement("div");
     // this.printPage2 = document.createElement("div");
     this.reportPDF = new jsPDF("p", "pt", "a4", true);
     this.reportPDF2 = new jsPDF("p", "pt", "a4");
+    this.$nextTick(() => {
+      this.createReport();
+    });
   },
   methods: {
     formatPrice(value) {
@@ -690,7 +704,12 @@ export default {
       } else if (recipientId == "2") {
         recipientId = "1";
       }
-      await this.drawLabel(value);
+      this.progressDialog = true;
+      this.progressLoading = true;
+      this.checkID = setInterval(() => {
+        this.checkReportImg(value);
+      }, 1000);
+      // await this.drawLabel(value);
       // await this.printReport(value);
       // this.printPage.remove();
       // console.log("printPage remove");
@@ -730,7 +749,10 @@ export default {
         })
           .then(async () => {
             if (value == 1) {
-              await this.printReport(value);
+              this.checkID = setInterval(() => {
+                this.checkReportImg(value);
+              }, 1000);
+              // await this.printReport(value);
               // this.printPage.remove();
               // console.log("printPage remove");
               // this.printPage2.remove();
@@ -775,7 +797,10 @@ export default {
         })
           .then(async () => {
             if (value == 1) {
-              await this.printReport(value);
+              this.checkID = setInterval(() => {
+                this.checkReportImg(value);
+              }, 1000);
+              // await this.printReport(value);
               // this.printPage.remove();
               // console.log("printPage remove");
               // this.printPage2.remove();
@@ -800,6 +825,12 @@ export default {
       // this.$store.state.successSnackbar = true;
       // this.$router.push("/salesLog");
     },
+    checkReportImg(value) {
+      if (this.reportImage2.length == this.tableList.length) {
+        clearInterval(this.checkID);
+        this.printReport(value);
+      }
+    },
     async addReportImg(value, page) {
       let pageClass = "page" + page;
 
@@ -811,7 +842,7 @@ export default {
         let img = new Image();
 
         img.src = dataUrl;
-        img.width = 595;
+        // img.width = 595;
         // this.printPage.appendChild(img);
 
         // var w = window.open("");
@@ -822,7 +853,7 @@ export default {
         let img = new Image();
 
         img.src = dataUrl;
-        img.width = 595;
+        // img.width = 595;
         // this.printPage2.appendChild(img);
         // console.log("print page2 add image");
         // var w = window.open("");
@@ -837,13 +868,11 @@ export default {
       // img.width = 595
       // this.printPage.appendChild(img)
     },
-    async printReport(value) {
-      this.reportImage = []
-      this.reportImage2 = []
-      this.progressDialog = true;
-      this.progressLoading = true;
-      let pdfFile, pdfFile2;
-      let file1, file2;
+    async createReport() {
+      console.log("createReport 1231231");
+      this.reportImage = [];
+      this.reportImage2 = [];
+      this.setHeader = this.headers;
       // 出貨單 輸出格式
       let printTypeStr = "",
         printTypeStr2 = "";
@@ -864,33 +893,35 @@ export default {
           printTypeStr2 = "零售-無價格";
         }
       }
-      this.$nextTick(() => {
-        this.templateType = printTypeStr;
-        if (this.printType2 == 2) {
-          this.setHeader = this.headers2;
-        }
-      });
+
+      this.templateType = printTypeStr;
+      if (this.printType2 == 2) {
+        this.setHeader = this.headers2;
+      }
+      console.log("set printtype");
+
       JsBarcode("#order-barcode").init();
       JsBarcode("#order-trackNo").init();
-
-
-      for (let item of this.tableList) {
-        let index = this.tableList.indexOf(item);
-        await this.addReportImg(1, index + 1);
-      }
-
-
-
-      this.$nextTick(() => {
+      this.$forceUpdate();
+      this.$nextTick(async () => {
+        for (let item of this.tableList) {
+          console.log("addReport IMG");
+          let index = this.tableList.indexOf(item);
+          await this.addReportImg(1, index + 1);
+        }
         this.templateType = printTypeStr2;
         this.setHeader = this.headers2;
+        console.log("set printtype 2");
+        this.$nextTick(async () => {
+          for (let item of this.tableList) {
+            console.log("addReport IMG 222");
+            let index = this.tableList.indexOf(item);
+            await this.addReportImg(2, index + 1);
+          }
+        });
       });
-
-      for (let item of this.tableList) {
-        let index = this.tableList.indexOf(item);
-        await this.addReportImg(2, index + 1);
-      }
-
+    },
+    async printReport(value) {
       // fetch(pdfFile2)
       //         .then(res => res.blob())
       //         .then(blob => {
@@ -951,18 +982,39 @@ export default {
       //   },
       //   x: 10
       // });
-
-      function postPdf() {
-        return new Promise(async resolve => {
+      function postPdf(dataUrl) {
+        return new Promise(resolve => {
           console.log("is ready print pdf");
-          let formData = new FormData();
-          formData.append("pdf", file1);
+          // let formData = new FormData();
+          // formData.append("pdf", file1);
           // formData.append("printerName", "Sbarco T4ES 203 dpi");
           // formData.append("printerName", "EPSONDB5105 (L3150 Series)");
-          formData.append("printerName", this.$store.state.printName);
-          console.log(this.$store.state.ip);
-          const agent = new https.Agent({ rejectUnauthorized: false });
+          // formData.append("printerName", this.$store.state.printName);
+          // console.log(this.$store.state.ip);
+          // const agent = new https.Agent({ rejectUnauthorized: false });
+          let data = {
+            action: "pdf",
+            printerName: this.$store.state.printName,
+            pdfImage: dataUrl
+          };
+          if (this.printState != "error") {
+            this.$api.Distribute.print(data)
+              .then(res => {
+                console.log(res);
+                this.printState = "ok";
+                // await this.drawLabel(value);
+              })
+              .catch(err => {
+                console.log(err);
+                this.printState = "error";
+                // this.$store.state.successMsg = "出貨單產出失敗";
+                // this.$store.state.successSnackbar = true;
+                // this.$store.state.salesDetailed = false;
+                // this.$router.push("/salesLog");
+              });
+          }
 
+          /*
           await axios
             .post(
               `https://${this.$store.state.ip}:8099/print/printPdf`,
@@ -997,29 +1049,38 @@ export default {
               this.$store.state.salesDetailed = false;
               this.$router.push("/salesLog");
             });
-
+*/
           resolve(true);
         });
       }
       setTimeout(async () => {
         console.log("created pdf to server");
-        var w = window.open("");
-        this.reportImage.forEach((value, index) => {
-          console.log(value);
-          let img = new Image();
 
-          img.src = value;
-          img.width = 595;
-          w.document.write(img.outerHTML);
-        });
-        this.reportImage2.forEach((value, index) => {
+        for (let value of this.reportImage) {
           console.log(value);
-          let img = new Image();
-
-          img.src = value;
-          img.width = 595;
-          w.document.write(img.outerHTML);
-        });
+          await postPdf.bind(this)(value);
+        }
+        for (let value of this.reportImage2) {
+          console.log(value);
+          await postPdf.bind(this)(value);
+        }
+        // var w = window.open("");
+        // this.reportImage.forEach((value, index) => {
+        //   console.log(value);
+        //   let img = new Image();
+        //
+        //   img.src = value;
+        //   img.width = 595;
+        //   w.document.write(img.outerHTML);
+        // });
+        // this.reportImage2.forEach((value, index) => {
+        //   console.log(value);
+        //   let img = new Image();
+        //
+        //   img.src = value;
+        //   img.width = 595;
+        //   w.document.write(img.outerHTML);
+        // });
         // w.document.write(this.reportImage.outerHTML);
         // w.document.write(this.reportImage2.outerHTML);
         this.progressLoading = false;
@@ -1029,6 +1090,8 @@ export default {
         this.$store.state.successSnackbar = true;
         this.$store.state.salesDetailed = false;
         this.$router.push("/salesLog");
+
+        await this.drawLabel(value);
         // await postPdf.bind(this)();
       }, 1000);
     },
@@ -1198,7 +1261,6 @@ export default {
     },
     async exportSVG(value) {
       let canvasJson = this.canvas.toJSON();
-      console.log(canvasJson);
       // let file = await new File([JSON.stringify(canvasJson)], "foo.txt", {
       //   type: "text/plain"
       // });
@@ -1209,22 +1271,42 @@ export default {
       // formData.append("printerName", "Sbarco T4ES 203 dpi");
       // const agent = new https.Agent({ rejectUnauthorized: false });
       let data = {
+        action: "tag",
         width: "100",
         height: "80",
         printerName: "Sbarco T4ES 203 dpi",
         content: JSON.stringify(canvasJson)
-      }
-      this.$api.Distribute.printTag(data).then((res)=>{
-        console.log(res);
-        this.$store.state.successSnackbar = true;
-        this.$store.state.salesDetailed = false;
-        this.$router.push("/salesLog");
-      }).catch((err)=>{
-        console.log(err);
-        this.$store.state.successSnackbar = true;
-        this.$store.state.salesDetailed = false;
-        this.$router.push("/salesLog");
-      })
+      };
+      this.$api.Distribute.print(data)
+        .then(res => {
+          console.log(res);
+          if (value == 1) {
+            if (this.printState == "error") {
+              this.$store.state.successMsg =
+                "出貨確認成功，出貨單 或 貼箱標籤 列印失敗";
+            } else {
+              this.$store.state.successMsg =
+                "出貨確認成功，已列印出貨單/貼箱標籤";
+            }
+          } else if (value == 2) {
+            this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
+          }
+          this.$store.state.successSnackbar = true;
+          this.$store.state.salesDetailed = false;
+          this.$router.push("/salesLog");
+        })
+        .catch(err => {
+          console.log(err);
+          if (value == 1) {
+            this.$store.state.successMsg =
+              "出貨確認成功，出貨單 或 貼箱標籤 列印失敗";
+          } else if (value == 2) {
+            this.$store.state.successMsg = "出貨確認成功，貼箱標籤 列印失敗";
+          }
+          this.$store.state.successSnackbar = true;
+          this.$store.state.salesDetailed = false;
+          this.$router.push("/salesLog");
+        });
       // await axios
       //   .post(`https://${this.$store.state.ip}:8099/print/printTag`, formData, {
       //     httpsAgent: agent
