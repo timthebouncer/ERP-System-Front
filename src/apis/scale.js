@@ -21,6 +21,9 @@ const api = {
         //編輯庫存
         updateStock(params) {
             return request.put("/inventory/updateStock", params);
+        },
+        print(data){
+            return request.post('/printTask',data)
         }
     },
     ProductDepot: {
