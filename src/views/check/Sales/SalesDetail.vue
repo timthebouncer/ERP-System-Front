@@ -14,6 +14,20 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="tagProgressDialog" persistent>
+      <v-card style="background-color: #fff0e9;">
+        <v-card-text class="text-center"
+        ><span class="text-h6 font-weight-black">標籤列印中</span>
+          <v-progress-linear
+                  color="cyan"
+                  :active="tagProgressLoading"
+                  :indeterminate="tagProgressLoading"
+                  rounded
+                  height="6"
+          ></v-progress-linear>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
     <!--   貼箱標籤   -->
     <div style="position: absolute; top:-1000px;">
       <div style="height: 173px; padding: 8px 0 0 0;">
@@ -184,7 +198,7 @@
                 <span>{{
                   item.unit == "件" || item.unit == "包"
                     ? item.quantity
-                    : item.weight
+                    : item.tWeight
                 }}</span>
               </template>
               <template v-slot:item.listPrice="{ item }">
@@ -391,7 +405,7 @@
               <p v-if="item.unit == '件' || item.unit == '包'">
                 {{ item.quantity }}
               </p>
-              <p v-else>{{ item.weight }}</p>
+              <p v-else>{{ item.tWeight }}</p>
               <p>${{ formatPrice(item.money) }}</p>
             </v-col>
           </v-row>
@@ -591,6 +605,8 @@ export default {
       ],
       progressLoading: false,
       progressDialog: false,
+      tagProgressLoading: false,
+      tagProgressDialog: false,
       setHeader: [],
       tableList: [],
       tableData: [],
@@ -638,7 +654,7 @@ export default {
     this.shipmentData.orderItemRequestList.map(item => {
       let num;
       num =
-        item.unit == "件" || item.unit == "包" ? item.quantity : item.weight;
+        item.unit == "件" || item.unit == "包" ? item.quantity : Number(item.tWeight);
       this.count += num;
     });
     this.count = this.count.toFixed(3);
@@ -702,6 +718,8 @@ export default {
       } else if (recipientId == "2") {
         recipientId = "1";
       }
+      // this.progressDialog = true;
+      // this.progressLoading = true;
       // this.checkID = setInterval(() => {
       //   this.checkReportImg(value);
       // }, 1000);
@@ -731,20 +749,22 @@ export default {
                     item.quantity -
                   item.money,
                 price: item.money,
-                remark: item.remark,
+                remark: item.description,
                 weight: item.weight
               };
             }
           )
         })
           .then(async () => {
-            this.progressDialog = true;
-            this.progressLoading = true;
             if (value == 1) {
+              this.progressDialog = true;
+              this.progressLoading = true;
               this.checkID = setInterval(() => {
                 this.checkReportImg(value);
               }, 1000);
             } else if (value == 2) {
+              this.tagProgressDialog = true;
+              this.tagProgressLoading = true;
               await this.drawLabel(value);
             }
           })
@@ -783,13 +803,15 @@ export default {
           )
         })
           .then(async () => {
-            this.progressDialog = true;
-            this.progressLoading = true;
             if (value == 1) {
+              this.progressDialog = true;
+              this.progressLoading = true;
               this.checkID = setInterval(() => {
                 this.checkReportImg(value);
               }, 1000);
             } else if (value == 2) {
+              this.tagProgressDialog = true;
+              this.tagProgressLoading = true;
               await this.drawLabel(value);
             }
           })
@@ -925,7 +947,11 @@ export default {
 
         this.progressLoading = false;
         this.progressDialog = false;
-
+        // this.$store.state.successSnackbar = true;
+        // this.$store.state.salesDetailed = false;
+        // this.$router.push("/salesLog");
+        this.tagProgressDialog = true;
+        this.tagProgressLoading = true;
         await this.drawLabel(value);
       }, 1000);
     },
@@ -1105,6 +1131,8 @@ export default {
       this.$api.Distribute.print(data)
         .then(res => {
           console.log(res);
+          this.tagProgressDialog = false;
+          this.tagProgressLoading = false;
           if (value == 1) {
             if (this.printState == "error") {
               this.$store.state.successMsg =
