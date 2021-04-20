@@ -198,7 +198,7 @@
                 <span>{{
                   item.unit == "件" || item.unit == "包"
                     ? item.quantity
-                    : item.weight
+                    : item.tWeight
                 }}</span>
               </template>
               <template v-slot:item.listPrice="{ item }">
@@ -405,7 +405,7 @@
               <p v-if="item.unit == '件' || item.unit == '包'">
                 {{ item.quantity }}
               </p>
-              <p v-else>{{ item.weight }}</p>
+              <p v-else>{{ item.tWeight }}</p>
               <p>${{ formatPrice(item.money) }}</p>
             </v-col>
           </v-row>
@@ -654,7 +654,7 @@ export default {
     this.shipmentData.orderItemRequestList.map(item => {
       let num;
       num =
-        item.unit == "件" || item.unit == "包" ? item.quantity : item.weight;
+        item.unit == "件" || item.unit == "包" ? item.quantity : Number(item.tWeight);
       this.count += num;
     });
     this.count = this.count.toFixed(3);
@@ -718,6 +718,8 @@ export default {
       } else if (recipientId == "2") {
         recipientId = "1";
       }
+      // this.progressDialog = true;
+      // this.progressLoading = true;
       // this.checkID = setInterval(() => {
       //   this.checkReportImg(value);
       // }, 1000);
@@ -747,7 +749,7 @@ export default {
                     item.quantity -
                   item.money,
                 price: item.money,
-                remark: item.remark,
+                remark: item.description,
                 weight: item.weight
               };
             }
@@ -945,6 +947,9 @@ export default {
 
         this.progressLoading = false;
         this.progressDialog = false;
+        // this.$store.state.successSnackbar = true;
+        // this.$store.state.salesDetailed = false;
+        // this.$router.push("/salesLog");
         this.tagProgressDialog = true;
         this.tagProgressLoading = true;
         await this.drawLabel(value);

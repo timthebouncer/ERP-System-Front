@@ -245,7 +245,8 @@ export default {
                 item.discount,
               unit: item.unit,
               description: item.remark,
-              weight: item.weight
+              weight: item.weight,
+              tWeight: (item.weight).toFixed(3)
             };
           }
         );

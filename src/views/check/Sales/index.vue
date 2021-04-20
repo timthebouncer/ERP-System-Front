@@ -355,23 +355,28 @@
             :value="receiveData.id"
             class="ma-0"
           >
-            <v-list-item v-for="(child,index) in item.items" :key="child.id">
+            <v-list-item v-for="(child, index) in item.items" :key="child.id">
               <v-radio :value="child.id" :key="child.id">
                 <template v-slot:label>
                   <v-list-item-content>
                     <div style="color: black;">
                       <v-row class="ma-0"
                         ><span class="">{{ child.name }}</span
-                        ><span class="pl-2"></span><span class="">{{ child.phone }}</span
-                        ></v-row>
-                      <v-row v-if="index>1" class="justify-space-between ma-0"
+                        ><span class="pl-2"></span
+                        ><span class="">{{ child.phone }}</span></v-row
+                      >
+                      <v-row v-if="index > 1" class="justify-space-between ma-0"
                         ><span class="col-1 pl-0">{{ child.code }}</span
                         ><span class="col-10">{{ child.address }}</span
                         ><span></span
                       ></v-row>
                     </div>
                   </v-list-item-content>
-                  <span v-if="item.defaultReceiveInfo == index" class="pl-2 red--text text-h5">預</span>
+                  <span
+                    v-if="item.defaultReceiveInfo == index"
+                    class="pl-2 red--text text-h5"
+                    >預</span
+                  >
                 </template>
               </v-radio>
             </v-list-item>
@@ -481,7 +486,7 @@
                 </ul>
                 <ul class="counter" v-else>
                   <p class="mb-1 commodityNumber">數量</p>
-                  <span class="text-h6">{{ item.weight }}</span>
+                  <span class="text-h6">{{ item.tWeight }}</span>
                 </ul>
               </div>
               <div class="text-center pt-3">
@@ -595,6 +600,7 @@ export default {
         name: "",
         unit: "",
         weight: 0,
+        tWeight: 0,
         amount: "",
         salesPrice: 0,
         listPrice: 0,
@@ -772,6 +778,7 @@ export default {
             name: item.productName,
             unit: this.getUnit(item.unit),
             weight: item.weight,
+            tWeight: item.weight,
             amount: item.amount,
             salesPrice: item.clientPrice,
             listPrice: item.price,
@@ -798,20 +805,23 @@ export default {
           if (productItemIndex != -1) {
             this.productItem[productItemIndex].salesPrice = data.salesPrice;
             this.productItem[productItemIndex].listPrice = data.listPrice;
-            this.productItem[productItemIndex].money = this.formatPrice(
-              (data.salesPrice === 0 ? data.listPrice : data.salesPrice) *
-                this.productItem[productItemIndex].quantity
-            );
+            // this.productItem[productItemIndex].money = this.formatPrice(
+            //   (data.salesPrice === 0 ? data.listPrice : data.salesPrice) *
+            //     this.productItem[productItemIndex].quantity
+            // );
+            this.productItem[productItemIndex].weight = data.weight;
+            this.productItem[productItemIndex].tWeight = (
+              data.weight * this.productItem[productItemIndex].quantity
+            ).toFixed(3);
           }
           this.productItemData.push(data);
         });
       });
-      console.log('is pushed');
+
       if (this.productItem.length > 0) {
-        setTimeout(()=>{
-          console.log('onCal');
+        setTimeout(() => {
           this.onCalculation();
-        },1500)
+        }, 1500);
       } else {
         this.checkNexted();
       }
@@ -894,28 +904,37 @@ export default {
       if (this.productItem.findIndex(item => item.barcode == barcode) == -1) {
         this.productData.quantity = this.quantityDialog;
         this.productData.description = this.remarkDialog;
+
+        this.productData.money = this.formatPrice(
+          (this.productData.salesPrice === 0
+            ? this.productData.listPrice
+            : this.productData.salesPrice) * this.productData.quantity
+        );
         this.productItem.push(this.productData);
       } else {
         let data = this.productItem.find(item => item.barcode == barcode);
-        if (data.unit == "件" || data.unit == "包") {
-          if (data.quantity + this.quantityDialog > this.productData.amount) {
-            data.quantity = this.productData.amount;
-          } else {
-            data.quantity += this.quantityDialog;
-          }
-        }else{
-          this.productData.quantity = this.quantityDialog;
-          this.productData.description = this.remarkDialog;
-          this.productItem.push(this.productData);
+        if (data.quantity + this.quantityDialog > this.productData.amount) {
+          data.quantity = this.productData.amount;
+        } else {
+          data.quantity += this.quantityDialog;
+        }
+        data.description = this.remarkDialog;
+        data.money = this.formatPrice(
+            (data.salesPrice === 0 ? data.listPrice : data.salesPrice) *
+              data.quantity
+          );
+        if (data.unit != "件" && data.unit != "包") {
+          data.tWeight = (data.weight * data.quantity).toFixed(3);
         }
       }
 
-      this.productItem.forEach(item => {
-        item.money = this.formatPrice(
-          (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
-            item.quantity
-        );
-      });
+      // this.productItem.forEach(item => {
+      //   item.money = this.formatPrice(
+      //     (item.salesPrice === 0 ? item.listPrice : item.salesPrice) *
+      //       item.quantity
+      //   );
+      //   console.log(item.tWeight, "tWeight");
+      // });
       this.onCalculation();
       this.salesDialogVisible = false;
       this.productBarcode = "";
@@ -1007,10 +1026,10 @@ export default {
 
         _this.total = _this.total + money;
       });
-      console.log(_this.total,'onCal  totallllll');
-      this.$nextTick(()=>{
-        this.total = _this.total
-      })
+      console.log(_this.total, "onCal  totallllll");
+      this.$nextTick(() => {
+        this.total = _this.total;
+      });
       this.checkNexted();
     },
     submit() {
@@ -1055,7 +1074,12 @@ export default {
           postCode: this.dialogData.find(x => x.key == "code").value.trim(),
           address: this.dialogData.find(x => x.key == "address").value.trim()
         };
-        if (data.receiver == "" || data.tel == "" || data.postCode == "" || data.address == "") {
+        if (
+          data.receiver == "" ||
+          data.tel == "" ||
+          data.postCode == "" ||
+          data.address == ""
+        ) {
           this.errSnackbar = true;
           this.messageText = "請輸入必填項目!";
           return;
