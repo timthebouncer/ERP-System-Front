@@ -25,6 +25,9 @@
     <v-snackbar v-model="delSnackbar" centered color="primary" timeout="3000">
       <p class="text-center ma-0">{{ messageText }}</p>
     </v-snackbar>
+    <v-snackbar v-model="errSnackbar" centered color="red" timeout="3000">
+      <p class="text-center ma-0">{{ errMessageText }}</p>
+    </v-snackbar>
     <v-dialog v-model="delOrderDialogVisible">
       <v-card style="background-color: #fff0e9;">
         <v-card-text class="text-center"
@@ -118,6 +121,8 @@ export default {
       clientListRes: [],
       delSnackbar: false,
       messageText: "",
+      errSnackbar: false,
+      errMessageText: "",
       skus: { format: "auto", title: "" },
       skus2: { format: "auto", title: "" },
       orderNo: '',
@@ -425,32 +430,24 @@ export default {
     },
     async exportSVG(index) {
       let canvasJson = this.canvas.toJSON();
-      console.log(canvasJson);
-      let file = await new File([JSON.stringify(canvasJson)], "foo.txt", {
-        type: "text/plain"
+      let data = {
+        action: "tag",
+        width: "100",
+        height: "80",
+        printerName: "Sbarco T4ES 203 dpi",
+        content: JSON.stringify(canvasJson)
+      };
+      this.$api.Distribute.print(data).then(res => {
+        console.log(res);
+        this.delSnackbar = true;
+        this.messageText = "已列印貼箱標籤";
+        this.$refs.swipeList.closeActions(index);
+      }).catch(error => {
+        console.error(error);
+        this.errSnackbar = true;
+        this.errMessageText = "列印貼箱標籤 失敗";
+        this.$refs.swipeList.closeActions(index);
       });
-      const formData = await new FormData();
-      formData.append("file", file);
-      formData.append("width", "100");
-      formData.append("height", "80");
-      formData.append("printerName", "Sbarco T4ES 203 dpi");
-      const agent = new https.Agent({rejectUnauthorized: false});
-      await axios
-              .post(`https://${this.$store.state.ip}:8099/print/printTag`, formData, {
-                httpsAgent: agent
-              })
-              .then(res => {
-                console.log(res);
-                this.delSnackbar = true;
-                this.messageText = "已列印貼箱標籤";
-                this.$refs.swipeList.closeActions(index);
-              })
-              .catch(error => {
-                console.error(error);
-                this.delSnackbar = true;
-                this.messageText = "列印貼箱標籤 失敗";
-                this.$refs.swipeList.closeActions(index);
-              });
     }
   },
   mounted() {
