@@ -135,7 +135,7 @@
         </v-row>
       </v-menu>
       <v-spacer></v-spacer>
-      <span style="font-size: large; color: #fff0e9;">名字</span>
+      <span style="font-size: large; color: #fff0e9;">{{ userName }}</span>
       <v-btn icon @click="userLogout">
         <v-icon color="#f7b573">mdi-export</v-icon>
       </v-btn>
@@ -162,7 +162,8 @@ export default {
       },
       settingDialog: false,
       ip: "",
-      printName: ""
+      printName: "",
+      userName: ""
     };
   },
   watch: {
@@ -281,6 +282,7 @@ export default {
     this.$store.state.printName = localStorage.getItem('printName')
     this.ip = this.$store.state.ip
     this.printName = this.$store.state.printName
+    this.userName = sessionStorage.getItem("checkUser")
   }
 };
 </script>
