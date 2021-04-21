@@ -278,7 +278,7 @@
           >
             <div>{{ item.name }}</div>
             <div>
-              {{formatUnit(item)}}{{formatWeightUnit(item)}}
+            {{formatUnit(item)}}{{formatWeightUnit(item)}}
             </div>
           </div>
           <i />
@@ -552,7 +552,7 @@ export default {
       }else if (item.barcode === "") {
         return this.getUnit(item.unit)
       }else{
-        return `${this.getUnit(item.weightUnit)}/${this.getUnit(item.unit)}`
+        return `${item.weightUnit === null ?'':this.getUnit(item.weightUnit)}/${this.getUnit(item.unit)}`
       }
     },
     changeDepot() {
@@ -694,6 +694,7 @@ export default {
     },
     //商品切換
     addClass(index) {
+      console.log(this.commodity)
       //當前選擇的商品ID
       this.stockInForm.productId = this.commodity[index].id;
       //當前選擇的商品barcode
