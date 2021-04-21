@@ -1,5 +1,20 @@
 <template>
   <v-container class="container">
+    <v-btn
+            v-scroll="onScroll"
+            v-show="fab"
+            fab
+            dark
+            fixed
+            right
+            bottom
+            small
+            color="primary"
+            style="margin-right: -10px;"
+            class="mb-10"
+            @click="toTop"
+    ><v-icon>mdi-chevron-up</v-icon></v-btn
+    >
     <v-dialog v-model="progressDialog" persistent>
       <v-card style="background-color: #fff0e9;">
         <v-card-text class="text-center"
@@ -503,6 +518,7 @@ export default {
   name: "SalesDetail",
   data() {
     return {
+      fab: false,
       shipmentData: {},
       vatNumber: null,
       workDate: "",
@@ -703,6 +719,14 @@ export default {
     });
   },
   methods: {
+    onScroll(e) {
+      if (typeof window === "undefined") return;
+      const top = window.pageYOffset || e.target.scrollTop || 0;
+      this.fab = top > 20;
+    },
+    toTop() {
+      this.$vuetify.goTo(0);
+    },
     formatPrice(value) {
       return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     },
