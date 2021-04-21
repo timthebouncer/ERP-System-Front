@@ -101,6 +101,7 @@ export default {
           .then(res => {
             if (res.status === 200) {
               sessionStorage.setItem("token", res.data.code);
+              sessionStorage.setItem("checkUser", res.data.user);
               this.loading = false;
               this.$router.push("/");
             }
