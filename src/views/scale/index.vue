@@ -549,12 +549,12 @@ export default {
       }
     },
     formatWeightUnit(item) {
-      if (item.barcode !== "" && item.fixedWeight === 0) {
-        return this.getUnit(item.unit);
-      } else if (item.barcode === "") {
-        return this.getUnit(item.unit);
-      } else {
-        return `${this.getUnit(item.weightUnit)}/${this.getUnit(item.unit)}`;
+      if(item.barcode !== "" && item.fixedWeight === 0) {
+        return this.getUnit(item.unit)
+      }else if (item.barcode === "") {
+        return this.getUnit(item.unit)
+      }else{
+        return `${item.weightUnit === null ?'':this.getUnit(item.weightUnit)}/${this.getUnit(item.unit)}`
       }
     },
     changeDepot() {
