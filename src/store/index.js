@@ -31,6 +31,8 @@ export default new Vuex.Store({
     shipmentEdited: false,
     successSnackbar: false,
     successMsg: '',
+    errorSnackbar: false,
+    errorMsg: '',
     menuName: '',
     ip: "",
     printName: ""
