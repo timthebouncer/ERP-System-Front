@@ -88,7 +88,7 @@ export default {
         materialId: "",
         count: "",
         carcassWeight: "",
-        livingWeight: "",
+        livingWeight: 0,
         username: ""
       },
       selectData: ''
@@ -178,7 +178,7 @@ export default {
             materialId: "",
             count: "",
             carcassWeight: "",
-            livingWeight: ""
+            livingWeight: 0
           };
           this.material = { id: "", name: "" };
           this.loading = false;
@@ -201,7 +201,7 @@ export default {
         materialId: "",
         count: "",
         carcassWeight: "",
-        livingWeight: ""
+        livingWeight: 0
       };
       this.material = { id: "", name: "" };
       this.$emit("close");
