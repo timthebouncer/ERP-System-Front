@@ -15,8 +15,15 @@
               />
               <!--                        <v-select v-model="material" :items="materialList" return-object item-text="name" item-value="id" label="*物料名稱"/>-->
 <!--              使用套件製作彈出選項  -->
-              <span style="font-size: 16px">*物料名稱</span>
-              <v-btn plain><div id="trigger5">{{selectData}}</div> </v-btn>
+              <div class="materialName">
+                <div :style="selectData? 'fontSize:12px':'fontSize:16px'">*物料名稱</div>
+                <div class="btn-wrapper">
+                  <div style="font-size: 20px;color: rgba(0,0,0,.87);">{{selectData}}</div>
+                  <v-btn plain>
+                    <div id="trigger5"><i class="v-icon notranslate mdi mdi-menu-down theme--light"></i></div>
+                  </v-btn>
+                </div>
+              </div>
               <v-text-field
                 v-model="orderForm.count"
                 label="*物料數量"
@@ -84,7 +91,7 @@ export default {
         livingWeight: "",
         username: ""
       },
-      selectData: '請選擇'
+      selectData: ''
     };
   },
   mounted() {},
@@ -92,6 +99,7 @@ export default {
     //判斷彈窗是否開啟
     show() {
       if (this.show) {
+        this.materialList.unshift({id: 0, name: '請選擇'})
         if(this.mobileSelect5 === null){
           this.$nextTick(() => {
             this.mobileSelect5 = new MobileSelect({
@@ -112,8 +120,8 @@ export default {
                   this.material.id = data[0].id;
                   this.material.name = data[0].name;
                   this.selectData = data[0].name;
-                  this.materialSave.id = data[0].id;
-                  this.materialSave.name = data[0].name;
+                  // this.materialSave.id = data[0].id;
+                  // this.materialSave.name = data[0].name;
                 let arr = [
                   ...document.getElementsByClassName("selectContainer")[0]
                           .childNodes
@@ -131,7 +139,7 @@ export default {
             });
           });
         }else {
-          this.selectData = '請選擇'
+          this.selectData = ''
           this.mobileSelect5.updateWheel(0,this.materialList)
           this.mobileSelect5.locatePosition(0,0)
         }
@@ -206,8 +214,16 @@ export default {
 .v-text-field >>> input {
   font-size: 20px;
 }
+.materialName{
+  border-bottom: 1px solid;
+}
+.btn-wrapper{
+  display: flex;
+  justify-content:space-between;
+  line-height: 2;
+  margin-right: -20px;
+}
 #trigger5 {
   font-size: 20px;
-  line-height: 1px;
 }
 </style>
