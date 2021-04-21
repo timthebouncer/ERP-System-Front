@@ -1159,28 +1159,30 @@ export default {
           this.tagProgressLoading = false;
           if (value == 1) {
             if (this.printState == "error") {
-              this.$store.state.successMsg =
+              this.$store.state.errorMsg =
                 "出貨確認成功，出貨單 或 貼箱標籤 列印失敗";
+              this.$store.state.errorSnackbar = true;
             } else {
               this.$store.state.successMsg =
                 "出貨確認成功，已列印出貨單/貼箱標籤";
+              this.$store.state.successSnackbar = true;
             }
           } else if (value == 2) {
             this.$store.state.successMsg = "出貨確認成功，已列印貼箱標籤";
+            this.$store.state.successSnackbar = true;
           }
-          this.$store.state.successSnackbar = true;
           this.$store.state.salesDetailed = false;
           this.$router.push("/salesLog");
         })
         .catch(err => {
           console.log(err);
           if (value == 1) {
-            this.$store.state.successMsg =
+            this.$store.state.errorMsg =
               "出貨確認成功，出貨單 或 貼箱標籤 列印失敗";
           } else if (value == 2) {
-            this.$store.state.successMsg = "出貨確認成功，貼箱標籤 列印失敗";
+            this.$store.state.errorMsg = "出貨確認成功，貼箱標籤 列印失敗";
           }
-          this.$store.state.successSnackbar = true;
+          this.$store.state.errorSnackbar = true;
           this.$store.state.salesDetailed = false;
           this.$router.push("/salesLog");
         });
