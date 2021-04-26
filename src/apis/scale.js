@@ -4,13 +4,13 @@ const api = {
     Login: {
         //登入
         login(formatData) {
-            return request.post("/api/login", formatData);
+            return request.post("/login", formatData);
         }
     },
     Logout: {
         //登出
       logout() {
-          return request.post("/api/logout")
+          return request.post("/logout")
       }
     },
     Inventory: {
