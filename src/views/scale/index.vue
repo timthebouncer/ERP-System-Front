@@ -565,12 +565,7 @@ export default {
       //防止累加按鈕連續操作
       if (this.displayValue === 0.0) return;
       //累加的值如果有扣重的重量要扣掉
-      this.accumulateValue = Number(
-        (
-          this.accumulateValue +
-          (this.displayValue - this.deductionValue)
-        ).toFixed(3)
-      );
+      this.accumulateValue = Number((this.accumulateValue + (this.displayValue)).toFixed(3));
       this.displayValue = 0.0;
       this.changeValue = 0.0;
     },
@@ -1171,7 +1166,7 @@ export default {
           this.deductionStatus === true &&
           this.displayValue > this.deductionValue
         ) {
-          this.displayValue = this.displayValue - this.deductionValue;
+          this.displayValue = Number((this.displayValue - this.deductionValue).toFixed(3));
         }
       }
     },
