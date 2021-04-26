@@ -3,13 +3,13 @@ import request from "./https";
 const api= {
   Login:{
     userLogin(formData) {
-      return request.post("/login", formData)
+      return request.post("/api/login", formData)
     },
     loginIdentify(){
       return request.get('session/isAuthenticated')
     },
     logOut(){
-      return request.post('/logout')
+      return request.post('/api/logout')
     }
     },
   Commodity:{
