@@ -112,15 +112,15 @@ export default {
         await this.$scale.Login.login(formData)
           .then(res => {
             if (res.status === 200) {
-              //登入成功後如果今日日期與上次操作日期不同則清空localStorage
-              if(localStorage.getItem("time") !== this.today){
-                localStorage.removeItem("addOrderForm");
-                localStorage.removeItem("orderNumber");
-                localStorage.removeItem("orderName");
-                localStorage.removeItem("depot");
+              //登入成功後如果今日日期與上次操作日期不同則清空sessionStorage
+              if(sessionStorage.getItem("time") !== this.today){
+                sessionStorage.removeItem("addOrderForm");
+                sessionStorage.removeItem("orderNumber");
+                sessionStorage.removeItem("orderName");
+                sessionStorage.removeItem("depot");
               }
-              localStorage.setItem("token", res.data.code);
-              localStorage.setItem("userName", res.data.user)
+              sessionStorage.setItem("token", res.data.code);
+              sessionStorage.setItem("userName", res.data.user)
               this.loading = false;
               this.$router.push("/");
             }
