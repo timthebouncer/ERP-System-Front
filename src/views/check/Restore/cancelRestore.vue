@@ -8,6 +8,7 @@
         </div>
         <div class="barcode-input">
           <v-text-field
+            id="barcodeInput"
             solo
             v-model="searchBarcode"
             v-on:keyup="updateLen"
@@ -169,6 +170,9 @@ export default {
       }
       this.totalAmount = e;
     }
+  },
+  mounted() {
+    document.getElementById("barcodeInput").focus();
   }
 };
 </script>
