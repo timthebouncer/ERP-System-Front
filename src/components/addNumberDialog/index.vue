@@ -154,6 +154,9 @@ export default {
       if (this.orderForm.count === "") {
         return (this.snackbar = true), (this.deleteText = "請填寫物料數量");
       }
+      if (this.orderForm.livingWeight === 0) {
+        return (this.snackbar = true), (this.deleteText = "屠體重量不得為0");
+      }
       this.orderForm.materialId = this.material.id;
       this.orderForm.carcassWeight = this.kg;
       this.orderForm.username = sessionStorage.getItem("userName");
