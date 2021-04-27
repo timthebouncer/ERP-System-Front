@@ -109,4 +109,7 @@
     .v-data-table >>> td {
         font-size: 18px !important;
     }
+    .v-data-table >>> tr:hover{
+        background: #5ccdff !important;
+    }
 </style>

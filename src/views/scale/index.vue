@@ -442,14 +442,14 @@ export default {
     };
   },
   async mounted() {
-    this.userName = sessionStorage.getItem("userName");
+    this.userName = localStorage.getItem("userName");
     //代入上次操作結果
-    if (sessionStorage.getItem("orderNumber")) {
-      this.addOrderForm = JSON.parse(sessionStorage.getItem("addOrderForm"));
-      this.orderNumber = sessionStorage.getItem("orderNumber");
-      this.orderName = sessionStorage.getItem("orderName");
-      this.stockInForm.depotId = sessionStorage.getItem("depot");
-      this.productDepot = sessionStorage.getItem("depot");
+    if (localStorage.getItem("orderNumber")) {
+      this.addOrderForm = JSON.parse(localStorage.getItem("addOrderForm"));
+      this.orderNumber = localStorage.getItem("orderNumber");
+      this.orderName = localStorage.getItem("orderName");
+      this.stockInForm.depotId = localStorage.getItem("depot");
+      this.productDepot = localStorage.getItem("depot");
     }
     this.canvas = new fabric.Canvas("canvasTest");
     await this.$scale.Product.getProduct().then(res => {
@@ -531,7 +531,7 @@ export default {
     },
     changeDepot() {
       this.stockInForm.depotId = this.productDepot;
-      window.sessionStorage.setItem("depot", this.productDepot);
+      window.localStorage.setItem("depot", this.productDepot);
     },
     accumulate() {
       //防止累加按鈕連續操作
@@ -632,9 +632,9 @@ export default {
       this.orderNumber = value.number;
       this.orderName = value.name;
       //紀錄最後一次操作的單號資料
-      sessionStorage.setItem("addOrderForm", JSON.stringify(value));
-      sessionStorage.setItem("orderNumber", value.number);
-      sessionStorage.setItem("orderName", value.name);
+      localStorage.setItem("addOrderForm", JSON.stringify(value));
+      localStorage.setItem("orderNumber", value.number);
+      localStorage.setItem("orderName", value.name);
       //紀錄後一次操作的日期
       let today = new Date();
       let time =
@@ -645,7 +645,7 @@ export default {
         "-" +
         (today.getDate() < 10 ? "0" : "") +
         today.getDate();
-      sessionStorage.setItem("time", time);
+      localStorage.setItem("time", time);
     },
     changeNumber(value, name) {
       if (name === "商品序號") {
@@ -895,8 +895,8 @@ export default {
               let canvasStr = JSON.stringify(this.canvas);
               let data = {
                 action: "tag",
-                width: "100",
-                height: "80",
+                width: this.tagWidth,
+                height: this.tagHeight,
                 printerName: "Sbarco T4ES 203 dpi",
                 content: canvasStr
               };
@@ -932,8 +932,8 @@ export default {
           let canvasStr = JSON.stringify(this.canvas);
           let data = {
             action: "tag",
-            width: "100",
-            height: "80",
+            width: this.tagWidth,
+            height: this.tagHeight,
             printerName: "Sbarco T4ES 203 dpi",
             content: canvasStr
           };
@@ -1054,8 +1054,8 @@ export default {
     logout() {
       this.$scale.Logout.logout().then(res => {
         if (res.status === 200) {
-          sessionStorage.removeItem("token");
-          sessionStorage.removeItem("userName");
+          localStorage.removeItem("token");
+          localStorage.removeItem("userName");
           this.$router.push("/login");
         }
       });
