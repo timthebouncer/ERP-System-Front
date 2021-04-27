@@ -443,13 +443,6 @@ export default {
   },
   async mounted() {
     this.userName = sessionStorage.getItem("userName");
-    this.userIP = localStorage.getItem("userIP");
-    //需要有IP才能入庫
-    if (this.userIP) {
-      this.inboundPrintStatus = false;
-    } else {
-      this.inboundPrintStatus = true;
-    }
     //代入上次操作結果
     if (sessionStorage.getItem("orderNumber")) {
       this.addOrderForm = JSON.parse(sessionStorage.getItem("addOrderForm"));
@@ -484,27 +477,6 @@ export default {
     "long-press": LongPress
   },
   watch: {
-    userIP() {
-      //需要有IP才能入庫
-      if (this.userIP) {
-        this.inboundPrintStatus = false;
-      } else {
-        this.inboundPrintStatus = true;
-      }
-    },
-    position() {
-      //先設定IP
-      if (this.userIP) {
-        this.barcodeStorage = "";
-        this.inventoryId = "";
-        //切換標籤時重置取消入庫狀態
-        this.rePrintStatus = false;
-        //切換標籤時重置入庫列印狀態
-        this.inboundPrintStatus = false;
-        //切換標籤時重置重印標籤狀態
-        this.rePrintTagStatus = true;
-      }
-    },
     //當磅秤機重量改變時
     displayValue() {
       if (this.kgStatus) {
@@ -609,10 +581,8 @@ export default {
     setIPDialog() {
       this.ipShow = true;
     },
-    closeIpDialog(ip) {
+    closeIpDialog() {
       this.ipShow = false;
-      localStorage.setItem("userIP", ip);
-      this.userIP = ip;
     },
     async showAddNumberDialog(show) {
       //拿物料名稱
