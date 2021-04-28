@@ -385,7 +385,7 @@ export default {
       defaultValue: 0,
       list: [],
       lastValue: "0",
-      displayValue: 0.00,
+      displayValue: 0.000,
       changeValue: 0,
       accumulateValue: 0,
       stockInFormAmount: 0,
@@ -477,6 +477,16 @@ export default {
     "long-press": LongPress
   },
   watch: {
+    position() {
+      this.barcodeStorage = "";
+      this.inventoryId = "";
+      //切換標籤時重置取消入庫狀態
+      this.rePrintStatus = false;
+      //切換標籤時重置入庫列印狀態
+      this.inboundPrintStatus = false;
+      //切換標籤時重置重印標籤狀態
+      this.rePrintTagStatus = true;
+    },
     //當磅秤機重量改變時
     displayValue() {
       if (this.kgStatus) {
