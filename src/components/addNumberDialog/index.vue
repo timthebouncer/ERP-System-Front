@@ -154,7 +154,7 @@ export default {
       if (this.orderForm.count === "") {
         return (this.snackbar = true), (this.deleteText = "請填寫物料數量");
       }
-      if (this.orderForm.livingWeight === 0) {
+      if (this.kg === 0) {
         return (this.snackbar = true), (this.deleteText = "屠體重量不得為0");
       }
       this.orderForm.materialId = this.material.id;
@@ -171,12 +171,12 @@ export default {
             res.data
           );
           this.$emit("close");
-          sessionStorage.setItem(
+          localStorage.setItem(
             "addOrderForm",
             JSON.stringify(this.orderForm)
           );
-          sessionStorage.setItem("orderNumber", this.addOrderNumber);
-          sessionStorage.setItem("orderName", this.material.name);
+          localStorage.setItem("orderNumber", this.addOrderNumber);
+          localStorage.setItem("orderName", this.material.name);
           this.orderForm = {
             materialId: "",
             count: "",
@@ -195,7 +195,7 @@ export default {
             "-" +
             (today.getDate() < 10 ? "0" : "") +
             today.getDate();
-          sessionStorage.setItem("time", time);
+          localStorage.setItem("time", time);
         }
       });
     },
