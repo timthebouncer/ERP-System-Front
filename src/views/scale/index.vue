@@ -64,7 +64,7 @@
             depressed
             color="success"
             @click="handleRestartNotification"
-            v-else
+            v-if="characteristic && !btStatus"
           >
             <h3>重新連接</h3>
             <v-icon>mdi-bluetooth</v-icon>
