@@ -217,6 +217,7 @@
               </v-col>
               <v-col class="d-flex pb-0" cols="12" sm="6" md="6">
                 <v-text-field
+                  disabled="true"
                   v-model="addOrderForm.livingWeight"
                   type="number"
                   label="毛雞重量(公斤) :"
@@ -385,7 +386,7 @@ export default {
       defaultValue: 0,
       list: [],
       lastValue: "0",
-      displayValue: 0.000,
+      displayValue: 20.000,
       changeValue: 0,
       accumulateValue: 0,
       stockInFormAmount: 0,
