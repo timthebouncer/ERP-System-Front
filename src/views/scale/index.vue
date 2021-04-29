@@ -386,7 +386,7 @@ export default {
       defaultValue: 0,
       list: [],
       lastValue: "0",
-      displayValue: 20.000,
+      displayValue: 0.000,
       changeValue: 0,
       accumulateValue: 0,
       stockInFormAmount: 0,
