@@ -64,7 +64,7 @@
       <v-card style="background-color: #fff0e9;">
         <v-system-bar color="#fff0e9"
           ><v-spacer></v-spacer
-          ><v-btn icon @click="salesDialogVisible = false"
+          ><v-btn icon @click="cancelAddSales"
             ><v-icon color="#000000" size="25">mdi-close</v-icon></v-btn
           ></v-system-bar
         >
@@ -147,7 +147,7 @@
           ></v-row>
         </v-card-text>
         <v-card-actions class="justify-center">
-          <v-btn color="" text outlined @click="salesDialogVisible = false">
+          <v-btn color="" text outlined @click="cancelAddSales">
             取消
           </v-btn>
           <v-btn color="primary" @click="addSales(productData.barcode)">
@@ -412,9 +412,10 @@
           <!--          ></v-autocomplete>-->
           <v-text-field
             id="barcodeInput"
+            :disabled="clientData.id == ''"
             v-model="productBarcode"
             placeholder="可掃條碼 或 手動輸入"
-            @input="setBarcode"
+            @change="setBarcode"
             solo
           ></v-text-field> </v-col
       ></v-row>
@@ -825,7 +826,9 @@ export default {
       } else {
         this.checkNexted();
       }
-      document.getElementById("barcodeInput").focus();
+      this.$nextTick(()=>{
+        document.getElementById("barcodeInput").focus();
+      })
     },
     receiveRadioChange(value) {
       if (value == "1") {
@@ -939,6 +942,10 @@ export default {
       this.salesDialogVisible = false;
       this.productBarcode = "";
     },
+    cancelAddSales(){
+      this.salesDialogVisible = false;
+      this.productBarcode = "";
+    },
     adder(index) {
       let item = this.productItem[index];
       let amount;
@@ -1033,6 +1040,9 @@ export default {
       this.checkNexted();
     },
     submit() {
+      if (this.receiveData.address == null){
+        this.receiveData.address = ""
+      }
       if (this.receiveData.address.trim() == "") {
         this.errSnackbar = true;
         this.messageText = "地址為空，請至後台系統填寫!";
