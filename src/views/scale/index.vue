@@ -39,15 +39,15 @@
           <span class="work-date">工作日期 : {{ today }}</span>
         </div>
         <div class="btn d-flex align-center">
-<!--          <v-btn-->
-<!--            class="mr-4"-->
-<!--            large-->
-<!--            depressed-->
-<!--            color="primary"-->
-<!--            @click="setIPDialog"-->
-<!--          >-->
-<!--            <h3>設定IP</h3>-->
-<!--          </v-btn>-->
+          <!--          <v-btn-->
+          <!--            class="mr-4"-->
+          <!--            large-->
+          <!--            depressed-->
+          <!--            color="primary"-->
+          <!--            @click="setIPDialog"-->
+          <!--          >-->
+          <!--            <h3>設定IP</h3>-->
+          <!--          </v-btn>-->
           <v-btn
             class="mr-4"
             large
@@ -217,7 +217,7 @@
               </v-col>
               <v-col class="d-flex pb-0" cols="12" sm="6" md="6">
                 <v-text-field
-                  disabled="true"
+                  disabled
                   v-model="addOrderForm.livingWeight"
                   type="number"
                   label="毛雞重量(公斤) :"
@@ -386,7 +386,7 @@ export default {
       defaultValue: 0,
       list: [],
       lastValue: "0",
-      displayValue: 0.000,
+      displayValue: 10.000,
       changeValue: 0,
       accumulateValue: 0,
       stockInFormAmount: 0,
@@ -532,12 +532,12 @@ export default {
       }
     },
     formatWeightUnit(item) {
-      if(item.barcode !== "" && item.fixedWeight === 0) {
-        return this.getUnit(item.unit)
-      }else if (item.barcode === "") {
-        return this.getUnit(item.unit)
-      }else{
-        return `${item.weightUnit === null ?'':this.getUnit(item.weightUnit)}/${this.getUnit(item.unit)}`
+      if (item.barcode !== "" && item.fixedWeight === 0) {
+        return this.getUnit(item.unit);
+      } else if (item.barcode === "") {
+        return this.getUnit(item.unit);
+      } else {
+        return `${item.weightUnit === null ? "" : this.getUnit(item.weightUnit)}/${this.getUnit(item.unit)}`;
       }
     },
     changeDepot() {
@@ -548,7 +548,9 @@ export default {
       //防止累加按鈕連續操作
       if (this.displayValue === 0.0) return;
       //累加的值如果有扣重的重量要扣掉
-      this.accumulateValue = Number((this.accumulateValue + (this.displayValue)).toFixed(3));
+      this.accumulateValue = Number(
+        (this.accumulateValue + this.displayValue).toFixed(3)
+      );
       this.displayValue = 0.0;
       this.changeValue = 0.0;
     },
@@ -670,29 +672,7 @@ export default {
     },
     //商品切換
     addClass(index) {
-      //當前選擇的商品ID
       this.stockInForm.productId = this.commodity[index].id;
-      //當前選擇的商品barcode
-      this.stockInForm.barcode = this.commodity[index].barcode;
-      //當前選擇的商品的總數量
-      this.stockInFormAmount = this.commodity[index].stockAmount;
-      //取得當前選擇的商品單位
-      this.stockInForm.unit = this.commodity[index].unit;
-      //取得當前選擇的商品barcodeBase64
-      this.barcodeBase64 = this.commodity[index].barcodeBase64;
-      //取得標籤高
-      this.tagHeight = this.commodity[index].tagHeight;
-      //取得標籤寬
-      this.tagWidth = this.commodity[index].tagWidth;
-      //SVG
-      this.svgString = this.commodity[index].svgString;
-      this.svgForm.name = this.commodity[index].name;
-      this.svgForm.unit = this.getUnit(this.commodity[index].unit);
-      this.svgForm.barcode = this.commodity[index].barcode;
-      this.svgForm.price = this.commodity[index].price;
-      this.svgForm.alias = this.commodity[index].alias;
-      //固定條碼列印時帶入定重重量
-      this.svgForm.fixedWeight = this.commodity[index].fixedWeight.toFixed(2);
       this.position = index;
       //切換標籤時reset組件
       this.restPlusBtn = false;
@@ -799,10 +779,7 @@ export default {
       //svg塞值
       let svgJSON = this.svgString ? JSON.parse(this.svgString) : null;
       //正向太陽日 今天是一年中的第幾天
-      let pSolarDay = Math.ceil(
-        (new Date() - new Date(new Date().getFullYear().toString())) /
-          (24 * 60 * 60 * 1000)
-      );
+      let pSolarDay = Math.ceil((new Date() - new Date(new Date().getFullYear().toString())) / (24 * 60 * 60 * 1000));
       //反向太陽日 一年幾天-正向太陽日+今天
       let rSolarDay = 365 - pSolarDay + 1;
       if (svgJSON) {
@@ -817,7 +794,7 @@ export default {
             items.text = `計價單位:${this.svgForm.unit}`;
           } else if (items.name === "weight") {
             if (this.stockInForm.barcode !== "") {
-              items.text = `定重重量:${this.svgForm.fixedWeight}`;
+              items.text = `重量:${this.svgForm.fixedWeight}`;
             } else {
               items.text = `重量:${this.svgForm.weight}`;
             }
@@ -828,9 +805,9 @@ export default {
           } else if (items.name === "today") {
             items.text = `${this.today}`;
           } else if (items.name === "pSolarDay") {
-            items.text = `正向太陽日:${pSolarDay}`;
+            items.text = `${pSolarDay}`;
           } else if (items.name === "rSolarDay") {
-            items.text = `反向太陽日:${rSolarDay}`;
+            items.text = `${rSolarDay}`;
           }
         });
         this.canvas.clear();
@@ -984,82 +961,113 @@ export default {
         if (this.stockInForm.productId === "") {
           return (this.inboundStatus = true), (this.inboundMsg = "請選擇商品");
         }
-        //取得當前要操作入庫/取消的數量
-        this.stockInForm.amount = this.count;
-        this.stockInForm.orderId = this.addOrderForm.id;
-        //商品有固定條碼時不用傳重量
-        if (this.stockInForm.barcode !== "") {
-          this.stockInForm.weight = 0;
-          this.svgForm.weight = 0;
-        }
-        // if (this.stockInForm.weight === "") {
-        //   return (this.inboundStatus = true), (this.inboundMsg = "入庫商品請秤重");
-        // }
-        await this.$scale.Inventory.stockIn(this.stockInForm).then(
-          async res => {
-            if (res.status === 200) {
-              this.inboundSuccessMsg = "商品入庫成功";
-              //入庫之後才能重印標籤
-              this.rePrintTagStatus = false;
-              //barcode為空時才做barcode暫存
-              if (this.stockInForm.barcode === "") {
-                this.barcodeStorage = res.data.barcode;
-                this.barcodeBase64 = res.data.barcodeBase64;
-                //動態條碼只能入庫一次
-                //this.inboundPrintStatus = true;
-              }
-              //獲取當前庫存id
-              this.inventoryId = res.data.id;
-              //新增入庫成功後獲得當前商品數量
-              this.stockInFormAmount = res.data.amount;
-              this.inboundMsg = "";
-              this.inboundStatus = true;
-              //svg塞值
-              let svgJSON = this.svgString ? JSON.parse(this.svgString) : null;
-              //正向太陽日 今天是一年中的第幾天
-              let pSolarDay = Math.ceil(
-                (new Date() - new Date(new Date().getFullYear().toString())) /
-                  (24 * 60 * 60 * 1000)
-              );
-              //反向太陽日 一年幾天-正向太陽日+今天
-              let rSolarDay = 365 - pSolarDay + 1;
-              if (svgJSON) {
-                await svgJSON.objects.map(async items => {
-                  if (items.name === "productName") {
-                    if (this.svgForm.alias) {
-                      items.text = `商品名稱:${this.svgForm.alias}`;
-                    } else {
-                      items.text = `商品名稱:${this.svgForm.name}`;
-                    }
-                  } else if (items.name === "unit") {
-                    items.text = `計價單位:${this.svgForm.unit}`;
-                  } else if (items.name === "weight") {
-                    if (this.stockInForm.barcode !== "") {
-                      items.text = `定重重量:${this.svgForm.fixedWeight}`;
-                    } else {
-                      items.text = `重量:${this.svgForm.weight}`;
-                    }
-                  } else if (items.name === "price") {
-                    items.text = `價格:${this.svgForm.price}元`;
-                  } else if (items.name === "productNo") {
-                    items.text = `${this.commodityNumber}`;
-                  } else if (items.name === "today") {
-                    items.text = `${this.today}`;
-                  } else if (items.name === "pSolarDay") {
-                    items.text = `正向太陽日:${pSolarDay}`;
-                  } else if (items.name === "rSolarDay") {
-                    items.text = `反向太陽日:${rSolarDay}`;
-                  }
-                });
-                this.canvas.clear();
-                await this.loadFromJson(svgJSON);
-                await this.changeBarcode();
-                this.stockInForm.weight = "";
-                this.svgForm.weight = "";
-              }
+        await this.$scale.Product.getProduct().then(async res => {
+          if (res.status === 200) {
+            this.commodity = res.data;
+            //當前選擇的商品ID
+            this.stockInForm.productId = this.commodity[this.position].id;
+            //當前選擇的商品barcode
+            this.stockInForm.barcode = this.commodity[this.position].barcode;
+            //當前選擇的商品的總數量
+            this.stockInFormAmount = this.commodity[this.position].stockAmount;
+            //取得當前選擇的商品單位
+            this.stockInForm.unit = this.commodity[this.position].unit;
+            //取得當前選擇的商品barcodeBase64
+            this.barcodeBase64 = this.commodity[this.position].barcodeBase64;
+            //取得標籤高
+            this.tagHeight = this.commodity[this.position].tagHeight;
+            //取得標籤寬
+            this.tagWidth = this.commodity[this.position].tagWidth;
+            //SVG
+            this.svgString = this.commodity[this.position].svgString;
+            this.svgForm.name = this.commodity[this.position].name;
+            this.svgForm.unit = this.getUnit(
+              this.commodity[this.position].unit
+            );
+            this.svgForm.barcode = this.commodity[this.position].barcode;
+            this.svgForm.price = this.commodity[this.position].price;
+            this.svgForm.alias = this.commodity[this.position].alias;
+            //固定條碼列印時帶入定重重量
+            this.svgForm.fixedWeight = this.commodity[
+              this.position
+            ].fixedWeight.toFixed(2);
+            //取得當前要操作入庫/取消的數量
+            this.stockInForm.amount = this.count;
+            this.stockInForm.orderId = this.addOrderForm.id;
+            //商品有固定條碼時不用傳重量
+            if (this.stockInForm.barcode !== "") {
+              this.stockInForm.weight = 0;
+              this.svgForm.weight = 0;
             }
+            // if (this.stockInForm.weight === "") {
+            //   return (this.inboundStatus = true), (this.inboundMsg = "入庫商品請秤重");
+            // }
+            await this.$scale.Inventory.stockIn(this.stockInForm).then(
+              async res => {
+                if (res.status === 200) {
+                  this.inboundSuccessMsg = "商品入庫成功";
+                  //入庫之後才能重印標籤
+                  this.rePrintTagStatus = false;
+                  //barcode為空時才做barcode暫存
+                  if (this.stockInForm.barcode === "") {
+                    this.barcodeStorage = res.data.barcode;
+                    this.barcodeBase64 = res.data.barcodeBase64;
+                    //動態條碼只能入庫一次
+                    //this.inboundPrintStatus = true;
+                  }
+                  //獲取當前庫存id
+                  this.inventoryId = res.data.id;
+                  //新增入庫成功後獲得當前商品數量
+                  this.stockInFormAmount = res.data.amount;
+                  this.inboundMsg = "";
+                  this.inboundStatus = true;
+                  //svg塞值
+                  let svgJSON = this.svgString
+                    ? JSON.parse(this.svgString)
+                    : null;
+                  //正向太陽日 今天是一年中的第幾天
+                  let pSolarDay = Math.ceil((new Date() - new Date(new Date().getFullYear().toString())) / (24 * 60 * 60 * 1000));
+                  //反向太陽日 一年幾天-正向太陽日+今天
+                  let rSolarDay = 365 - pSolarDay + 1;
+                  if (svgJSON) {
+                    await svgJSON.objects.map(async items => {
+                      if (items.name === "productName") {
+                        if (this.svgForm.alias) {
+                          items.text = `商品名稱:${this.svgForm.alias}`;
+                        } else {
+                          items.text = `商品名稱:${this.svgForm.name}`;
+                        }
+                      } else if (items.name === "unit") {
+                        items.text = `計價單位:${this.svgForm.unit}`;
+                      } else if (items.name === "weight") {
+                        if (this.stockInForm.barcode !== "") {
+                          items.text = `重量:${this.svgForm.fixedWeight}`;
+                        } else {
+                          items.text = `重量:${this.svgForm.weight}`;
+                        }
+                      } else if (items.name === "price") {
+                        items.text = `價格:${this.svgForm.price}元`;
+                      } else if (items.name === "productNo") {
+                        items.text = `${this.commodityNumber}`;
+                      } else if (items.name === "today") {
+                        items.text = `${this.today}`;
+                      } else if (items.name === "pSolarDay") {
+                        items.text = `${pSolarDay}`;
+                      } else if (items.name === "rSolarDay") {
+                        items.text = `${rSolarDay}`;
+                      }
+                    });
+                    this.canvas.clear();
+                    await this.loadFromJson(svgJSON);
+                    await this.changeBarcode();
+                    this.stockInForm.weight = "";
+                    this.svgForm.weight = "";
+                  }
+                }
+              }
+            );
           }
-        );
+        });
       }
     },
     logout() {
@@ -1147,7 +1155,9 @@ export default {
           this.deductionStatus === true &&
           this.displayValue > this.deductionValue
         ) {
-          this.displayValue = Number((this.displayValue - this.deductionValue).toFixed(3));
+          this.displayValue = Number(
+            (this.displayValue - this.deductionValue).toFixed(3)
+          );
         }
       }
     },
