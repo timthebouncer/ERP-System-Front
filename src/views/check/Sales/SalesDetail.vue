@@ -477,27 +477,31 @@
     </div>
     <div class="mt-3">
       <v-row>
-        <v-col>
+        <v-col class="col-4 pr-0">
+<!--          <v-btn-->
+<!--            :disabled="btnDisable"-->
+<!--            style="width: 100%"-->
+<!--            @click="back"-->
+<!--            v-if="$store.state.shipmentEdited"-->
+<!--          >-->
+<!--            修改-->
+<!--          </v-btn>-->
           <v-btn
             :disabled="btnDisable"
             style="width: 100%;"
             @click="back"
-            v-if="$store.state.shipmentEdited"
-          >
-            修改
-          </v-btn>
-          <v-btn
-            :disabled="btnDisable"
-            style="width: 100%;"
-            @click="back"
-            v-else
           >
             返回修改
           </v-btn>
         </v-col>
-        <v-col>
-          <v-btn :disabled="btnDisable" style="width: 100%;" @click="submit(2)">
-            只列印貼箱標籤
+        <v-col class="col-4">
+          <v-btn :disabled="btnDisable" style="width: 100%; background-color: #84c31c; color: white;" @click="submit(3)">
+            列印出貨單
+          </v-btn>
+        </v-col>
+        <v-col class="col-4 pl-0">
+          <v-btn :disabled="btnDisable" style="width: 100%; background-color: #84c31c; color: white;" @click="submit(2)">
+            列印貼箱標籤
           </v-btn>
         </v-col>
       </v-row>
@@ -780,7 +784,7 @@ export default {
           )
         })
           .then(async () => {
-            if (value == 1) {
+            if (value == 1 || value == 3) {
               this.progressDialog = true;
               this.progressLoading = true;
               this.checkID = setInterval(() => {
@@ -827,7 +831,7 @@ export default {
           )
         })
           .then(async () => {
-            if (value == 1) {
+            if (value == 1 || value == 3) {
               this.progressDialog = true;
               this.progressLoading = true;
               this.checkID = setInterval(() => {
@@ -974,9 +978,23 @@ export default {
         // this.$store.state.successSnackbar = true;
         // this.$store.state.salesDetailed = false;
         // this.$router.push("/salesLog");
-        this.tagProgressDialog = true;
-        this.tagProgressLoading = true;
-        await this.drawLabel(value);
+        if(value == 1){
+          this.tagProgressDialog = true;
+          this.tagProgressLoading = true;
+          await this.drawLabel(value);
+        }else{
+          if (this.printState == "error") {
+            this.$store.state.errorMsg =
+                    "出貨確認成功，出貨單列印失敗";
+            this.$store.state.errorSnackbar = true;
+          } else {
+            this.$store.state.successMsg =
+                    "出貨確認成功，已列印出貨單";
+            this.$store.state.successSnackbar = true;
+          }
+          this.$store.state.salesDetailed = false;
+          this.$router.push("/salesLog");
+        }
       }, 1000);
     },
     async drawLabel(value) {
