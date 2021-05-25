@@ -23,31 +23,12 @@
           style="width: 190px; height: 45px;"
         />
       </div>
-      <div class="top pa-3">
+      <div class="top pt-0 pb-2">
         <div class="title d-flex align-center">
-          <!--                    <div-->
-          <!--                            class="mr-3"-->
-          <!--                            v-if="btStatus"-->
-          <!--                            style="width:20px; height:20px; background-color: #4caf50; border-radius: 50%"-->
-          <!--                    />-->
-          <!--                    <div-->
-          <!--                            class="mr-3"-->
-          <!--                            v-if="!btStatus"-->
-          <!--                            style="width:20px; height:20px; background-color: #888888; border-radius: 50%"-->
-          <!--                    />-->
           <span class="inbound">入庫作業</span>
           <span class="work-date">工作日期 : {{ today }}</span>
         </div>
         <div class="btn d-flex align-center">
-          <!--          <v-btn-->
-          <!--            class="mr-4"-->
-          <!--            large-->
-          <!--            depressed-->
-          <!--            color="primary"-->
-          <!--            @click="setIPDialog"-->
-          <!--          >-->
-          <!--            <h3>設定IP</h3>-->
-          <!--          </v-btn>-->
           <v-btn
             class="mr-4"
             large
@@ -55,7 +36,7 @@
             :color="btColor"
             @click="handleNotification"
             v-if="!characteristic"
-            ><h3>{{ testText }}</h3>
+            ><h3>{{ connectBtText }}</h3>
             <v-icon>mdi-bluetooth</v-icon>
           </v-btn>
           <v-btn
@@ -104,7 +85,7 @@
           </div>
         </div>
       </div>
-      <div class="mid d-flex pa-2 pb-4">
+      <div class="mid d-flex pa-2">
         <div class="weight-wrap">
           <div class="weight-scale">
             <div v-if="kgStatus">
@@ -120,7 +101,7 @@
             <div v-else>{{ changeValue }}</div>
           </div>
           <div class="d-flex">
-            <v-btn-toggle v-model="defaultValue" mandatory>
+            <v-btn-toggle v-model="defaultValue" style="margin:80px 0 15px 0;" mandatory>
               <v-btn
                 x-large
                 active-class="btnColor"
@@ -147,7 +128,7 @@
               </v-btn>
             </v-btn-toggle>
           </div>
-          <v-btn-toggle class="d-flex" style="margin: 45px 0 -100px 0">
+          <v-btn-toggle class="d-flex">
             <v-btn
               text
               large
@@ -230,20 +211,19 @@
                   :items="productDepotList"
                   item-value="id"
                   item-text="name"
-                  :rules="warehouseValidat"
                   label="儲存倉庫 :"
                   style="font-size: 17px;"
                   @change="changeDepot"
                 />
               </v-col>
-              <v-col class="d-flex pb-0 mt-4" cols="12" sm="6" md="6">
+              <v-col class="d-flex pb-0 mt-7" cols="12" sm="6" md="6">
                 <PlusButton
                   v-if="restPlusBtn"
                   :name="'商品序號'"
                   @changeNumber="changeNumber"
                 />
               </v-col>
-              <v-col class="d-flex pb-0 mt-4" cols="12" sm="6" md="6">
+              <v-col class="d-flex pb-0 mt-7" cols="12" sm="6" md="6">
                 <PlusButton
                   v-if="restPlusBtn"
                   :name="'數量'"
@@ -268,6 +248,11 @@
           >
         </div>
       </div>
+      <v-tabs v-model="tabModel">
+        <v-tab active-class="tabStyle" v-for="(item, i) in tabs" :key="i" :href="`#tab-${i}`" @click="tabChange(item)">
+          {{ item }}
+        </v-tab>
+      </v-tabs>
       <div class="weight-control">
         <div id class="weight-btn-bar">
           <div
@@ -362,6 +347,9 @@ export default {
   },
   data() {
     return {
+      tabModel: 'tab-0',
+      tab: null,
+      tabs: ['商用包', '零售包'],
       characteristic: null,
       addNumberShow: false,
       isActive: false,
@@ -406,7 +394,7 @@ export default {
       inboundMsg: "",
       inboundSuccessMsg: "",
       btColor: "success",
-      testText: "連接藍芽",
+      connectBtText: "連接藍芽",
       commodityNumber: 1,
       count: 1,
       commodity: [],
@@ -438,8 +426,7 @@ export default {
       },
       svgString: "",
       barcodeBase64: "",
-      barcodeImageUrl: "",
-      warehouseValidat: [v => !!v || "請選擇倉庫"]
+      barcodeImageUrl: ""
     };
   },
   async mounted() {
@@ -453,7 +440,7 @@ export default {
       this.productDepot = localStorage.getItem("depot");
     }
     this.canvas = new fabric.Canvas("canvasTest");
-    await this.$scale.Product.getProduct().then(res => {
+    await this.$scale.Product.getProduct({categories: 'COMMERCIAL'}).then(res => {
       if (res.status === 200) {
         this.commodity = res.data;
       }
@@ -522,6 +509,19 @@ export default {
     }
   },
   methods: {
+    async tabChange(value) {
+      let type = ''
+      if(value === "零售包") {
+        type = 'RETAIL'
+      }else{
+        type = 'COMMERCIAL'
+      }
+      await this.$scale.Product.getProduct({categories: type}).then(res => {
+        if (res.status === 200) {
+          this.commodity = res.data;
+        }
+      })
+    },
     formatUnit(item) {
       if (item.barcode !== "" && item.fixedWeight === 0) {
         return null;
@@ -685,19 +685,19 @@ export default {
     },
     connectBt(status) {
       if (status) {
-        if (this.testText === "連接成功") return;
-        this.testText = "連接中...";
+        if (this.connectBtText === "連接成功") return;
+        this.connectBtText = "連接中...";
         setTimeout(() => {
           this.btStatus = status;
           if (this.btStatus) {
-            this.testText = "連接成功";
+            this.connectBtText = "連接成功";
             this.btColor = "success";
             this.btConncet = true;
           }
         }, 1500);
       } else {
         this.btStatus = status;
-        this.testText = "連接藍芽";
+        this.connectBtText = "連接藍芽";
         this.btColor = "success";
         this.btConncet = true;
       }
@@ -768,13 +768,13 @@ export default {
           (this.inboundStatus = true), (this.inboundMsg = "請選擇入料單號")
         );
       }
-      if (this.stockInForm.productId === "") {
-        return (this.inboundStatus = true), (this.inboundMsg = "請選擇商品");
-      }
       if (this.productDepot === "") {
         return (
-          (this.inboundStatus = true), (this.inboundMsg = "請選擇儲存倉庫")
+                (this.inboundStatus = true), (this.inboundMsg = "請選擇儲存倉庫")
         );
+      }
+      if (this.stockInForm.productId === "") {
+        return (this.inboundStatus = true), (this.inboundMsg = "請選擇商品");
       }
       //svg塞值
       let svgJSON = this.svgString ? JSON.parse(this.svgString) : null;
@@ -956,6 +956,11 @@ export default {
         if (this.orderNumber === "") {
           return (
             (this.inboundStatus = true), (this.inboundMsg = "請選擇入料單號")
+          );
+        }
+        if (this.productDepot === "") {
+          return (
+                  (this.inboundStatus = true), (this.inboundMsg = "請選擇儲存倉庫")
           );
         }
         if (this.stockInForm.productId === "") {
@@ -1241,7 +1246,7 @@ body {
     margin-top: 20px;
     padding: 20px;
     width: 100%;
-    height: 210px;
+    height: 160px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1262,9 +1267,9 @@ body {
 
     div {
       white-space: nowrap;
-      font-size: 64px;
+      font-size: 60px;
       position: absolute;
-      top: 10%;
+      //top: 10%;
       right: 0%;
       //transform: translate(-50%, -50%);
     }
@@ -1277,12 +1282,15 @@ body {
 
   .print {
     width: 180px;
-    height: 180px;
+    height: 110px;
     color: #ffffff;
     background-color: #179bd5;
   }
 }
-
+.tabStyle{
+  font-size: 18px;
+  font-weight: 900;
+}
 .weight-control {
   width: 100%;
   height: calc(44%);
@@ -1347,5 +1355,8 @@ h2 {
 }
 .v-btn--active.btnColor::before {
   background-color: #000000 !important;
+}
+.v-input {
+  height: 38px
 }
 </style>
