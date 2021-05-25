@@ -54,8 +54,8 @@ const api = {
     },
     Product: {
         //取得所有商品資料
-        getProduct() {
-            return request.get("/product/getProduct?searchKey=&barcode");
+        getProduct(params) {
+            return request.get("/product/getProduct?searchKey=&barcode",{params});
         }
     }
 };
