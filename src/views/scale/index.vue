@@ -101,7 +101,7 @@
             <div v-else>{{ changeValue }}</div>
           </div>
           <div class="d-flex">
-            <v-btn-toggle v-model="defaultValue" style="margin:80px 0 15px 0;" mandatory>
+            <v-btn-toggle v-model="defaultValue" style="margin:65px 0 25px 0;" mandatory>
               <v-btn
                 x-large
                 active-class="btnColor"
@@ -160,7 +160,7 @@
         </div>
         <div class="pl-5">
           <v-form ref="form" v-model="valid" lazy-validation>
-            <v-row align="center">
+            <v-row align="center" style="margin-top: -32px;">
               <v-col class="d-flex pb-0" cols="12" sm="6" md="6">
                 <v-text-field
                   v-model="orderNumber"
@@ -233,7 +233,7 @@
             </v-row>
           </v-form>
         </div>
-        <div class="mid-btn mx-5 mt-6">
+        <div class="mid-btn mx-5 mt-1">
           <v-btn
             :disabled="rePrintTagStatus"
             class="reprint-label"
@@ -1243,10 +1243,10 @@ body {
     position: relative;
     /*background: #00cc92;*/
     border: 1px solid #666666;
-    margin-top: 20px;
+    margin-top: 5px;
     padding: 20px;
     width: 100%;
-    height: 160px;
+    height: 152px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1269,7 +1269,7 @@ body {
       white-space: nowrap;
       font-size: 60px;
       position: absolute;
-      //top: 10%;
+      top: -20px;
       right: 0%;
       //transform: translate(-50%, -50%);
     }
