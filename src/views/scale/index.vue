@@ -966,7 +966,7 @@ export default {
         if (this.stockInForm.productId === "") {
           return (this.inboundStatus = true), (this.inboundMsg = "請選擇商品");
         }
-        await this.$scale.Product.getProduct({categories: this.categoriesType}).then(async res => {
+        await this.$scale.Product.getProduct({categories: this.categoriesType ? this.categoriesType : 'COMMERCIAL'}).then(async res => {
           if (res.status === 200) {
             this.commodity = res.data;
             //當前選擇的商品ID
