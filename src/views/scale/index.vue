@@ -101,7 +101,7 @@
             <div v-else>{{ changeValue }}</div>
           </div>
           <div class="d-flex">
-            <v-btn-toggle v-model="defaultValue" style="margin:65px 0 25px 0;" mandatory>
+            <v-btn-toggle v-model="defaultValue" style="margin:77px 0 25px 0;" mandatory>
               <v-btn
                 x-large
                 active-class="btnColor"
@@ -160,7 +160,7 @@
         </div>
         <div class="pl-5">
           <v-form ref="form" v-model="valid" lazy-validation>
-            <v-row align="center" style="margin-top: -32px;">
+            <v-row align="center" style="margin-top: -20px;">
               <v-col class="d-flex pb-0" cols="12" sm="6" md="6">
                 <v-text-field
                   v-model="orderNumber"
@@ -390,6 +390,7 @@ export default {
       orderNumber: "",
       addOrderNumber: "",
       inventoryId: "",
+      categoriesType: "",
       barcodeStorage: "",
       inboundMsg: "",
       inboundSuccessMsg: "",
@@ -510,13 +511,12 @@ export default {
   },
   methods: {
     async tabChange(value) {
-      let type = ''
       if(value === "零售包") {
-        type = 'RETAIL'
+        this.categoriesType = 'RETAIL'
       }else{
-        type = 'COMMERCIAL'
+        this.categoriesType = 'COMMERCIAL'
       }
-      await this.$scale.Product.getProduct({categories: type}).then(res => {
+      await this.$scale.Product.getProduct({categories: this.categoriesType}).then(res => {
         if (res.status === 200) {
           this.commodity = res.data;
         }
@@ -966,7 +966,7 @@ export default {
         if (this.stockInForm.productId === "") {
           return (this.inboundStatus = true), (this.inboundMsg = "請選擇商品");
         }
-        await this.$scale.Product.getProduct().then(async res => {
+        await this.$scale.Product.getProduct({categories: this.categoriesType}).then(async res => {
           if (res.status === 200) {
             this.commodity = res.data;
             //當前選擇的商品ID
@@ -1246,7 +1246,7 @@ body {
     margin-top: 5px;
     padding: 20px;
     width: 100%;
-    height: 152px;
+    height: 160px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1282,7 +1282,7 @@ body {
 
   .print {
     width: 180px;
-    height: 110px;
+    height: 120px;
     color: #ffffff;
     background-color: #179bd5;
   }
