@@ -832,7 +832,7 @@ export default {
     changeBarcode() {
       function loadImage() {
         return new Promise(resolve => {
-          this.barcodeImageUrl = "data:image/png;base64," + this.barcodeBase64;
+          this.barcodeImageUrl = "data:image/svg+xml;base64," + this.barcodeBase64;
           resolve(true);
         });
       }
@@ -850,10 +850,14 @@ export default {
             element = new fabric.Image(imgElement, {
               left: left,
               top: top,
+              width:width,
+              height: height,
               name: "barcode"
             });
-            element.scaleX = (width * scaleX) / element.width;
-            element.scaleY = (height * scaleY) / element.height;
+            // element.scaleX = (width * scaleX) / element.width;
+            // element.scaleY = (height * scaleY) / element.height;
+            element.scaleX = scaleX;
+            element.scaleY = scaleY;
             this.canvas.add(element);
             this.canvas.renderAll();
           }
