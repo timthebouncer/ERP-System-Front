@@ -850,14 +850,12 @@ export default {
             element = new fabric.Image(imgElement, {
               left: left,
               top: top,
-              width:width,
-              height: height,
               name: "barcode"
             });
-            // element.scaleX = (width * scaleX) / element.width;
-            // element.scaleY = (height * scaleY) / element.height;
             element.scaleX = scaleX;
             element.scaleY = scaleY;
+            element.width = 95;
+            element.height = 71;
             this.canvas.add(element);
             this.canvas.renderAll();
           }
