@@ -591,13 +591,13 @@ export default {
         );
       }
     },
-    setIPDialog() {
-      this.ipShow = true;
-    },
     closeIpDialog() {
       this.ipShow = false;
     },
     async showAddNumberDialog(show) {
+      if(this.displayValue < 0){
+        return (this.inboundStatus = true), (this.inboundMsg = "重量不能為負數");
+      }
       //拿物料名稱
       await this.$scale.Material.getList().then(res => {
         if (res.status === 200) {
@@ -1155,7 +1155,7 @@ export default {
       let noti = Buffer.from(event.target.value.buffer);
       if (!(this.lastValue == noti.toString("ascii"))) {
         this.lastValue = noti.toString("ascii");
-        this.displayValue = Number(noti.toString("ascii"));
+        this.displayValue = Number(this.lastValue.replace(/\s+/g, ''));
         if (this.deductionStatus === true && this.displayValue === 0) {
           this.displayValue = 0 - this.deductionValue;
         } else if (this.displayValue === this.deductionValue) {
