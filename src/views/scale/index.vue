@@ -101,7 +101,11 @@
             <div v-else>{{ changeValue }}</div>
           </div>
           <div class="d-flex">
-            <v-btn-toggle v-model="defaultValue" style="margin:77px 0 25px 0;" mandatory>
+            <v-btn-toggle
+              v-model="defaultValue"
+              style="margin:77px 0 25px 0;"
+              mandatory
+            >
               <v-btn
                 x-large
                 active-class="btnColor"
@@ -155,6 +159,22 @@
               @click="toZero()"
             >
               <h3>歸零</h3>
+            </v-btn>
+            <v-btn
+              x-large
+              active-class="btnColor"
+              style="border-left: 1px solid #666"
+              @click="calc('add')"
+            >
+              <h3>+</h3>
+            </v-btn>
+            <v-btn
+              x-large
+              active-class="btnColor"
+              style="border-left: 1px solid #666"
+              @click="calc('less')"
+            >
+              <h3>-</h3>
             </v-btn>
           </v-btn-toggle>
         </div>
@@ -249,7 +269,13 @@
         </div>
       </div>
       <v-tabs v-model="tabModel">
-        <v-tab active-class="tabStyle" v-for="(item, i) in tabs" :key="i" :href="`#tab-${i}`" @click="tabChange(item)">
+        <v-tab
+          active-class="tabStyle"
+          v-for="(item, i) in tabs"
+          :key="i"
+          :href="`#tab-${i}`"
+          @click="tabChange(item)"
+        >
           {{ item }}
         </v-tab>
       </v-tabs>
@@ -347,9 +373,9 @@ export default {
   },
   data() {
     return {
-      tabModel: 'tab-0',
+      tabModel: "tab-0",
       tab: null,
-      tabs: ['商用包', '零售包'],
+      tabs: ["商用包", "零售包"],
       characteristic: null,
       addNumberShow: false,
       isActive: false,
@@ -374,7 +400,7 @@ export default {
       defaultValue: 0,
       list: [],
       lastValue: "0",
-      displayValue: 0.000,
+      displayValue: 0.0,
       changeValue: 0,
       accumulateValue: 0,
       stockInFormAmount: 0,
@@ -441,11 +467,13 @@ export default {
       this.productDepot = localStorage.getItem("depot");
     }
     this.canvas = new fabric.Canvas("canvasTest");
-    await this.$scale.Product.getProduct({categories: 'COMMERCIAL'}).then(res => {
-      if (res.status === 200) {
-        this.commodity = res.data;
+    await this.$scale.Product.getProduct({ categories: "COMMERCIAL" }).then(
+      res => {
+        if (res.status === 200) {
+          this.commodity = res.data;
+        }
       }
-    });
+    );
     await this.$scale.ProductDepot.productDepotList().then(res => {
       if (res.status === 200) {
         this.productDepotList = res.data;
@@ -510,17 +538,26 @@ export default {
     }
   },
   methods: {
-    async tabChange(value) {
-      if(value === "零售包") {
-        this.categoriesType = 'RETAIL'
-      }else{
-        this.categoriesType = 'COMMERCIAL'
+    calc(val) {
+      if (val === "add") {
+        this.displayValue++;
+      } else {
+        this.displayValue--;
       }
-      await this.$scale.Product.getProduct({categories: this.categoriesType}).then(res => {
+    },
+    async tabChange(value) {
+      if (value === "零售包") {
+        this.categoriesType = "RETAIL";
+      } else {
+        this.categoriesType = "COMMERCIAL";
+      }
+      await this.$scale.Product.getProduct({
+        categories: this.categoriesType
+      }).then(res => {
         if (res.status === 200) {
           this.commodity = res.data;
         }
-      })
+      });
     },
     formatUnit(item) {
       if (item.barcode !== "" && item.fixedWeight === 0) {
@@ -537,7 +574,9 @@ export default {
       } else if (item.barcode === "") {
         return this.getUnit(item.unit);
       } else {
-        return `${item.weightUnit === null ? "" : this.getUnit(item.weightUnit)}/${this.getUnit(item.unit)}`;
+        return `${
+          item.weightUnit === null ? "" : this.getUnit(item.weightUnit)
+        }/${this.getUnit(item.unit)}`;
       }
     },
     changeDepot() {
@@ -595,8 +634,10 @@ export default {
       this.ipShow = false;
     },
     async showAddNumberDialog(show) {
-      if(this.displayValue < 0){
-        return (this.inboundStatus = true), (this.inboundMsg = "重量不能為負數");
+      if (this.displayValue < 0) {
+        return (
+          (this.inboundStatus = true), (this.inboundMsg = "重量不能為負數")
+        );
       }
       //拿物料名稱
       await this.$scale.Material.getList().then(res => {
@@ -770,7 +811,7 @@ export default {
       }
       if (this.productDepot === "") {
         return (
-                (this.inboundStatus = true), (this.inboundMsg = "請選擇儲存倉庫")
+          (this.inboundStatus = true), (this.inboundMsg = "請選擇儲存倉庫")
         );
       }
       if (this.stockInForm.productId === "") {
@@ -779,7 +820,10 @@ export default {
       //svg塞值
       let svgJSON = this.svgString ? JSON.parse(this.svgString) : null;
       //正向太陽日 今天是一年中的第幾天
-      let pSolarDay = Math.ceil((new Date() - new Date(new Date().getFullYear().toString())) / (24 * 60 * 60 * 1000));
+      let pSolarDay = Math.ceil(
+        (new Date() - new Date(new Date().getFullYear().toString())) /
+          (24 * 60 * 60 * 1000)
+      );
       //反向太陽日 一年幾天-正向太陽日+今天
       let rSolarDay = 365 - pSolarDay + 1;
       if (svgJSON) {
@@ -796,7 +840,17 @@ export default {
             if (this.stockInForm.barcode !== "") {
               items.text = `重量:${this.svgForm.fixedWeight}`;
             } else {
-              items.text = `重量:${this.svgForm.weight}`;
+              if (this.svgForm.unit === "公斤") {
+                items.text = `重量:${this.svgForm.weight}`;
+              } else if (this.svgForm.unit === "台斤") {
+                this.changeUnit("tkg");
+                items.text = `重量:${Math.floor(this.changeValue)}斤${
+                  this.twTael
+                }兩`;
+              } else {
+                let g = this.svgForm.weight * 1000;
+                items.text = `重量:${g}`;
+              }
             }
           } else if (items.name === "price") {
             items.text = `價格:${this.svgForm.price}元`;
@@ -832,10 +886,12 @@ export default {
     changeBarcode() {
       function loadImage() {
         return new Promise(resolve => {
-          this.barcodeImageUrl = "data:image/svg+xml;base64," + this.barcodeBase64;
+          this.barcodeImageUrl =
+            "data:image/svg+xml;base64," + this.barcodeBase64;
           resolve(true);
         });
       }
+
       return new Promise(async resolve => {
         await loadImage.bind(this)();
         let imgElement;
@@ -850,14 +906,12 @@ export default {
             element = new fabric.Image(imgElement, {
               left: left,
               top: top,
-              width:width,
-              height: height,
               name: "barcode"
             });
-            // element.scaleX = (width * scaleX) / element.width;
-            // element.scaleY = (height * scaleY) / element.height;
             element.scaleX = scaleX;
             element.scaleY = scaleY;
+            element.width = 95;
+            element.height = 71;
             this.canvas.add(element);
             this.canvas.renderAll();
           }
@@ -964,13 +1018,15 @@ export default {
         }
         if (this.productDepot === "") {
           return (
-                  (this.inboundStatus = true), (this.inboundMsg = "請選擇儲存倉庫")
+            (this.inboundStatus = true), (this.inboundMsg = "請選擇儲存倉庫")
           );
         }
         if (this.stockInForm.productId === "") {
           return (this.inboundStatus = true), (this.inboundMsg = "請選擇商品");
         }
-        await this.$scale.Product.getProduct({categories: this.categoriesType ? this.categoriesType : 'COMMERCIAL'}).then(async res => {
+        await this.$scale.Product.getProduct({
+          categories: this.categoriesType ? this.categoriesType : "COMMERCIAL"
+        }).then(async res => {
           if (res.status === 200) {
             this.commodity = res.data;
             //當前選擇的商品ID
@@ -1035,7 +1091,11 @@ export default {
                     ? JSON.parse(this.svgString)
                     : null;
                   //正向太陽日 今天是一年中的第幾天
-                  let pSolarDay = Math.ceil((new Date() - new Date(new Date().getFullYear().toString())) / (24 * 60 * 60 * 1000));
+                  let pSolarDay = Math.ceil(
+                    (new Date() -
+                      new Date(new Date().getFullYear().toString())) /
+                      (24 * 60 * 60 * 1000)
+                  );
                   //反向太陽日 一年幾天-正向太陽日+今天
                   let rSolarDay = 365 - pSolarDay + 1;
                   if (svgJSON) {
@@ -1052,7 +1112,17 @@ export default {
                         if (this.stockInForm.barcode !== "") {
                           items.text = `重量:${this.svgForm.fixedWeight}`;
                         } else {
-                          items.text = `重量:${this.svgForm.weight}`;
+                          if (this.svgForm.unit === "公斤") {
+                            items.text = `重量:${this.svgForm.weight}`;
+                          } else if (this.svgForm.unit === "台斤") {
+                            this.changeUnit("tkg");
+                            items.text = `重量:${Math.floor(
+                              this.changeValue
+                            )}斤${this.twTael}兩`;
+                          } else {
+                            let g = this.svgForm.weight * 1000;
+                            items.text = `重量:${g}`;
+                          }
                         }
                       } else if (items.name === "price") {
                         items.text = `價格:${this.svgForm.price}元`;
@@ -1155,7 +1225,7 @@ export default {
       let noti = Buffer.from(event.target.value.buffer);
       if (!(this.lastValue == noti.toString("ascii"))) {
         this.lastValue = noti.toString("ascii");
-        this.displayValue = Number(this.lastValue.replace(/\s+/g, ''));
+        this.displayValue = Number(this.lastValue.replace(/\s+/g, ""));
         if (this.deductionStatus === true && this.displayValue === 0) {
           this.displayValue = 0 - this.deductionValue;
         } else if (this.displayValue === this.deductionValue) {
@@ -1291,10 +1361,12 @@ body {
     background-color: #179bd5;
   }
 }
-.tabStyle{
+
+.tabStyle {
   font-size: 18px;
   font-weight: 900;
 }
+
 .weight-control {
   width: 100%;
   height: calc(44%);
@@ -1357,10 +1429,12 @@ h2 {
   font-size: 32px;
   margin: 0;
 }
+
 .v-btn--active.btnColor::before {
   background-color: #000000 !important;
 }
+
 .v-input {
-  height: 38px
+  height: 38px;
 }
 </style>
