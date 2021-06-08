@@ -83,7 +83,7 @@
               /></span>
             </div>
             <div class="title">
-              <h1>出貨單</h1>
+              <h3>出貨單</h3>
             </div>
             <div
               v-show="
@@ -247,7 +247,7 @@
                 templateType !== '零售-有價格' && templateType !== '零售-無價格'
               "
             >
-              <span style="font-size: 35px;">總計 {{ count }}</span>
+              <span style="font-size: 25px;">總計 {{ count }}</span>
               <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
               <span>業務聯絡人 : 0935-734982</span>
               <span>帳務聯絡人 : 0952-582050</span>
@@ -255,7 +255,7 @@
               <span>戶名: 張何男</span>
             </div>
             <div v-else class="contact-wrapper">
-              <span style="font-size: 35px;">總計 {{ count }}</span>
+              <span style="font-size: 25px;">總計 {{ count }}</span>
               <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
               <span>聯絡電話: 03-4760311</span>
               <span>匯款帳號: 中國信託-新竹分行 822-554540329807</span>
@@ -282,7 +282,7 @@
                 "
                 class="sign-block"
               >
-                <span style="font-size: 17px;">客戶簽收</span>
+                <span style="font-size: 15px;">客戶簽收</span>
               </div>
               <div v-else></div>
             </div>
@@ -543,84 +543,84 @@ export default {
         {
           text: "商品名稱",
           value: "name",
-          class: "text-h5 font-weight-black grey lighten-2 pt-5 pb-5"
+          class: "text-h6 font-weight-black grey lighten-2 pt-1 pb-1"
         },
         {
           text: "數量",
           value: "quantity",
-          class: "text-h5 font-weight-black grey lighten-2"
+          class: "text-h6 font-weight-black grey lighten-2"
         },
         {
           text: "單位",
           value: "unit",
-          class: "text-h5 font-weight-black grey lighten-2"
+          class: "text-h6 font-weight-black grey lighten-2"
         },
         {
           text: "建議售價",
           value: "listPrice",
-          class: "text-h5 font-weight-black grey lighten-2"
+          class: "text-h6 font-weight-black grey lighten-2"
         },
         {
           text: "出貨售價",
           value: "salesPrice",
-          class: "text-h5 font-weight-black grey lighten-2"
+          class: "text-h6 font-weight-black grey lighten-2"
         },
         {
           text: "折讓",
           value: "discount",
-          class: "text-h5 font-weight-black grey lighten-2"
+          class: "text-h6 font-weight-black grey lighten-2"
         },
         {
           text: "總計",
           value: "total",
-          class: "text-h5 font-weight-black grey lighten-2"
+          class: "text-h6 font-weight-black grey lighten-2"
         },
         {
           text: "備註",
           value: "description",
-          class: "text-h5 font-weight-black grey lighten-2"
+          class: "text-h6 font-weight-black grey lighten-2"
         }
       ],
       headers2: [
         {
           text: "商品名稱",
           value: "name",
-          class: "text-h5 font-weight-black grey lighten-2 pt-5 pb-5"
+          class: "text-h6 font-weight-black grey lighten-2 pt-1 pb-1"
         },
         {
           text: "數量",
           value: "quantity",
-          class: "text-h5 font-weight-black grey lighten-2"
+          class: "text-h6 font-weight-black grey lighten-2"
         },
         {
           text: "單位",
           value: "unit",
-          class: "text-h5 font-weight-black grey lighten-2"
+          class: "text-h6 font-weight-black grey lighten-2"
         },
         {
           text: "",
           value: "",
-          class: "text-h5 font-weight-black grey lighten-2"
+          class: "text-h6 font-weight-black grey lighten-2"
         },
         {
           text: "",
           value: "",
-          class: "text-h5 font-weight-black grey lighten-2"
+          class: "text-h6 font-weight-black grey lighten-2"
         },
         {
           text: "",
           value: "",
-          class: "text-h5 font-weight-black grey lighten-2"
+          class: "text-h6 font-weight-black grey lighten-2"
         },
         {
           text: "",
           value: "",
-          class: "text-h5 font-weight-black grey lighten-2"
+          class: "text-h6 font-weight-black grey lighten-2"
         },
         {
           text: "備註",
           value: "description",
-          class: "text-h5 font-weight-black grey lighten-2"
+          class: "text-h6 font-weight-black grey lighten-2"
         }
       ],
       progressLoading: false,
@@ -679,22 +679,22 @@ export default {
     });
     this.count = this.count.toFixed(3);
 
-    if (this.shipmentData.orderItemRequestList.length > 15) {
+    if (this.shipmentData.orderItemRequestList.length > 5) {
       this.isManyData = true;
       let pages = 0;
       if (
-        this.shipmentData.orderItemRequestList.length / 15 >
-        parseInt(this.shipmentData.orderItemRequestList.length / 15)
+        this.shipmentData.orderItemRequestList.length / 5 >
+        parseInt(this.shipmentData.orderItemRequestList.length / 5)
       ) {
         pages =
-          parseInt(this.shipmentData.orderItemRequestList.length / 15) + 1;
+          parseInt(this.shipmentData.orderItemRequestList.length / 5) + 1;
       } else {
-        pages = this.shipmentData.orderItemRequestList.length / 15;
+        pages = this.shipmentData.orderItemRequestList.length / 5;
       }
 
       for (let i = 0; i < pages; i++) {
         this.tableList.push(
-          this.shipmentData.orderItemRequestList.slice(i * 15, i * 15 + 15)
+          this.shipmentData.orderItemRequestList.slice(i * 5, i * 5 + 5)
         );
         this.pageClassName.push("page" + (i + 1));
         if (i == 0) {
@@ -1227,7 +1227,7 @@ canvas {
   display: flex;
   /*justify-content: space-between;*/
   align-items: center;
-  height: 120px;
+  height: 80px;
   .black-cat-logo {
     border: 2px solid;
   }
@@ -1240,7 +1240,7 @@ canvas {
     right: -55%;
   }
   img {
-    width: 150px;
+    width: 100px;
     position: relative;
     left: 0;
     top: 0;
@@ -1262,10 +1262,10 @@ canvas {
     flex-direction: column;
     position: relative;
     width: 70%;
-    line-height: 30px;
+    line-height: 22px;
     left: 0;
     span {
-      font-size: 25px;
+      font-size: 18px;
     }
   }
   .barcode-wrapper {
@@ -1275,7 +1275,7 @@ canvas {
     width: 30%;
     right: 20px;
     span {
-      font-size: 25px;
+      font-size: 18px;
     }
     .paper-content-detail-order {
       display: flex;
@@ -1287,16 +1287,16 @@ canvas {
 }
 .other3-order-barcode {
   svg {
-    width: 200px;
+    width: 150px;
   }
 }
 .content-wrapper {
   position: relative;
-  top: 20px;
-  margin-bottom: 20px;
+  top: 15px;
+  margin-bottom: 15px;
 }
 .footer {
-  margin-top: 80px;
+  margin-top: 50px;
   h2 {
     margin-bottom: 50px;
   }
@@ -1309,7 +1309,7 @@ canvas {
     width: 70%;
     left: 0;
     span {
-      font-size: 25px;
+      font-size: 18px;
     }
   }
   .sign-wrapper {
@@ -1317,7 +1317,7 @@ canvas {
     width: 20%;
     right: 0px;
     span {
-      font-size: 35px;
+      font-size: 25px;
     }
   }
   .sign-block {
@@ -1349,9 +1349,9 @@ canvas {
 /*}*/
 ::v-deep .v-data-table > .v-data-table__wrapper > table > tbody > tr {
   td {
-    padding-top: 20px;
-    padding-bottom: 20px;
-    font-size: 20px !important;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 18px !important;
   }
 }
 </style>
