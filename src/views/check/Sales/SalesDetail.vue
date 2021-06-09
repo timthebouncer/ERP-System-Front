@@ -679,23 +679,30 @@ export default {
     });
     this.count = this.count.toFixed(3);
 
-    if (this.shipmentData.orderItemRequestList.length > 10) {
+    if (this.shipmentData.orderItemRequestList.length > 7) {
       this.isManyData = true;
-      let pages = 0;
+      let pages = 1;
+      let lastLength = this.shipmentData.orderItemRequestList.length - 7
       if (
-        this.shipmentData.orderItemRequestList.length / 10 >
-        parseInt(this.shipmentData.orderItemRequestList.length / 10)
+              lastLength / 10 >
+              parseInt(lastLength / 10)
       ) {
-        pages =
-          parseInt(this.shipmentData.orderItemRequestList.length / 10) + 1;
+        pages = pages +
+                parseInt(lastLength / 10) + 1;
       } else {
-        pages = this.shipmentData.orderItemRequestList.length / 10;
+        pages = pages + (lastLength / 10);
       }
 
       for (let i = 0; i < pages; i++) {
-        this.tableList.push(
-          this.shipmentData.orderItemRequestList.slice(i * 10, i * 10 + 10)
-        );
+        if( i == 0 ){
+          this.tableList.push(
+                  this.shipmentData.orderItemRequestList.slice(i * 7, i * 7 + 7)
+          );
+        } else{
+          this.tableList.push(
+                  this.shipmentData.orderItemRequestList.slice(i * 7, i * 7 + 10)
+          );
+        }
         this.pageClassName.push("page" + (i + 1));
         if (i == 0) {
           this.disableTitle.push(false);
