@@ -247,7 +247,7 @@
                 templateType !== '零售-有價格' && templateType !== '零售-無價格'
               "
             >
-              <span style="font-size: 25px;">總計 {{ count }}</span>
+              <span style="font-size: 22px;">總計 {{ count }}</span>
               <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
               <span>業務聯絡人 : 0935-734982</span>
               <span>帳務聯絡人 : 0952-582050</span>
@@ -255,7 +255,7 @@
               <span>戶名: 張何男</span>
             </div>
             <div v-else class="contact-wrapper">
-              <span style="font-size: 25px;">總計 {{ count }}</span>
+              <span style="font-size: 22px;">總計 {{ count }}</span>
               <span>藤舍牧業(何藤畜牧場) 農場牧登字第一一七四三三號</span>
               <span>聯絡電話: 03-4760311</span>
               <span>匯款帳號: 中國信託-新竹分行 822-554540329807</span>
@@ -282,7 +282,7 @@
                 "
                 class="sign-block"
               >
-                <span style="font-size: 15px;">客戶簽收</span>
+                <span style="font-size: 12px;">客戶簽收</span>
               </div>
               <div v-else></div>
             </div>
@@ -679,22 +679,22 @@ export default {
     });
     this.count = this.count.toFixed(3);
 
-    if (this.shipmentData.orderItemRequestList.length > 5) {
+    if (this.shipmentData.orderItemRequestList.length > 10) {
       this.isManyData = true;
       let pages = 0;
       if (
-        this.shipmentData.orderItemRequestList.length / 5 >
-        parseInt(this.shipmentData.orderItemRequestList.length / 5)
+        this.shipmentData.orderItemRequestList.length / 10 >
+        parseInt(this.shipmentData.orderItemRequestList.length / 10)
       ) {
         pages =
-          parseInt(this.shipmentData.orderItemRequestList.length / 5) + 1;
+          parseInt(this.shipmentData.orderItemRequestList.length / 10) + 1;
       } else {
-        pages = this.shipmentData.orderItemRequestList.length / 5;
+        pages = this.shipmentData.orderItemRequestList.length / 10;
       }
 
       for (let i = 0; i < pages; i++) {
         this.tableList.push(
-          this.shipmentData.orderItemRequestList.slice(i * 5, i * 5 + 5)
+          this.shipmentData.orderItemRequestList.slice(i * 10, i * 10 + 10)
         );
         this.pageClassName.push("page" + (i + 1));
         if (i == 0) {
@@ -1262,10 +1262,10 @@ canvas {
     flex-direction: column;
     position: relative;
     width: 70%;
-    line-height: 22px;
+    line-height: 20px;
     left: 0;
     span {
-      font-size: 18px;
+      font-size: 15px;
     }
   }
   .barcode-wrapper {
@@ -1275,7 +1275,7 @@ canvas {
     width: 30%;
     right: 20px;
     span {
-      font-size: 18px;
+      font-size: 15px;
     }
     .paper-content-detail-order {
       display: flex;
@@ -1309,7 +1309,7 @@ canvas {
     width: 70%;
     left: 0;
     span {
-      font-size: 18px;
+      font-size: 15px;
     }
   }
   .sign-wrapper {
@@ -1317,7 +1317,7 @@ canvas {
     width: 20%;
     right: 0px;
     span {
-      font-size: 25px;
+      font-size: 22px;
     }
   }
   .sign-block {
