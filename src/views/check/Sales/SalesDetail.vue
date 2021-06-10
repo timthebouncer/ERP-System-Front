@@ -684,7 +684,7 @@ export default {
       let pages = 1;
       let lastLength = this.shipmentData.orderItemRequestList.length - 7
       if (
-              lastLength / 15 >
+              lastLength / 12 >
               parseInt(lastLength / 12)
       ) {
         pages = pages +
