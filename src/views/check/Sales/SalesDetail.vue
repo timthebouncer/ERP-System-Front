@@ -684,13 +684,13 @@ export default {
       let pages = 1;
       let lastLength = this.shipmentData.orderItemRequestList.length - 7
       if (
-              lastLength / 10 >
-              parseInt(lastLength / 10)
+              lastLength / 15 >
+              parseInt(lastLength / 15)
       ) {
         pages = pages +
-                parseInt(lastLength / 10) + 1;
+                parseInt(lastLength / 15) + 1;
       } else {
-        pages = pages + (lastLength / 10);
+        pages = pages + (lastLength / 15);
       }
 
       for (let i = 0; i < pages; i++) {
@@ -700,7 +700,7 @@ export default {
           );
         } else{
           this.tableList.push(
-                  this.shipmentData.orderItemRequestList.slice(i * 7, i * 7 + 10)
+                  this.shipmentData.orderItemRequestList.slice(i * 7, i * 7 + 15)
           );
         }
         this.pageClassName.push("page" + (i + 1));
@@ -1269,10 +1269,10 @@ canvas {
     flex-direction: column;
     position: relative;
     width: 70%;
-    line-height: 20px;
+    line-height: 30px;
     left: 0;
     span {
-      font-size: 15px;
+      font-size: 20px;
     }
   }
   .barcode-wrapper {
@@ -1282,7 +1282,7 @@ canvas {
     width: 30%;
     right: 20px;
     span {
-      font-size: 15px;
+      font-size: 20px;
     }
     .paper-content-detail-order {
       display: flex;
@@ -1294,7 +1294,7 @@ canvas {
 }
 .other3-order-barcode {
   svg {
-    width: 150px;
+    width: 160px;
   }
 }
 .content-wrapper {
@@ -1303,7 +1303,7 @@ canvas {
   margin-bottom: 15px;
 }
 .footer {
-  margin-top: 50px;
+  margin-top: 10px;
   h2 {
     margin-bottom: 50px;
   }
