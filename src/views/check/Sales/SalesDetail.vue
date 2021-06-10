@@ -683,6 +683,8 @@ export default {
       this.isManyData = true;
       let pages = 1;
       let lastLength = this.shipmentData.orderItemRequestList.length - 7
+      console.log(parseInt(lastLength / 12),'lastLength / 12');
+      console.log(lastLength / 12,'lastLength / 12');
       if (
               lastLength / 12 >
               parseInt(lastLength / 12)
@@ -700,7 +702,7 @@ export default {
           );
         } else{
           this.tableList.push(
-                  this.shipmentData.orderItemRequestList.slice(i * 7, i * 7 + 12)
+                  this.shipmentData.orderItemRequestList.slice(((i-1) * 12)+7, (i * 12)+7)
           );
         }
         this.pageClassName.push("page" + (i + 1));
@@ -753,12 +755,12 @@ export default {
       } else if (recipientId == "2") {
         recipientId = "1";
       }
-      // this.progressDialog = true;
-      // this.progressLoading = true;
-      // this.checkID = setInterval(() => {
-      //   this.checkReportImg(value);
-      // }, 1000);
-      // return
+      this.progressDialog = true;
+      this.progressLoading = true;
+      this.checkID = setInterval(() => {
+        this.checkReportImg(value);
+      }, 1000);
+      return
       if (this.$store.state.shipmentEdited) {
         this.$api.Distribute.editOrder({
           orderId: this.$store.state.shipment.orderId,
@@ -954,54 +956,54 @@ export default {
       setTimeout(async () => {
         console.log("created pdf to server");
 
-        for (let value of this.reportImage) {
-          console.log(value);
-          await postPdf.bind(this)(value);
-        }
-        for (let value of this.reportImage2) {
-          console.log(value);
-          await postPdf.bind(this)(value);
-        }
-        // var w = window.open("");
-        // this.reportImage.forEach((value, index) => {
+        // for (let value of this.reportImage) {
         //   console.log(value);
-        //   let img = new Image();
-        //
-        //   img.src = value;
-        //   img.width = 595;
-        //   w.document.write(img.outerHTML);
-        // });
-        // this.reportImage2.forEach((value, index) => {
+        //   await postPdf.bind(this)(value);
+        // }
+        // for (let value of this.reportImage2) {
         //   console.log(value);
-        //   let img = new Image();
-        //
-        //   img.src = value;
-        //   img.width = 595;
-        //   w.document.write(img.outerHTML);
-        // });
+        //   await postPdf.bind(this)(value);
+        // }
+        var w = window.open("");
+        this.reportImage.forEach((value, index) => {
+          console.log(value);
+          let img = new Image();
+
+          img.src = value;
+          img.width = 595;
+          w.document.write(img.outerHTML);
+        });
+        this.reportImage2.forEach((value, index) => {
+          console.log(value);
+          let img = new Image();
+
+          img.src = value;
+          img.width = 595;
+          w.document.write(img.outerHTML);
+        });
 
         this.progressLoading = false;
         this.progressDialog = false;
         // this.$store.state.successSnackbar = true;
         // this.$store.state.salesDetailed = false;
         // this.$router.push("/salesLog");
-        if(value == 1){
-          this.tagProgressDialog = true;
-          this.tagProgressLoading = true;
-          await this.drawLabel(value);
-        }else{
-          if (this.printState == "error") {
-            this.$store.state.errorMsg =
-                    "出貨確認成功，出貨單列印失敗";
-            this.$store.state.errorSnackbar = true;
-          } else {
-            this.$store.state.successMsg =
-                    "出貨確認成功，已列印出貨單";
-            this.$store.state.successSnackbar = true;
-          }
-          this.$store.state.salesDetailed = false;
-          this.$router.push("/salesLog");
-        }
+        // if(value == 1){
+        //   this.tagProgressDialog = true;
+        //   this.tagProgressLoading = true;
+        //   await this.drawLabel(value);
+        // }else{
+        //   if (this.printState == "error") {
+        //     this.$store.state.errorMsg =
+        //             "出貨確認成功，出貨單列印失敗";
+        //     this.$store.state.errorSnackbar = true;
+        //   } else {
+        //     this.$store.state.successMsg =
+        //             "出貨確認成功，已列印出貨單";
+        //     this.$store.state.successSnackbar = true;
+        //   }
+        //   this.$store.state.salesDetailed = false;
+        //   this.$router.push("/salesLog");
+        // }
       }, 1000);
     },
     async drawLabel(value) {
