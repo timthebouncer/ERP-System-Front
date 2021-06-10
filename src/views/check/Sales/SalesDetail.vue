@@ -685,12 +685,12 @@ export default {
       let lastLength = this.shipmentData.orderItemRequestList.length - 7
       if (
               lastLength / 15 >
-              parseInt(lastLength / 15)
+              parseInt(lastLength / 12)
       ) {
         pages = pages +
-                parseInt(lastLength / 15) + 1;
+                parseInt(lastLength / 12) + 1;
       } else {
-        pages = pages + (lastLength / 15);
+        pages = pages + (lastLength / 12);
       }
 
       for (let i = 0; i < pages; i++) {
@@ -700,7 +700,7 @@ export default {
           );
         } else{
           this.tableList.push(
-                  this.shipmentData.orderItemRequestList.slice(i * 7, i * 7 + 15)
+                  this.shipmentData.orderItemRequestList.slice(i * 7, i * 7 + 12)
           );
         }
         this.pageClassName.push("page" + (i + 1));
